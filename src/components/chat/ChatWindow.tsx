@@ -27,13 +27,15 @@ export const ChatWindow = ({
   onSendFile
 }: ChatWindowProps) => {
   const { chats, currentChatId } = useChat();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentChat = currentChatId ? chats.find(chat => chat.id === currentChatId) : null;
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollIntoView({ behavior: "smooth" });
-    }
+    scrollToBottom();
   }, [currentChat?.messages]);
 
   return (
@@ -76,11 +78,11 @@ export const ChatWindow = ({
         
         <TabsContent value="current" className="flex-1 flex flex-col mt-0">
           <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
+            <div className="space-y-4 flex flex-col">
               {currentChat?.messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
-              <div ref={scrollRef} />
+              <div ref={messagesEndRef} />
             </div>
           </ScrollArea>
           
