@@ -33,26 +33,37 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
   }
 
   try {
+    console.log('Fetching customers from:', `${API_URL}/customers/?skip=${skip}&limit=${limit}`);
+    
     const response = await fetch(`${API_URL}/customers/?skip=${skip}&limit=${limit}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      console.error('Response not OK:', response.status, response.statusText);
+      const errorText = await response.text();
+      console.error('Error response body:', errorText);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error('Invalid content type:', contentType);
+      throw new Error('Invalid response format: expected JSON');
     }
 
     const data = await response.json();
-    console.log('API Response:', data); // Debug log
+    console.log('API Response:', data);
     
     // Ensure we're returning an array
     if (Array.isArray(data)) {
       return data;
     } else if (data && typeof data === 'object' && Array.isArray(data.items)) {
-      return data.items; // Some APIs wrap the array in an 'items' property
+      return data.items;
     } else {
       console.warn('Unexpected API response format:', data);
       return [];
