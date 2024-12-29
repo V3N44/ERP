@@ -40,6 +40,8 @@ const ShippingOrdersPage = () => {
   };
 
   const totalOrders = allShippingOrders?.length || 0;
+  const pendingOrders = allShippingOrders?.filter(order => order.bookingStatus === "Pending").length || 0;
+  const confirmedOrders = allShippingOrders?.filter(order => order.bookingStatus === "Confirmed").length || 0;
   const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
   const canGoNext = currentPage < totalPages;
   const canGoPrevious = currentPage > 1;
@@ -71,9 +73,7 @@ const ShippingOrdersPage = () => {
             <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {allShippingOrders?.filter(order => order.bookingStatus === "Pending").length || 0}
-            </div>
+            <div className="text-2xl font-bold">{pendingOrders}</div>
           </CardContent>
         </Card>
         <Card>
@@ -81,9 +81,7 @@ const ShippingOrdersPage = () => {
             <CardTitle className="text-sm font-medium">Confirmed Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {allShippingOrders?.filter(order => order.bookingStatus === "Confirmed").length || 0}
-            </div>
+            <div className="text-2xl font-bold">{confirmedOrders}</div>
           </CardContent>
         </Card>
       </div>
