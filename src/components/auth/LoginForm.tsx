@@ -36,7 +36,7 @@ export const LoginForm = () => {
             </div>
           ),
           duration: 6000,
-          className: "left-0 top-4 fixed", // This positions the toast on the left side
+          className: "left-0 bottom-4 fixed", // This positions the toast on the bottom left side
         });
         navigate("/dashboard");
       }
