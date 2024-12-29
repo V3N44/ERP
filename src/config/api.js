@@ -4,6 +4,7 @@ export const API_CONFIG = {
   timeout: 30000, // 30 seconds
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json'
+    'Accept': 'application/json',
+    'ngrok-skip-browser-warning': 'true' // Add this header to skip ngrok browser warning
   }
 };
