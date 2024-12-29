@@ -3,6 +3,7 @@ import { CircleDollarSign, Users, ShoppingBag, Warehouse } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomers } from "@/services/customerService";
 import { getInventoryItems } from "@/services/inventoryService";
+import { getFreightForwarders } from "@/services/freightForwarderService";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const DashboardMetrics = () => {
@@ -14,6 +15,11 @@ export const DashboardMetrics = () => {
   const { data: inventory, isLoading: isLoadingInventory, error: inventoryError } = useQuery({
     queryKey: ['inventory'],
     queryFn: () => getInventoryItems(0, 100),
+  });
+
+  const { data: forwarders, isLoading: isLoadingForwarders, error: forwardersError } = useQuery({
+    queryKey: ['freight-forwarders'],
+    queryFn: () => getFreightForwarders(),
   });
 
   const renderCustomerCount = () => {
@@ -80,6 +86,38 @@ export const DashboardMetrics = () => {
     );
   };
 
+  const renderForwardersCount = () => {
+    if (isLoadingForwarders) {
+      return (
+        <>
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-4 w-32 mt-1" />
+        </>
+      );
+    }
+
+    if (forwardersError) {
+      return (
+        <>
+          <div className="text-2xl font-heading font-bold text-gray-800">Error</div>
+          <p className="text-xs font-sans text-red-500 mt-1">Failed to load forwarders</p>
+        </>
+      );
+    }
+
+    const forwardersCount = forwarders?.length || 0;
+    return (
+      <>
+        <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">
+          {forwardersCount}
+        </div>
+        <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">
+          Active partnerships
+        </p>
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -109,8 +147,7 @@ export const DashboardMetrics = () => {
             <Warehouse className="h-4 w-4 text-violet-500 animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">8</div>
-            <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">Active partnerships</p>
+            {renderForwardersCount()}
           </CardContent>
         </Card>
 
