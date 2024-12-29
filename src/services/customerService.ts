@@ -1,4 +1,4 @@
-import { API_URL } from "@/config";
+import { API_CONFIG } from "@/config/api";
 
 export interface Customer {
   id: number;
@@ -33,9 +33,9 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
   }
 
   try {
-    console.log('Fetching customers from:', `${API_URL}/customers/?skip=${skip}&limit=${limit}`);
+    console.log('Fetching customers from:', `${API_CONFIG.baseURL}/customers/?skip=${skip}&limit=${limit}`);
     
-    const response = await fetch(`${API_URL}/customers/?skip=${skip}&limit=${limit}`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/customers/?skip=${skip}&limit=${limit}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Accept': 'application/json',
@@ -45,20 +45,17 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
 
     // First check if the response is ok
     if (!response.ok) {
-      // Try to get error details if available
-      try {
-        const errorData = await response.json();
-        throw new Error(`API Error: ${errorData.detail || response.statusText}`);
-      } catch {
-        // If we can't parse the error as JSON, use the status text
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
-      }
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
     }
 
     // Check content type
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       console.error('Invalid content type:', contentType);
+      const responseText = await response.text();
+      console.error('Response body:', responseText);
       throw new Error(`Invalid response format: Server returned ${contentType || 'unknown'} instead of application/json`);
     }
 
@@ -90,10 +87,11 @@ export const updateCustomer = async (customerId: number, customerData: Partial<C
     throw new Error('No access token found');
   }
 
-  const response = await fetch(`${API_URL}/customers/${customerId}`, {
+  const response = await fetch(`${API_CONFIG.baseURL}/customers/${customerId}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(customerData),
@@ -113,10 +111,11 @@ export const deleteCustomer = async (customerId: number) => {
     throw new Error('No access token found');
   }
 
-  const response = await fetch(`${API_URL}/customers/${customerId}`, {
+  const response = await fetch(`${API_CONFIG.baseURL}/customers/${customerId}`, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
+      'Accept': 'application/json',
     },
   });
 
