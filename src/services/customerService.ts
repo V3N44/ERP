@@ -38,8 +38,7 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
     const response = await fetch(`${API_CONFIG.baseURL}/customers/?skip=${skip}&limit=${limit}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+        ...API_CONFIG.headers,
       },
     });
 
@@ -56,7 +55,7 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
       console.error('Invalid content type:', contentType);
       const responseText = await response.text();
       console.error('Response body:', responseText);
-      throw new Error(`Invalid response format: Server returned ${contentType || 'unknown'} instead of application/json`);
+      throw new Error(`Invalid response format: Expected application/json but got ${contentType || 'unknown'}`);
     }
 
     // Try to parse the response as JSON
@@ -91,13 +90,14 @@ export const updateCustomer = async (customerId: number, customerData: Partial<C
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
-      'Content-Type': 'application/json',
+      ...API_CONFIG.headers,
     },
     body: JSON.stringify(customerData),
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response:', errorText);
     throw new Error(`Failed to update customer: ${response.status} ${response.statusText}`);
   }
 
@@ -115,11 +115,13 @@ export const deleteCustomer = async (customerId: number) => {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
+      ...API_CONFIG.headers,
     },
   });
 
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error('API Error Response:', errorText);
     throw new Error(`Failed to delete customer: ${response.status} ${response.statusText}`);
   }
 
