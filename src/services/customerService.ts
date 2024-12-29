@@ -43,24 +43,40 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
       },
     });
 
+    // First check if the response is ok
     if (!response.ok) {
-      throw new Error(`Failed to fetch customers: ${response.statusText}`);
+      // Try to get error details if available
+      try {
+        const errorData = await response.json();
+        throw new Error(`API Error: ${errorData.detail || response.statusText}`);
+      } catch {
+        // If we can't parse the error as JSON, use the status text
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
     }
 
+    // Check content type
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
-      throw new Error("Invalid response format: expected JSON");
+      console.error('Invalid content type:', contentType);
+      throw new Error(`Invalid response format: Server returned ${contentType || 'unknown'} instead of application/json`);
     }
 
-    const data = await response.json();
-    console.log('API Response:', data);
-    
-    if (!Array.isArray(data)) {
-      console.error('Unexpected API response format:', data);
-      throw new Error('Invalid response format: expected array of customers');
-    }
+    // Try to parse the response as JSON
+    try {
+      const data = await response.json();
+      console.log('API Response:', data);
+      
+      if (!Array.isArray(data)) {
+        console.error('Unexpected API response format:', data);
+        throw new Error('Invalid response format: expected array of customers');
+      }
 
-    return data as Customer[];
+      return data as Customer[];
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      throw new Error('Failed to parse API response as JSON');
+    }
   } catch (error) {
     console.error('Error fetching customers:', error);
     throw error;
