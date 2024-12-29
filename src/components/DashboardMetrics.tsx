@@ -30,7 +30,6 @@ export const DashboardMetrics = () => {
     }
 
     const customerCount = customers?.length || 0;
-    // Note: The percentage increase is hardcoded for now as we don't have historical data
     return (
       <>
         <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">

@@ -59,11 +59,9 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
     const data = await response.json();
     console.log('API Response:', data);
     
-    // Ensure we're returning an array
+    // Handle the exact response format from the API
     if (Array.isArray(data)) {
-      return data;
-    } else if (data && typeof data === 'object' && Array.isArray(data.items)) {
-      return data.items;
+      return data as Customer[];
     } else {
       console.warn('Unexpected API response format:', data);
       return [];
