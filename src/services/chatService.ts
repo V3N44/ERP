@@ -34,22 +34,34 @@ export const sendChatMessage = async (message: string): Promise<ChatResponse> =>
         statusText: response.statusText,
         body: data
       });
-      throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
+      return {
+        response: "Sorry, I'm having trouble connecting to the service. Please try again later.",
+        status: response.status,
+        message: `Error: ${response.status} ${response.statusText}`
+      };
     }
 
     try {
       const jsonData = JSON.parse(data);
       console.log('Parsed Chat API Response:', jsonData);
-      return jsonData;
+      return {
+        ...jsonData,
+        status: response.status
+      };
     } catch (parseError) {
       console.error('Error parsing JSON response:', parseError);
       return {
         response: "Sorry, I received an invalid response format. Please try again.",
-        status: response.status
+        status: response.status,
+        message: "Invalid response format"
       };
     }
   } catch (error) {
     console.error('Error sending chat message:', error);
-    throw error;
+    return {
+      response: "Sorry, there was an error processing your request. Please try again.",
+      status: 500,
+      message: error instanceof Error ? error.message : "Unknown error occurred"
+    };
   }
-}
+};
