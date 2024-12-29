@@ -7,7 +7,8 @@ import { useChat } from "@/contexts/ChatContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatMessage } from "./chat/ChatMessage";
 import { ChatInput } from "./chat/ChatInput";
-import { sendMessageToGoogleApi } from "@/utils/googleApi";
+import { sendChatMessage } from "@/services/chatService";
+import { toast } from "./ui/use-toast";
 
 export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -30,23 +31,23 @@ export const ChatBot = () => {
     });
 
     try {
-      // Get response from Google API
-      const apiKey = process.env.GOOGLE_API_KEY;
-      if (!apiKey) {
-        throw new Error('Google API key not found');
-      }
-
-      const response = await sendMessageToGoogleApi(text, apiKey);
+      // Get response from Chat API
+      const response = await sendChatMessage(text);
 
       // Add bot response
       addMessageToChat(currentChatId, {
-        text: response,
+        text: response.response || "I received your message but I'm not sure how to respond.",
         isBot: true,
         timestamp: new Date(),
         type: "text"
       });
     } catch (error) {
       console.error('Error processing message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again later.",
+        variant: "destructive"
+      });
       addMessageToChat(currentChatId, {
         text: "I apologize, but I'm having trouble connecting to the service right now. Please try again later.",
         isBot: true,
