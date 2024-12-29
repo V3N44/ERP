@@ -1,12 +1,11 @@
 import { Card } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
-import { X, Maximize2, Minimize2 } from "lucide-react";
+import { X, Maximize2, Minimize2, MessageCircle, Plus } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 import { useChat } from "@/contexts/ChatContext";
-import { MessageCircle } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 interface ChatWindowProps {
@@ -26,7 +25,7 @@ export const ChatWindow = ({
   onSendAudio,
   onSendFile
 }: ChatWindowProps) => {
-  const { chats, currentChatId } = useChat();
+  const { chats, currentChatId, createNewChat } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const currentChat = currentChatId ? chats.find(chat => chat.id === currentChatId) : null;
 
@@ -45,13 +44,24 @@ export const ChatWindow = ({
         : "w-96 h-[600px]"
     } flex flex-col`}>
       <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground">
-        <h3 className="font-semibold">RamaDBK Assistant</h3>
         <div className="flex items-center gap-2">
+          <MessageCircle className="h-5 w-5" />
+          <h3 className="font-semibold">RamaDBK Assistant</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={createNewChat}
+            className="h-8 w-8 hover:bg-primary-foreground/10"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onToggleExpand} 
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-primary-foreground/10"
           >
             {isExpanded ? (
               <Minimize2 className="h-4 w-4" />
@@ -63,7 +73,7 @@ export const ChatWindow = ({
             variant="ghost" 
             size="icon" 
             onClick={onClose} 
-            className="h-8 w-8"
+            className="h-8 w-8 hover:bg-primary-foreground/10"
           >
             <X className="h-4 w-4" />
           </Button>
