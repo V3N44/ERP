@@ -42,8 +42,9 @@ export const ChatWindow = ({
       isExpanded 
         ? "w-full h-full rounded-none"
         : "w-96 h-[600px]"
-    } flex flex-col`}>
-      <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground">
+    } flex flex-col overflow-hidden`}>
+      {/* Header */}
+      <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground shrink-0">
         <div className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
           <h3 className="font-semibold">RamaDBK Assistant</h3>
@@ -80,15 +81,16 @@ export const ChatWindow = ({
         </div>
       </div>
       
-      <Tabs defaultValue="current" className="flex-1 flex flex-col">
-        <TabsList className="px-4 py-2">
+      {/* Main Content */}
+      <Tabs defaultValue="current" className="flex-1 flex flex-col min-h-0">
+        <TabsList className="px-4 py-2 shrink-0">
           <TabsTrigger value="current">Current Chat</TabsTrigger>
           <TabsTrigger value="history">Chat History</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="current" className="flex-1 flex flex-col mt-0">
+        <TabsContent value="current" className="flex-1 flex flex-col p-0 m-0 h-full">
           <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4 flex flex-col">
+            <div className="space-y-4">
               {currentChat?.messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
@@ -96,15 +98,17 @@ export const ChatWindow = ({
             </div>
           </ScrollArea>
           
-          <ChatInput 
-            onSendMessage={onSendMessage}
-            onSendAudio={onSendAudio}
-            onSendFile={onSendFile}
-          />
+          <div className="mt-auto border-t">
+            <ChatInput 
+              onSendMessage={onSendMessage}
+              onSendAudio={onSendAudio}
+              onSendFile={onSendFile}
+            />
+          </div>
         </TabsContent>
         
-        <TabsContent value="history" className="flex-1 mt-0">
-          <ScrollArea className="h-full p-4">
+        <TabsContent value="history" className="flex-1 p-4 m-0">
+          <ScrollArea className="h-full">
             <div className="space-y-4">
               {chats.map((chat) => (
                 <Card key={chat.id} className="p-4 cursor-pointer hover:bg-accent">
