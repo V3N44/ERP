@@ -44,9 +44,12 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      console.error('Response not OK:', response.status, response.statusText, errorData);
       throw new Error(`Failed to fetch customers: ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      throw new Error("Invalid response format: expected JSON");
     }
 
     const data = await response.json();

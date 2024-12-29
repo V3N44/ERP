@@ -22,11 +22,7 @@ const CustomerDatabasePage = () => {
 
   const { data: customers = [], isLoading, error } = useQuery({
     queryKey: ['customers'],
-    queryFn: async () => {
-      const result = await getCustomers();
-      console.log('Query result:', result); // Debug log
-      return result;
-    },
+    queryFn: () => getCustomers({ skip: 0, limit: 100 }),
     meta: {
       onError: (error: Error) => {
         toast({
@@ -129,7 +125,7 @@ const CustomerDatabasePage = () => {
   if (error) {
     return (
       <div className="text-center py-4 text-red-500">
-        Error loading customers: {error.message}
+        Error loading customers: {error instanceof Error ? error.message : 'Unknown error'}
       </div>
     )
   }
