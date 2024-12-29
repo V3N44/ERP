@@ -5,35 +5,49 @@ interface ChatRequest {
   context_data?: Record<string, Array<Record<string, unknown>>>;
 }
 
-export const sendChatMessage = async (message: string) => {
+interface ChatResponse {
+  response: string;
+  status: number;
+  message?: string;
+}
+
+export const sendChatMessage = async (message: string): Promise<ChatResponse> => {
   try {
     console.log('Sending chat message to:', `${API_CONFIG.baseURL}/chat`);
+    console.log('Message:', message);
     
     const response = await fetch(`${API_CONFIG.baseURL}/chat`, {
       method: 'POST',
-      headers: {
-        ...API_CONFIG.headers,
-        'Content-Type': 'application/json',
-      },
+      headers: API_CONFIG.headers,
       body: JSON.stringify({
         query: message,
-        context_data: {} // You can extend this with additional context if needed
+        context_data: {}
       } as ChatRequest),
     });
 
+    const data = await response.text();
+    console.log('Raw API Response:', data);
+
     if (!response.ok) {
-      const errorText = await response.text();
       console.error('Chat API Error:', {
         status: response.status,
         statusText: response.statusText,
-        body: errorText
+        body: data
       });
       throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
-    console.log('Chat API Response:', data);
-    return data;
+    try {
+      const jsonData = JSON.parse(data);
+      console.log('Parsed Chat API Response:', jsonData);
+      return jsonData;
+    } catch (parseError) {
+      console.error('Error parsing JSON response:', parseError);
+      return {
+        response: "Sorry, I received an invalid response format. Please try again.",
+        status: response.status
+      };
+    }
   } catch (error) {
     console.error('Error sending chat message:', error);
     throw error;

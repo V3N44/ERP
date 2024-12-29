@@ -33,10 +33,11 @@ export const ChatBot = () => {
     try {
       // Get response from Chat API
       const response = await sendChatMessage(text);
+      console.log('Chat response received:', response);
 
       // Add bot response
       addMessageToChat(currentChatId, {
-        text: response.response || "I received your message but I'm not sure how to respond.",
+        text: response.response || response.message || "I received your message but I'm not sure how to respond.",
         isBot: true,
         timestamp: new Date(),
         type: "text"
