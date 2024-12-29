@@ -16,6 +16,7 @@ export const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { login } = useAuth();
@@ -25,7 +26,7 @@ export const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const success = await login(identifier, password);
+      const success = await login(identifier, password, rememberMe);
       
       if (success) {
         toast({
@@ -36,7 +37,7 @@ export const LoginForm = () => {
             </div>
           ),
           duration: 6000,
-          className: "left-0 bottom-4 fixed max-w-[20%]", // This positions the toast on the bottom left side with max-width of 20%
+          className: "left-0 bottom-4 fixed max-w-[20%]",
         });
         navigate("/dashboard");
       }
@@ -127,6 +128,8 @@ export const LoginForm = () => {
               type="checkbox" 
               id="remember" 
               className="rounded border-[#C8C8C9]"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
               disabled={isLoading}
             />
             <label htmlFor="remember" className="text-sm text-[#403E43]">Remember me</label>

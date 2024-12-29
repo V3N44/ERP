@@ -5,7 +5,7 @@ import { loginUser } from "@/services/authService";
 
 interface AuthContextType {
   user: User | null;
-  login: (identifier: string, password: string) => Promise<boolean>;
+  login: (identifier: string, password: string, remember: boolean) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -16,12 +16,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
+    const rememberedUser = localStorage.getItem('rememberedUser');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
+    } else if (rememberedUser) {
+      setUser(JSON.parse(rememberedUser));
     }
   }, []);
 
-  const login = async (identifier: string, password: string) => {
+  const login = async (identifier: string, password: string, remember: boolean) => {
     try {
       const response = await loginUser({
         grant_type: 'password',
@@ -39,6 +42,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(user);
           localStorage.setItem('user', JSON.stringify(user));
           localStorage.setItem('access_token', response.access_token);
+          
+          if (remember) {
+            localStorage.setItem('rememberedUser', JSON.stringify(user));
+          } else {
+            localStorage.removeItem('rememberedUser');
+          }
           return true;
         }
       }
@@ -54,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
+    // Don't remove rememberedUser on logout if it exists
   };
 
   return (
