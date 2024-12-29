@@ -92,16 +92,21 @@ export const ChatBot = () => {
     setIsOpen(true);
   };
 
+  const handleClose = () => {
+    setIsOpen(false);
+    setIsExpanded(false); // Reset expanded state when closing
+  };
+
   return (
     <div className={`fixed z-50 transition-all duration-300 ${
       isExpanded 
-        ? "inset-0 bg-background/80 backdrop-blur-sm"
+        ? "inset-0"
         : "bottom-8 right-8"
     }`}>
       {isOpen ? (
         <ChatWindow
           isExpanded={isExpanded}
-          onClose={() => setIsOpen(false)}
+          onClose={handleClose}
           onToggleExpand={() => setIsExpanded(!isExpanded)}
           onSendMessage={handleSendMessage}
           onSendAudio={handleSendAudio}
