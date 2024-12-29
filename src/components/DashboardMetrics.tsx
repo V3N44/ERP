@@ -2,16 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CircleDollarSign, Users, ShoppingBag, Warehouse } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getCustomers } from "@/services/customerService";
+import { getInventoryItems } from "@/services/inventoryService";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const DashboardMetrics = () => {
-  const { data: customers, isLoading, error } = useQuery({
+  const { data: customers, isLoading: isLoadingCustomers, error: customerError } = useQuery({
     queryKey: ['customers'],
     queryFn: () => getCustomers({ skip: 0, limit: 100 }),
   });
 
+  const { data: inventory, isLoading: isLoadingInventory, error: inventoryError } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => getInventoryItems(0, 100),
+  });
+
   const renderCustomerCount = () => {
-    if (isLoading) {
+    if (isLoadingCustomers) {
       return (
         <>
           <Skeleton className="h-8 w-24" />
@@ -20,7 +26,7 @@ export const DashboardMetrics = () => {
       );
     }
 
-    if (error) {
+    if (customerError) {
       return (
         <>
           <div className="text-2xl font-heading font-bold text-gray-800">Error</div>
@@ -37,6 +43,38 @@ export const DashboardMetrics = () => {
         </div>
         <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">
           +12% from last month
+        </p>
+      </>
+    );
+  };
+
+  const renderInventoryCount = () => {
+    if (isLoadingInventory) {
+      return (
+        <>
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-4 w-32 mt-1" />
+        </>
+      );
+    }
+
+    if (inventoryError) {
+      return (
+        <>
+          <div className="text-2xl font-heading font-bold text-gray-800">Error</div>
+          <p className="text-xs font-sans text-red-500 mt-1">Failed to load inventory</p>
+        </>
+      );
+    }
+
+    const inventoryCount = inventory?.length || 0;
+    return (
+      <>
+        <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">
+          {inventoryCount}
+        </div>
+        <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">
+          +3 new this week
         </p>
       </>
     );
@@ -61,8 +99,7 @@ export const DashboardMetrics = () => {
             <ShoppingBag className="h-4 w-4 text-violet-500 animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">19</div>
-            <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">+3 new this week</p>
+            {renderInventoryCount()}
           </CardContent>
         </Card>
 
