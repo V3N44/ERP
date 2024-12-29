@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, MessageCircle } from "lucide-react";
 
 const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
 
@@ -30,7 +30,11 @@ export const LoginForm = () => {
       if (success) {
         toast({
           title: "Login successful",
-          description: "Welcome back! You can use our AI chatbot assistant by clicking the chat icon in the bottom right corner.",
+          description: (
+            <div className="flex items-center gap-2">
+              Welcome back! Use our AI assistant <MessageCircle className="h-4 w-4" /> <ArrowRight className="h-4 w-4" />
+            </div>
+          ),
           duration: 6000,
         });
         navigate("/dashboard");
