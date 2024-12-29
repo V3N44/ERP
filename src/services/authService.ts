@@ -1,4 +1,4 @@
-import { API_URL } from "@/config";
+import { API_CONFIG } from '@/config/api';
 
 interface LoginCredentials {
   grant_type: string;
@@ -34,9 +34,10 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
       formData.append('client_secret', credentials.client_secret);
     }
 
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/auth/login`, {
       method: 'POST',
       headers: {
+        ...API_CONFIG.headers,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: formData,
