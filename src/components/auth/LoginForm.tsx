@@ -30,7 +30,8 @@ export const LoginForm = () => {
       if (success) {
         toast({
           title: "Login successful",
-          description: "Welcome back!",
+          description: "Welcome back! You can use our AI chatbot assistant by clicking the chat icon in the bottom right corner.",
+          duration: 6000,
         });
         navigate("/dashboard");
       }

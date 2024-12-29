@@ -180,8 +180,10 @@ export const ChatBot = () => {
       ) : (
         <Button
           onClick={handleOpen}
-          className="rounded-full w-16 h-16 shadow-lg"
+          className="rounded-full w-16 h-16 shadow-lg animate-bounce hover:animate-none relative"
         >
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-ping" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full" />
           <MessageCircle className="w-6 h-6" />
         </Button>
       )}
