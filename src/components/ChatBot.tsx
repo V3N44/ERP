@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
@@ -12,7 +12,16 @@ import { sendMessageToGoogleApi } from "@/utils/googleApi";
 export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(true);
   const { chats, currentChatId, createNewChat, addMessageToChat } = useChat();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsAnimating(false);
+    }, 60000); // 60000ms = 1 minute
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const currentChat = currentChatId 
     ? chats.find(chat => chat.id === currentChatId)
@@ -180,7 +189,7 @@ export const ChatBot = () => {
       ) : (
         <Button
           onClick={handleOpen}
-          className="rounded-full w-16 h-16 shadow-lg animate-bounce hover:animate-none relative"
+          className={`rounded-full w-16 h-16 shadow-lg ${isAnimating ? 'animate-bounce hover:animate-none' : ''} relative`}
         >
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-ping" />
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full" />
