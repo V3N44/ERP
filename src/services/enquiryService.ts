@@ -13,11 +13,14 @@ interface GetEnquiriesParams {
 }
 
 export const createEnquiry = async (payload: CreateEnquiryPayload) => {
+  const token = localStorage.getItem('access_token');
+  
   try {
     const response = await fetch(`${API_CONFIG.baseURL}/enquiries`, {
       method: 'POST',
       headers: {
         ...API_CONFIG.headers,
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     });
@@ -36,6 +39,12 @@ export const createEnquiry = async (payload: CreateEnquiryPayload) => {
 };
 
 export const getEnquiries = async ({ skip = 0, limit = 100 }: GetEnquiriesParams = {}) => {
+  const token = localStorage.getItem('access_token');
+  
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
   try {
     console.log('Fetching enquiries from:', `${API_CONFIG.baseURL}/enquiries/?skip=${skip}&limit=${limit}`);
     
@@ -44,11 +53,16 @@ export const getEnquiries = async ({ skip = 0, limit = 100 }: GetEnquiriesParams
       {
         headers: {
           ...API_CONFIG.headers,
+          'Authorization': `Bearer ${token}`,
         },
       }
     );
 
     if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('No authentication token found');
+      }
+      
       const errorText = await response.text();
       console.error('API Error Response:', errorText);
       throw new Error(`Failed to fetch enquiries: ${response.status} ${response.statusText}`);
