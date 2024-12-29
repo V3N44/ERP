@@ -1,3 +1,5 @@
+import { API_CONFIG } from "@/config/api";
+
 interface CreateEnquiryPayload {
   customer_id: number;
   details: string;
@@ -10,20 +12,20 @@ interface GetEnquiriesParams {
   limit?: number;
 }
 
-const API_URL = 'https://api.example.com/enquiries'; // Replace with your actual API URL
-
 export const createEnquiry = async (payload: CreateEnquiryPayload) => {
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_CONFIG.baseURL}/enquiries`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        ...API_CONFIG.headers,
       },
       body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
-      throw new Error('Failed to create enquiry');
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Failed to create enquiry: ${response.status} ${response.statusText}`);
     }
 
     return await response.json();
@@ -35,34 +37,32 @@ export const createEnquiry = async (payload: CreateEnquiryPayload) => {
 
 export const getEnquiries = async ({ skip = 0, limit = 100 }: GetEnquiriesParams = {}) => {
   try {
-    // For testing purposes, return mock data until the API is ready
-    return [
-      {
-        id: 1,
-        customer_id: 1,
-        details: "Sample enquiry 1",
-        date: new Date().toISOString(),
-        status: "New"
-      },
-      {
-        id: 2,
-        customer_id: 2,
-        details: "Sample enquiry 2",
-        date: new Date().toISOString(),
-        status: "In Progress"
-      }
-    ];
-
-    // Uncomment this when the API is ready:
-    /*
-    const response = await fetch(`${API_URL}?skip=${skip}&limit=${limit}`);
+    console.log('Fetching enquiries from:', `${API_CONFIG.baseURL}/enquiries/?skip=${skip}&limit=${limit}`);
     
+    const response = await fetch(
+      `${API_CONFIG.baseURL}/enquiries/?skip=${skip}&limit=${limit}`,
+      {
+        headers: {
+          ...API_CONFIG.headers,
+        },
+      }
+    );
+
     if (!response.ok) {
-      throw new Error('Failed to fetch enquiries');
+      const errorText = await response.text();
+      console.error('API Error Response:', errorText);
+      throw new Error(`Failed to fetch enquiries: ${response.status} ${response.statusText}`);
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      console.error('Invalid content type:', contentType);
+      const responseText = await response.text();
+      console.error('Response body:', responseText);
+      throw new Error(`Invalid response format: Server returned ${contentType || 'unknown'} instead of application/json`);
     }
 
     return await response.json();
-    */
   } catch (error) {
     console.error('Error fetching enquiries:', error);
     throw error;
