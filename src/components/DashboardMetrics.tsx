@@ -1,7 +1,48 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CircleDollarSign, Users, ShoppingBag, Warehouse } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getCustomers } from "@/services/customerService";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const DashboardMetrics = () => {
+  const { data: customers, isLoading, error } = useQuery({
+    queryKey: ['customers'],
+    queryFn: () => getCustomers({ skip: 0, limit: 100 }),
+  });
+
+  const renderCustomerCount = () => {
+    if (isLoading) {
+      return (
+        <>
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-4 w-32 mt-1" />
+        </>
+      );
+    }
+
+    if (error) {
+      return (
+        <>
+          <div className="text-2xl font-heading font-bold text-gray-800">Error</div>
+          <p className="text-xs font-sans text-red-500 mt-1">Failed to load customers</p>
+        </>
+      );
+    }
+
+    const customerCount = customers?.length || 0;
+    // Note: The percentage increase is hardcoded for now as we don't have historical data
+    return (
+      <>
+        <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">
+          {customerCount}
+        </div>
+        <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">
+          +12% from last month
+        </p>
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -11,8 +52,7 @@ export const DashboardMetrics = () => {
             <Users className="h-4 w-4 text-violet-500 animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">1,275</div>
-            <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">+12% from last month</p>
+            {renderCustomerCount()}
           </CardContent>
         </Card>
 
