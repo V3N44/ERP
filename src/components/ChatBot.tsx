@@ -1,19 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { ScrollArea } from "./ui/scroll-area";
-import { MessageCircle, X, Maximize2, Minimize2 } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChatMessage } from "./chat/ChatMessage";
-import { ChatInput } from "./chat/ChatInput";
+import { ChatWindow } from "./chat/ChatWindow";
 import { sendMessageToGoogleApi } from "@/utils/googleApi";
 
 export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(true);
-  const { chats, currentChatId, createNewChat, addMessageToChat } = useChat();
+  const { currentChatId, createNewChat, addMessageToChat } = useChat();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -22,10 +18,6 @@ export const ChatBot = () => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  const currentChat = currentChatId 
-    ? chats.find(chat => chat.id === currentChatId)
-    : null;
 
   const handleSendMessage = async (text: string) => {
     if (!currentChatId) return;
@@ -100,10 +92,6 @@ export const ChatBot = () => {
     setIsOpen(true);
   };
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
   return (
     <div className={`fixed z-50 transition-all duration-300 ${
       isExpanded 
@@ -111,81 +99,14 @@ export const ChatBot = () => {
         : "bottom-8 right-8"
     }`}>
       {isOpen ? (
-        <Card className={`transition-all duration-300 ${
-          isExpanded 
-            ? "w-full h-full rounded-none"
-            : "w-96 h-[600px]"
-        } flex flex-col`}>
-          <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground">
-            <h3 className="font-semibold">RamaDBK Assistant</h3>
-            <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleExpand} 
-                className="h-8 w-8"
-              >
-                {isExpanded ? (
-                  <Minimize2 className="h-4 w-4" />
-                ) : (
-                  <Maximize2 className="h-4 w-4" />
-                )}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={() => setIsOpen(false)} 
-                className="h-8 w-8"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          
-          <Tabs defaultValue="current" className="flex-1 flex flex-col">
-            <TabsList className="px-4 py-2">
-              <TabsTrigger value="current">Current Chat</TabsTrigger>
-              <TabsTrigger value="history">Chat History</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="current" className="flex-1 flex flex-col mt-0">
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {currentChat?.messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
-                  ))}
-                </div>
-              </ScrollArea>
-              
-              <ChatInput 
-                onSendMessage={handleSendMessage}
-                onSendAudio={handleSendAudio}
-                onSendFile={handleSendFile}
-              />
-            </TabsContent>
-            
-            <TabsContent value="history" className="flex-1 mt-0">
-              <ScrollArea className="h-full p-4">
-                <div className="space-y-4">
-                  {chats.map((chat) => (
-                    <Card key={chat.id} className="p-4 cursor-pointer hover:bg-accent">
-                      <div className="flex items-center gap-2 mb-2">
-                        <MessageCircle className="h-4 w-4" />
-                        <span className="font-medium">{chat.title}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {chat.messages[chat.messages.length - 1]?.text || "No messages"}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(chat.createdAt).toLocaleDateString()}
-                      </p>
-                    </Card>
-                  ))}
-                </div>
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
-        </Card>
+        <ChatWindow
+          isExpanded={isExpanded}
+          onClose={() => setIsOpen(false)}
+          onToggleExpand={() => setIsExpanded(!isExpanded)}
+          onSendMessage={handleSendMessage}
+          onSendAudio={handleSendAudio}
+          onSendFile={handleSendFile}
+        />
       ) : (
         <Button
           onClick={handleOpen}
