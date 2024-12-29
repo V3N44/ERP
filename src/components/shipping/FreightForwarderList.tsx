@@ -1,6 +1,3 @@
-
-//FreightForwarderList.tsx
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getFreightForwarders, deleteFreightForwarder } from "@/services/freightForwarderService";
@@ -23,9 +20,18 @@ export const FreightForwarderList = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: forwarders, isLoading } = useQuery({
+  const { data: forwarders, isLoading, error } = useQuery({
     queryKey: ['freight-forwarders'],
     queryFn: () => getFreightForwarders(),
+    meta: {
+      onError: (error: Error) => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message,
+        });
+      }
+    }
   });
 
   const deleteMutation = useMutation({
@@ -50,6 +56,14 @@ export const FreightForwarderList = () => {
     return (
       <div className="flex justify-center items-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center p-8 text-red-500">
+        Failed to load freight forwarders
       </div>
     );
   }
@@ -99,11 +113,16 @@ export const FreightForwarderList = () => {
                 </TableCell>
               </TableRow>
             ))}
+            {(!forwarders || forwarders.length === 0) && (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-4 text-gray-500">
+                  No freight forwarders found
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
     </div>
   );
 };
-
-
