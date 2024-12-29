@@ -44,28 +44,20 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
     });
 
     if (!response.ok) {
-      console.error('Response not OK:', response.status, response.statusText);
-      const errorText = await response.text();
-      console.error('Error response body:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      console.error('Invalid content type:', contentType);
-      throw new Error('Invalid response format: expected JSON');
+      const errorData = await response.json().catch(() => null);
+      console.error('Response not OK:', response.status, response.statusText, errorData);
+      throw new Error(`Failed to fetch customers: ${response.statusText}`);
     }
 
     const data = await response.json();
     console.log('API Response:', data);
     
-    // Handle the exact response format from the API
-    if (Array.isArray(data)) {
-      return data as Customer[];
-    } else {
-      console.warn('Unexpected API response format:', data);
-      return [];
+    if (!Array.isArray(data)) {
+      console.error('Unexpected API response format:', data);
+      throw new Error('Invalid response format: expected array of customers');
     }
+
+    return data as Customer[];
   } catch (error) {
     console.error('Error fetching customers:', error);
     throw error;
