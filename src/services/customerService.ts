@@ -25,6 +25,28 @@ export interface GetCustomersParams {
   limit?: number;
 }
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const fetchWithRetry = async (url: string, options: RequestInit, retries = MAX_RETRIES): Promise<Response> => {
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    if (retries > 0) {
+      console.log(`Retrying request... (${MAX_RETRIES - retries + 1}/${MAX_RETRIES})`);
+      await delay(RETRY_DELAY);
+      return fetchWithRetry(url, options, retries - 1);
+    }
+    throw error;
+  }
+};
+
 export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams = {}) => {
   const token = localStorage.getItem('access_token');
   
@@ -32,22 +54,20 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
     throw new Error('No access token found');
   }
 
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    ...API_CONFIG.headers,
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  };
+
   try {
     console.log('Fetching customers from:', `${API_CONFIG.baseURL}/customers/?skip=${skip}&limit=${limit}`);
     
-    const response = await fetch(`${API_CONFIG.baseURL}/customers/?skip=${skip}&limit=${limit}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        ...API_CONFIG.headers,
-      },
-    });
-
-    // First check if the response is ok
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('API Error Response:', errorText);
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
+    const response = await fetchWithRetry(
+      `${API_CONFIG.baseURL}/customers/?skip=${skip}&limit=${limit}`,
+      { headers }
+    );
 
     // Check content type
     const contentType = response.headers.get("content-type");
@@ -58,23 +78,21 @@ export const getCustomers = async ({ skip = 0, limit = 100 }: GetCustomersParams
       throw new Error(`Invalid response format: Expected application/json but got ${contentType || 'unknown'}`);
     }
 
-    // Try to parse the response as JSON
-    try {
-      const data = await response.json();
-      console.log('API Response:', data);
-      
-      if (!Array.isArray(data)) {
-        console.error('Unexpected API response format:', data);
-        throw new Error('Invalid response format: expected array of customers');
-      }
-
-      return data as Customer[];
-    } catch (error) {
-      console.error('Error parsing JSON:', error);
-      throw new Error('Failed to parse API response as JSON');
+    const data = await response.json();
+    console.log('API Response:', data);
+    
+    if (!Array.isArray(data)) {
+      console.error('Unexpected API response format:', data);
+      throw new Error('Invalid response format: expected array of customers');
     }
+
+    return data as Customer[];
   } catch (error) {
     console.error('Error fetching customers:', error);
+    // Add more detailed error information
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      console.error('Network error: Please check your internet connection and ensure the API server is running');
+    }
     throw error;
   }
 };
@@ -86,22 +104,28 @@ export const updateCustomer = async (customerId: number, customerData: Partial<C
     throw new Error('No access token found');
   }
 
-  const response = await fetch(`${API_CONFIG.baseURL}/customers/${customerId}`, {
-    method: 'PUT',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      ...API_CONFIG.headers,
-    },
-    body: JSON.stringify(customerData),
-  });
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    ...API_CONFIG.headers,
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  };
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('API Error Response:', errorText);
-    throw new Error(`Failed to update customer: ${response.status} ${response.statusText}`);
+  try {
+    const response = await fetchWithRetry(
+      `${API_CONFIG.baseURL}/customers/${customerId}`,
+      {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(customerData),
+      }
+    );
+
+    return response.json();
+  } catch (error) {
+    console.error('Error updating customer:', error);
+    throw error;
   }
-
-  return response.json();
 };
 
 export const deleteCustomer = async (customerId: number) => {
@@ -111,19 +135,25 @@ export const deleteCustomer = async (customerId: number) => {
     throw new Error('No access token found');
   }
 
-  const response = await fetch(`${API_CONFIG.baseURL}/customers/${customerId}`, {
-    method: 'DELETE',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      ...API_CONFIG.headers,
-    },
-  });
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    ...API_CONFIG.headers,
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+  };
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('API Error Response:', errorText);
-    throw new Error(`Failed to delete customer: ${response.status} ${response.statusText}`);
+  try {
+    await fetchWithRetry(
+      `${API_CONFIG.baseURL}/customers/${customerId}`,
+      {
+        method: 'DELETE',
+        headers,
+      }
+    );
+
+    return true;
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    throw error;
   }
-
-  return true;
 };
