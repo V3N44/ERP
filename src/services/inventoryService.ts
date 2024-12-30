@@ -29,11 +29,13 @@ export const getInventoryItems = async (
     const response = await fetch(
       `${API_URL}/inventory/?skip=${skip}&limit=${limit}`,
       {
+        method: 'GET',
         headers: {
           'Authorization': authHeader,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        credentials: 'include', // Add this to include cookies
+        credentials: 'include',
       }
     );
 
@@ -42,12 +44,12 @@ export const getInventoryItems = async (
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const errorMessage = user?.role 
           ? `Access denied. Your current role (${user.role}) does not have sufficient permissions.` 
-          : 'Access denied. Please ensure you have the required permissions (admin or sales role).';
+          : 'Access denied. Please ensure you have the required permissions.';
         throw new Error(errorMessage);
       }
 
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to fetch inventory items');
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || 'Failed to fetch inventory items');
     }
 
     const data = await response.json();

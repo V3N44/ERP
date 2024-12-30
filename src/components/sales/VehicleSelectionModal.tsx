@@ -2,10 +2,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, AlertCircle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getInventoryItems } from "@/services/inventoryService";
-import { useToast } from "@/components/ui/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface VehicleSelectionModalProps {
   open: boolean;
@@ -15,19 +15,15 @@ interface VehicleSelectionModalProps {
 
 export const VehicleSelectionModal = ({ open, onClose, onSelect }: VehicleSelectionModalProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const { toast } = useToast();
   
   const { data: vehicles = [], isLoading, error } = useQuery({
     queryKey: ['inventory'],
     queryFn: () => getInventoryItems(0, 100),
     enabled: open,
+    retry: 1,
     meta: {
       onError: (error: Error) => {
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: error.message || "Failed to fetch inventory items",
-        });
+        console.error('Error fetching inventory:', error);
       },
     },
   });
@@ -70,9 +66,12 @@ export const VehicleSelectionModal = ({ open, onClose, onSelect }: VehicleSelect
               <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
             </div>
           ) : error ? (
-            <div className="text-center p-8 text-red-500">
-              Failed to load inventory items
-            </div>
+            <Alert variant="destructive" className="mx-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {error instanceof Error ? error.message : 'Failed to load inventory items'}
+              </AlertDescription>
+            </Alert>
           ) : filteredVehicles.length === 0 ? (
             <div className="text-center p-8 text-gray-500">
               No vehicles found matching your search
