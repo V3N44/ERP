@@ -1,11 +1,11 @@
-const API_URL = 'http://localhost:8000';
+import { API_CONFIG } from '@/config/api';
 
 export const backofficeService = {
   async createInvoice(invoiceData: any) {
-    const response = await fetch(`${API_URL}/invoices`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/invoices`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        ...API_CONFIG.headers,
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
       },
       body: JSON.stringify(invoiceData)
@@ -19,10 +19,10 @@ export const backofficeService = {
   },
 
   async calculateCosts(costData: any) {
-    const response = await fetch(`${API_URL}/costs/calculate`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/costs/calculate`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        ...API_CONFIG.headers,
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
       },
       body: JSON.stringify(costData)
@@ -36,8 +36,9 @@ export const backofficeService = {
   },
 
   async getReports() {
-    const response = await fetch(`${API_URL}/reports`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/reports`, {
       headers: {
+        ...API_CONFIG.headers,
         'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
       }
     });

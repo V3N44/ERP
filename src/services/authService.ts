@@ -41,14 +41,16 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: formData,
+      credentials: 'include', // Include cookies
     });
 
-    const data = await response.json();
-
     if (!response.ok) {
-      console.error('Login failed:', data);
-      throw new Error(data.detail || 'Login failed');
+      const errorData = await response.json();
+      console.error('Login failed:', errorData);
+      throw new Error(errorData.detail || 'Login failed');
     }
+
+    const data = await response.json();
 
     // Store the token type and access token
     localStorage.setItem('token_type', data.token_type);

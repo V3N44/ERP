@@ -5,6 +5,7 @@ export const API_CONFIG = {
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'ngrok-skip-browser-warning': 'true' // Add this header to skip ngrok browser warning
+    'ngrok-skip-browser-warning': 'true', // Add this header to skip ngrok browser warning
+    'Access-Control-Allow-Origin': '*'
   }
 };
