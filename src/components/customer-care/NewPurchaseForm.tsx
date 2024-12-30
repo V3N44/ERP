@@ -14,6 +14,7 @@ import { toast } from "sonner";
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [date, setDate] = useState<Date>();
   const [items, setItems] = useState<PurchaseItem[]>([]);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const addItem = () => {
     setItems([...items, {
@@ -66,7 +67,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
     }
 
     const purchase: Purchase = {
-      supplier_id: 1, // This should be selected from a dropdown
+      supplier_id: 1,
       purchase_date: date.toISOString(),
       challan_no: "CH-" + Date.now(),
       details: "Purchase order",
@@ -94,7 +95,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       <div className="flex items-center gap-4">
         <div className="flex-1">
           <Label>Purchase Date</Label>
-          <Popover>
+          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -107,11 +108,14 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
                 {date ? format(date, "PPP") : <span>Pick a date</span>}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
+            <PopoverContent className="w-auto p-0" align="start">
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={(newDate) => {
+                  setDate(newDate);
+                  setIsCalendarOpen(false);
+                }}
                 initialFocus
               />
             </PopoverContent>
