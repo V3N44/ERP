@@ -8,67 +8,13 @@ import { useState } from "react";
 import { VehicleSelectionModal } from "./sales/VehicleSelectionModal";
 import { Search } from "lucide-react";
 import { SelectedVehicleDisplay } from "./sales/SelectedVehicleDisplay";
-import { createOrder } from "@/services/orderService";
-import { useToast } from "@/components/ui/use-toast";
-import { useMutation } from "@tanstack/react-query";
 
 export const SalesManagement = () => {
   const [showVehicleModal, setShowVehicleModal] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
-  const { toast } = useToast();
+  const [selectedVehicle, setSelectedVehicle] = useState<unknown>(null);
 
-  const createOrderMutation = useMutation({
-    mutationFn: createOrder,
-    onSuccess: () => {
-      toast({
-        title: "Success",
-        description: "Order created successfully",
-      });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleVehicleSelect = (vehicle: any) => {
+  const handleVehicleSelect = (vehicle: unknown) => {
     setSelectedVehicle(vehicle);
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    if (!selectedVehicle) {
-      toast({
-        title: "Error",
-        description: "Please select a vehicle",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const orderData = {
-      customer_id: Number(formData.get("customerName")),
-      contact_number: formData.get("phone") as string,
-      address: `${formData.get("streetAddress")}, ${formData.get("city")}, ${formData.get("state")}, ${formData.get("postalCode")}, ${formData.get("country")}`,
-      date: new Date().toISOString(),
-      total: selectedVehicle.price || 0,
-      status: "Pending" as const,
-      items: [
-        {
-          item_name: selectedVehicle.name || "Vehicle",
-          quantity: 1,
-          price: selectedVehicle.price || 0,
-          total: selectedVehicle.price || 0,
-        },
-      ],
-    };
-
-    createOrderMutation.mutate(orderData);
   };
 
   return (
