@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getServices } from "@/services/serviceService";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const ServiceList = () => {
   const { data: services, isLoading, error } = useQuery({
@@ -10,11 +11,35 @@ export const ServiceList = () => {
   });
 
   if (isLoading) {
-    return <div>Loading services...</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Services</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (error) {
-    return <div>Error loading services: {error.message}</div>;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Services</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-red-500">
+            Error loading services: {error instanceof Error ? error.message : 'Unknown error'}
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
