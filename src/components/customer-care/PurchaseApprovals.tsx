@@ -1,19 +1,46 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { NewPurchaseForm } from "./NewPurchaseForm";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const PurchaseApprovals = () => {
+  const [open, setOpen] = useState(false);
   const approvals = [
     { id: 1, item: "Vehicle Parts", amount: 5000, status: "pending", requester: "John Doe", date: "2024-02-20" },
     { id: 2, item: "Office Supplies", amount: 1200, status: "approved", requester: "Jane Smith", date: "2024-02-19" },
   ];
 
+  const handleSuccess = () => {
+    setOpen(false);
+    // Refresh the approvals list here
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Purchase Approvals</h3>
-        <Button variant="outline">New Request</Button>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              New Purchase
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Create New Purchase</DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="max-h-[80vh]">
+              <div className="p-4">
+                <NewPurchaseForm onSuccess={handleSuccess} />
+              </div>
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <Table>
