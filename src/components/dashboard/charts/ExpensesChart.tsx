@@ -4,21 +4,27 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
-
-const initialExpensesData = [
-  { day: "Mon", income: 300, spent: 250 },
-  { day: "Tue", income: 400, spent: 300 },
-  { day: "Wed", income: 500, spent: 450 },
-  { day: "Thu", income: 450, spent: 400 },
-  { day: "Fri", income: 300, spent: 200 },
-  { day: "Sat", income: 400, spent: 350 },
-  { day: "Sun", income: 350, spent: 300 },
-];
+import { useQuery } from "@tanstack/react-query";
+import { getInventoryItems } from "@/services/inventoryService";
 
 export const ExpensesChart = () => {
-  const [expensesData, setExpensesData] = useState(initialExpensesData);
   const [isEditing, setIsEditing] = useState(false);
-  const [tempData, setTempData] = useState(initialExpensesData);
+  const [tempData, setTempData] = useState([]);
+
+  const { data: inventory } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => getInventoryItems(0, 100),
+  });
+
+  // Calculate daily expenses based on inventory
+  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const totalInventoryValue = inventory?.reduce((total, item) => total + (item.price || 0), 0) || 0;
+  
+  const expensesData = daysOfWeek.map((day, index) => ({
+    day,
+    income: Math.round(totalInventoryValue / 7) + (index * 50), // Simulate daily variation
+    spent: Math.round((totalInventoryValue / 7) * 0.8) + (index * 30), // Expenses as 80% of income
+  }));
 
   const handleInputChange = (day: string, field: 'income' | 'spent', value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -30,7 +36,6 @@ export const ExpensesChart = () => {
   };
 
   const handleSave = () => {
-    setExpensesData(tempData);
     setIsEditing(false);
   };
 
@@ -58,7 +63,7 @@ export const ExpensesChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={expensesData} barGap={8}>
+          <BarChart data={isEditing ? tempData : expensesData} barGap={8}>
             <XAxis 
               dataKey="day" 
               axisLine={false}

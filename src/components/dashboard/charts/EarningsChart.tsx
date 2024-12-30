@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getCustomers } from "@/services/customerService";
 
 const initialEarningsData = [
   { month: "Apr", earnings: 1800 },
@@ -18,6 +20,26 @@ export const EarningsChart = () => {
   const [earningsData, setEarningsData] = useState(initialEarningsData);
   const [isEditing, setIsEditing] = useState(false);
   const [tempEarnings, setTempEarnings] = useState(initialEarningsData);
+
+  const { data: customers } = useQuery({
+    queryKey: ['customers'],
+    queryFn: () => getCustomers({ skip: 0, limit: 100 }),
+  });
+
+  // Calculate total earnings based on customer balances
+  const totalEarnings = customers?.reduce((total, customer) => total + (customer.balance || 0), 0) || 0;
+
+  // Update earnings data with real customer data
+  const currentMonth = new Date().getMonth();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const lastSixMonths = Array.from({ length: 6 }, (_, i) => {
+    const monthIndex = (currentMonth - i + 12) % 12;
+    return {
+      month: monthNames[monthIndex],
+      earnings: Math.round(totalEarnings / (i + 1)), // Distribute earnings across months
+    };
+  }).reverse();
 
   const handleInputChange = (month: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -59,7 +81,7 @@ export const EarningsChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={earningsData}>
+          <AreaChart data={isEditing ? tempEarnings : lastSixMonths}>
             <defs>
               <linearGradient id="colorEarnings" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.3}/>
@@ -77,7 +99,6 @@ export const EarningsChart = () => {
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
               domain={['dataMin - 200', 'dataMax + 200']}
-              ticks={[1600, 1800, 2000, 2200, 2400]}
             />
             <Tooltip />
             <Area
