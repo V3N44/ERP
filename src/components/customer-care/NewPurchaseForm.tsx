@@ -14,7 +14,6 @@ import { toast } from "sonner";
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [date, setDate] = useState<Date>();
   const [items, setItems] = useState<PurchaseItem[]>([]);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const addItem = () => {
     setItems([...items, {
@@ -95,7 +94,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       <div className="flex items-center gap-4">
         <div className="flex-1">
           <Label>Purchase Date</Label>
-          <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+          <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -112,10 +111,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(newDate) => {
-                  setDate(newDate);
-                  setIsCalendarOpen(false);
-                }}
+                onSelect={setDate}
                 initialFocus
               />
             </PopoverContent>
