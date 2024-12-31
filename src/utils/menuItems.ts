@@ -1,3 +1,4 @@
+import { UserRole } from "@/types/auth";
 import { 
   LayoutDashboard,
   Wrench,
@@ -18,6 +19,7 @@ import {
   Calendar,
   Mail,
   BookOpen,
+  FileCode,
   Ship,
   Container,
   Truck,
@@ -113,6 +115,12 @@ const allMenuItems = [
         name: "Orders", 
         icon: Container, 
         path: "/shipping/orders", 
+        roles: ["admin", "shipping"] 
+      },
+      { 
+        name: "Inventory", 
+        icon: Box, 
+        path: "/shipping/inventory", 
         roles: ["admin", "shipping"] 
       },
       { 
