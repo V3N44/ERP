@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { Switch } from "@/components/ui/switch";
 
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
@@ -141,3 +142,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+
