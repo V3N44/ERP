@@ -11,12 +11,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ChatBot } from "@/components/ChatBot";
 import Footer from "@/components/Footer";
 
-
-
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./pages/admin/settings"
-
-
 
 import Index from "./pages/Index";
 import DashboardPage from "./pages/dashboard";
@@ -43,7 +39,6 @@ import FAQsPage from "./pages/support/faqs";
 import FinancePage from "./pages/finance";
 import ShippingPage from "./pages/shipping";
 import ShippingOrdersPage from "./pages/shipping/orders";
-import InventoryShippingPage from "./pages/shipping/inventory";
 import TrackingPage from "./pages/shipping/tracking";
 import WarehousesPage from "./pages/shipping/warehouses";
 import FreightForwardersPage from "./pages/shipping/freight-forwarders";
@@ -98,9 +93,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-
     <div className="flex min-h-screen w-full">
-      
       <AppSidebar />
       <div className="flex-1 ml-16 flex flex-col">
         {children}
@@ -137,7 +130,6 @@ const App = () => (
                     <Route path="/inventory/list" element={
                       <ProtectedRoute allowedRoles={["admin", "sales"]}>
                         <InventoryListPage />
-                        
                       </ProtectedRoute>
                     } />
                     <Route path="/service" element={<ServiceCenterPage />} />
@@ -164,7 +156,6 @@ const App = () => (
                     <Route path="/finance/paypal-integration" element={<PayPalIntegrationPage />} />
                     <Route path="/shipping" element={<ShippingPage />} />
                     <Route path="/shipping/orders" element={<ShippingOrdersPage />} />
-                    <Route path="/shipping/inventory" element={<InventoryShippingPage />} />
                     <Route path="/shipping/tracking" element={<TrackingPage />} />
                     <Route path="/shipping/warehouses" element={<WarehousesPage />} />
                     <Route path="/shipping/freight-forwarders" element={<FreightForwardersPage />} />

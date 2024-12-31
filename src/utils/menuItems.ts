@@ -23,7 +23,6 @@ import {
   Ship,
   Container,
   Truck,
-  Box,
   Warehouse,
   Anchor,
   Plus,
@@ -32,10 +31,8 @@ import {
   Receipt,
   PieChart,
   ScanLine,
-  FileInput,
-  CreditCard
+  FileInput
 } from "lucide-react";
-import { Brain, FileText as AccountingIcon } from "lucide-react";
 import { MenuItem } from "@/types/menu";
 
 const allMenuItems = [
@@ -43,7 +40,7 @@ const allMenuItems = [
     name: "Dashboard",
     icon: LayoutDashboard,
     path: "/dashboard",
-    roles: ["admin", "user", "sales", "purchasing", "accounting", "shipping","shipp"],
+    roles: ["admin", "user", "sales", "purchasing", "accounting", "shipping"],
   },
   {
     name: "Service Center",
@@ -57,7 +54,6 @@ const allMenuItems = [
     path: "/vehicles",
     roles: ["admin", "sales", "shipping"],
     requirements: [
-      { name: "Inventory", icon: PackageSearch, path: "/vehicles/inventory", roles: ["admin", "sales", "shipping"] },
       { name: "Maintenance", icon: Wrench, path: "/vehicles/maintenance", roles: ["admin"] },
       { name: "Documents", icon: FileText, path: "/vehicles/documents", roles: ["admin", "sales"] }
     ],
@@ -128,12 +124,6 @@ const allMenuItems = [
         name: "Orders", 
         icon: Container, 
         path: "/shipping/orders", 
-        roles: ["admin", "shipping"] 
-      },
-      { 
-        name: "Inventory", 
-        icon: Box, 
-        path: "/shipping/inventory", 
         roles: ["admin", "shipping"] 
       },
       { 
@@ -270,7 +260,7 @@ const allMenuItems = [
   },
   {
     name: "Accounting",
-    icon: AccountingIcon,
+    icon: FileText,
     path: "/accounting",
     roles: ["admin", "accounting"],
     requirements: [
@@ -282,7 +272,7 @@ const allMenuItems = [
       },
       {
         name: "AI Discrepancy Detection",
-        icon: Brain,
+        icon: FileText,
         path: "/accounting/discrepancy-detection",
         roles: ["admin", "accounting"]
       }
