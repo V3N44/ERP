@@ -1,14 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Truck, MapPin } from "lucide-react";
+import { Truck, MapPin, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { ShipmentUpdateForm } from "@/components/shipping/ShipmentUpdateForm";
 
 const TrackingPage = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [searchedShipment, setSearchedShipment] = useState<any>(null);
   const { toast } = useToast();
 
   const handleTrackingSearch = (e: React.FormEvent) => {
@@ -21,35 +23,41 @@ const TrackingPage = () => {
       });
       return;
     }
-    // For demo purposes, just show a success message
-    toast({
-      title: "Tracking Search",
-      description: `Searching for tracking number: ${trackingNumber}`,
-    });
+
+    // Simulate finding a shipment (replace with actual API call)
+    const foundShipment = shipments.find(s => s.trackingNumber === trackingNumber);
+    if (foundShipment) {
+      setSearchedShipment(foundShipment);
+      toast({
+        title: "Success",
+        description: "Shipment found",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Not Found",
+        description: "No shipment found with this tracking number",
+      });
+    }
   };
 
   // This is a placeholder. In a real application, this would be fetched from an API
   const shipments = [
     { 
-      id: "SHP001", 
-      destination: "Los Angeles, CA", 
+      trackingNumber: "SHP001",
+      origin: "Tokyo, Japan",
+      destination: "Dubai, UAE",
       status: "In Transit",
-      eta: "2024-03-15",
-      carrier: "FedEx"
+      currentLocation: "Singapore",
+      estimatedDelivery: "2024-03-15",
     },
     { 
-      id: "SHP002", 
-      destination: "Miami, FL", 
+      trackingNumber: "SHP002",
+      origin: "Shanghai, China",
+      destination: "Riyadh, KSA",
       status: "Delivered",
-      eta: "2024-03-10",
-      carrier: "UPS"
-    },
-    { 
-      id: "SHP003", 
-      destination: "Chicago, IL", 
-      status: "Processing",
-      eta: "2024-03-20",
-      carrier: "DHL"
+      currentLocation: "Riyadh",
+      estimatedDelivery: "2024-03-10",
     },
   ];
 
@@ -60,7 +68,10 @@ const TrackingPage = () => {
       {/* Tracking Number Input Section */}
       <Card className="bg-white dark:bg-gray-800">
         <CardHeader>
-          <CardTitle className="text-lg font-medium">Track Your Shipment</CardTitle>
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Track Your Shipment
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleTrackingSearch} className="flex gap-4">
@@ -77,6 +88,49 @@ const TrackingPage = () => {
         </CardContent>
       </Card>
 
+      {/* Searched Shipment Details */}
+      {searchedShipment && (
+        <Card className="bg-white dark:bg-gray-800">
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">Shipment Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm font-medium">Tracking Number</p>
+                <p className="text-lg">{searchedShipment.trackingNumber}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Status</p>
+                <Badge variant={searchedShipment.status === "Delivered" ? "success" : "warning"}>
+                  {searchedShipment.status}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Current Location</p>
+                <p className="text-lg">{searchedShipment.currentLocation}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Estimated Delivery</p>
+                <p className="text-lg">{searchedShipment.estimatedDelivery}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Origin</p>
+                <p className="text-lg">{searchedShipment.origin}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium">Destination</p>
+                <p className="text-lg">{searchedShipment.destination}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Shipment Update Form */}
+      <ShipmentUpdateForm />
+
+      {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -99,36 +153,36 @@ const TrackingPage = () => {
         </Card>
       </div>
 
+      {/* Shipments Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Active Shipments</CardTitle>
+          <CardTitle>Recent Shipments</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tracking ID</TableHead>
+                <TableHead>Tracking Number</TableHead>
+                <TableHead>Origin</TableHead>
                 <TableHead>Destination</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>ETA</TableHead>
-                <TableHead>Carrier</TableHead>
+                <TableHead>Current Location</TableHead>
+                <TableHead>Estimated Delivery</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {shipments.map((shipment) => (
-                <TableRow key={shipment.id}>
-                  <TableCell className="font-medium">{shipment.id}</TableCell>
+                <TableRow key={shipment.trackingNumber}>
+                  <TableCell>{shipment.trackingNumber}</TableCell>
+                  <TableCell>{shipment.origin}</TableCell>
                   <TableCell>{shipment.destination}</TableCell>
                   <TableCell>
-                    <Badge variant={
-                      shipment.status === "Delivered" ? "default" :
-                      shipment.status === "In Transit" ? "secondary" : "outline"
-                    }>
+                    <Badge variant={shipment.status === "Delivered" ? "success" : "warning"}>
                       {shipment.status}
                     </Badge>
                   </TableCell>
-                  <TableCell>{shipment.eta}</TableCell>
-                  <TableCell>{shipment.carrier}</TableCell>
+                  <TableCell>{shipment.currentLocation}</TableCell>
+                  <TableCell>{shipment.estimatedDelivery}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
