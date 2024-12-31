@@ -13,16 +13,21 @@ const CHAT_API_URL = 'http://127.0.0.1:8001/chat';
 
 export const sendChatMessage = async (message: string, contextData?: Record<string, unknown[]>): Promise<string> => {
   try {
-    const response = await fetch(CHAT_API_URL, {
-      method: 'POST',
+    // Encode the message for use in URL
+    const encodedMessage = encodeURIComponent(message);
+    const url = `${CHAT_API_URL}?query=${encodedMessage}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
       headers: API_CONFIG.headers,
-      body: JSON.stringify({
-        query: message,
-        context_data: contextData || {}
-      })
     });
 
     if (!response.ok) {
+      console.error('Chat API Error:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url
+      });
       throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
     }
 
