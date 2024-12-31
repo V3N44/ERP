@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { GoogleOAuthProvider, GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { ForgotPasswordDialog } from "./ForgotPasswordDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, ArrowRight, MessageCircle } from "lucide-react";
 
-const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID";
+// This should be your Google Client ID from the Google Cloud Console
+const GOOGLE_CLIENT_ID = "1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com";
 
 export const LoginForm = () => {
   const [identifier, setIdentifier] = useState("");
@@ -52,20 +53,39 @@ export const LoginForm = () => {
     }
   };
 
-  const handleGoogleSuccess = (credentialResponse: unknown) => {
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     console.log('Google login success:', credentialResponse);
-    toast({
-      title: "Google login successful",
-      description: "Welcome back!",
-    });
-    navigate("/dashboard");
+    try {
+      // Here you would typically send the credential to your backend
+      // For now, we'll just show a success message and redirect
+      if (credentialResponse.credential) {
+        toast({
+          title: "Google login successful",
+          description: (
+            <div className="flex items-center gap-2">
+              Welcome! Use our AI assistant <MessageCircle className="h-4 w-4" /> <ArrowRight className="h-4 w-4" />
+            </div>
+          ),
+          duration: 6000,
+          className: "left-0 bottom-4 fixed max-w-[20%]",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.error('Google login error:', error);
+      toast({
+        variant: "destructive",
+        title: "Google login failed",
+        description: "There was an error logging in with Google",
+      });
+    }
   };
 
   const handleGoogleError = () => {
     toast({
       variant: "destructive",
       title: "Google login failed",
-      description: "Please try again",
+      description: "Please try again or use email login",
     });
   };
 
@@ -169,6 +189,10 @@ export const LoginForm = () => {
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleError}
             useOneTap
+            theme="outline"
+            size="large"
+            text="signin_with"
+            shape="rectangular"
           />
         </div>
       </div>
