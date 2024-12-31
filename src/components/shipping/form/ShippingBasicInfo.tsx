@@ -27,7 +27,7 @@ export const ShippingBasicInfo = ({ formData, setFormData }: ShippingBasicInfoPr
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="soNumber">SO Number</Label>
+        <Label htmlFor="soNumber">Tracking Number</Label>
         <Input
           id="soNumber"
           value={formData.soNumber}
