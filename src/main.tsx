@@ -7,22 +7,17 @@ import i18n from "./i18n/i18n.ts";
 import App from './App.tsx';
 import './index.css';
 
-const rootElement = document.getElementById("root");
-
-if (!rootElement) {
-  throw new Error("Root element not found. Check your index.html file.");
-}
-
-const root = createRoot(rootElement);
+const container = document.getElementById('root');
+const root = createRoot(container!);
 
 root.render(
-  <LanguageProvider>
+  <BrowserRouter>
     <SidebarProvider>
-      <I18nextProvider i18n={i18n}>
-        <BrowserRouter>
+      <LanguageProvider>
+        <I18nextProvider i18n={i18n}>
           <App />
-        </BrowserRouter>
-      </I18nextProvider>
+        </I18nextProvider>
+      </LanguageProvider>
     </SidebarProvider>
-  </LanguageProvider>
+  </BrowserRouter>
 );
