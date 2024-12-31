@@ -26,6 +26,11 @@ export const ExpensesChart = () => {
     spent: Math.round((totalInventoryValue / 7) * 0.8) + (index * 30), // Expenses as 80% of income
   }));
 
+  // Calculate total spent and income for the title
+  const totalSpent = expensesData.reduce((sum, item) => sum + item.spent, 0);
+  const totalIncome = expensesData.reduce((sum, item) => sum + item.income, 0);
+  const chartTitle = `Weekly Expenses Overview: $${totalSpent.toLocaleString()} spent of $${totalIncome.toLocaleString()} income`;
+
   const handleInputChange = (day: string, field: 'income' | 'spent', value: string) => {
     const numValue = parseFloat(value) || 0;
     setTempData(prev => 
@@ -47,7 +52,9 @@ export const ExpensesChart = () => {
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-sm font-heading font-semibold text-gray-700">Track expenses</CardTitle>
+        <CardTitle className="text-sm font-heading font-semibold text-gray-700">
+          {chartTitle}
+        </CardTitle>
         <Button
           variant="ghost"
           size="icon"
