@@ -1,23 +1,38 @@
+// import { createRoot } from 'react-dom/client'
+// import { SidebarProvider } from "@/components/ui/sidebar"
+// import App from './App.tsx'
+// import './index.css'
+
+// createRoot(document.getElementById("root")!).render(
+//   <SidebarProvider>
+//     <App />
+//   </SidebarProvider>
+// );
+
+
+
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
-import { I18nextProvider } from 'react-i18next';
-import { LanguageProvider } from '@/contexts/LanguageContext';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import i18n from './i18n/i18n';
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { LanguageProvider } from "@/contexts/LanguageContext"; // Assuming you have a LanguageContext for managing i18n
+import { I18nextProvider } from "react-i18next";
+import i18n from "./i18n/i18n.ts"; // Import the i18n configuration
 import App from './App.tsx';
 import './index.css';
 
-const container = document.getElementById('root');
-const root = createRoot(container!);
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  throw new Error("Root element not found. Check your index.html file.");
+}
+
+const root = createRoot(rootElement);
 
 root.render(
-  <SidebarProvider>
-    <BrowserRouter>
-      <LanguageProvider>
-        <I18nextProvider i18n={i18n}>
-          <App />
-        </I18nextProvider>
-      </LanguageProvider>
-    </BrowserRouter>
-  </SidebarProvider>
+  <LanguageProvider>
+    <SidebarProvider>
+      <I18nextProvider i18n={i18n}>
+        <App />
+      </I18nextProvider>
+    </SidebarProvider>
+  </LanguageProvider>
 );

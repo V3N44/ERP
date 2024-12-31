@@ -1,49 +1,199 @@
-import { ThemeProvider } from "next-themes";
-import { Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { ChatProvider } from "@/contexts/ChatContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSidebar } from "@/components/AppSidebar";
-import Home from "./pages/Home";
-import About from "./pages/About";
-import SettingsPage from "./pages/admin/settings";
-import SalesOrdersPage from "./pages/sales/orders";
-import ShippingPage from "./pages/shipping";
+import { ChatBot } from "@/components/ChatBot";
+import Footer from "@/components/Footer";
+
+
+
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./pages/admin/settings"
+
+
+
+import Index from "./pages/Index";
+import DashboardPage from "./pages/dashboard";
 import ServiceCenterPage from "./pages/service";
-import InventoryPage from "./pages/shipping/inventory";
-import FreightForwardersPage from "./pages/shipping/freight-forwarders";
+import InventoryPage from "./pages/vehicles/inventory";
+import MaintenancePage from "./pages/vehicles/maintenance";
+import DocumentsPage from "./pages/vehicles/documents";
+import SalesOrdersPage from "./pages/sales/orders";
+import AnalyticsPage from "./pages/sales/analytics";
+import ReportsPage from "./pages/sales/reports";
+import CustomerDatabasePage from "./pages/customers/database";
+import NewLeadPage from "./pages/customers/new";
+import FollowUpsPage from "./pages/customers/follow-ups";
+import SettingsPage from "./pages/admin/settings";
+import AdminReportsPage from "./pages/admin/reports";
+import SystemLogsPage from "./pages/admin/logs";
+import UsersPage from "./pages/admin/users";
+import MessagesPage from "./pages/notifications/messages";
+import CalendarPage from "./pages/notifications/calendar";
+import MailPage from "./pages/notifications/mail";
+import DocumentationPage from "./pages/support/docs";
+import ContactPage from "./pages/support/contact";
+import FAQsPage from "./pages/support/faqs";
+import FinancePage from "./pages/finance";
+import ShippingPage from "./pages/shipping";
+import ShippingOrdersPage from "./pages/shipping/orders";
+import InventoryShippingPage from "./pages/shipping/inventory";
 import TrackingPage from "./pages/shipping/tracking";
 import WarehousesPage from "./pages/shipping/warehouses";
-import FAQsPage from "./pages/support/faqs";
-import ContactPage from "./pages/support/contact";
-import DocumentationPage from "./pages/support/docs";
-import DocumentsPage from "./pages/vehicles/documents";
-import MaintenancePage from "./pages/vehicles/maintenance";
+import FreightForwardersPage from "./pages/shipping/freight-forwarders";
+import AddInventoryPage from "./pages/inventory/add";
+import InventoryListPage from "./pages/inventory/list";
+import { InvoiceManagement } from "@/components/backoffice/InvoiceManagement";
+import { CostCalculator } from "@/components/backoffice/CostCalculator";
+import { BackofficeReports } from "@/components/backoffice/BackofficeReports";
+import DataEntryPage from "./pages/purchasing/data-entry";
+import DocumentScannerPage from "./pages/purchasing/document-scanner";
+import CustomerCareDashboard from "./pages/customer-care/dashboard";
+import VendorManagementPage from "./pages/customer-care/vendors";
+import PurchaseApprovalsPage from "./pages/customer-care/PurchaseApprovals";
+import PayPalIntegrationPage from "./pages/finance/paypal-integration";
+import AutomatedEntriesPage from "./pages/accounting/automated-entries";
+import DiscrepancyDetectionPage from "./pages/accounting/discrepancy-detection";
+import ChartOfAccountsPage from "./pages/accounting/chart-of-accounts";
+import BankAccountsPage from "./pages/accounting/bank-accounts";
+import AddVendorPage from "./pages/customer-care/add-vendor";
 
-function App() {
+const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children, allowedRoles = ["admin", "sales"] }: { 
+  children: React.ReactNode;
+  allowedRoles?: string[];
+}) => {
+  const { user } = useAuth();
+  const location = useLocation();
+
+  if (!user && location.pathname !== "/") {
+    return <Navigate to="/" replace />;
+  }
+
+  if (user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/";
+
+  if (isLoginPage) {
+    return (
+      <main className="flex flex-col min-h-screen">
+        {children}
+        <Footer />
+      </main>
+    );
+  }
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="min-h-screen flex w-full">
-        <AppSidebar />
-        <main className="flex-1 ml-16">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/admin/settings" element={<SettingsPage />} />
-            <Route path="/sales/orders" element={<SalesOrdersPage />} />
-            <Route path="/shipping" element={<ShippingPage />} />
-            <Route path="/service" element={<ServiceCenterPage />} />
-            <Route path="/shipping/inventory" element={<InventoryPage />} />
-            <Route path="/shipping/freight-forwarders" element={<FreightForwardersPage />} />
-            <Route path="/shipping/tracking" element={<TrackingPage />} />
-            <Route path="/shipping/warehouses" element={<WarehousesPage />} />
-            <Route path="/support/faqs" element={<FAQsPage />} />
-            <Route path="/support/contact" element={<ContactPage />} />
-            <Route path="/support/docs" element={<DocumentationPage />} />
-            <Route path="/vehicles/documents" element={<DocumentsPage />} />
-            <Route path="/vehicles/maintenance" element={<MaintenancePage />} />
-          </Routes>
-        </main>
+
+    <div className="flex min-h-screen w-full">
+      
+      <AppSidebar />
+      <div className="flex-1 ml-16 flex flex-col">
+        {children}
+        <Footer />
       </div>
-    </ThemeProvider>
+      <ChatBot />
+    </div>
   );
-}
+};
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <LanguageProvider>
+          <ChatProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <SidebarProvider>
+                <AppLayout>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/dashboard" element={
+                      <ProtectedRoute allowedRoles={["admin", "sales","accounting","user","shipping","purchasing","customer-care"]}>
+                        <DashboardPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/inventory/add" element={
+                      <ProtectedRoute allowedRoles={["admin", "sales","accounting"]}>
+                        <AddInventoryPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/inventory/list" element={
+                      <ProtectedRoute allowedRoles={["admin", "sales"]}>
+                        <InventoryListPage />
+                        
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/service" element={<ServiceCenterPage />} />
+                    <Route path="/vehicles/inventory" element={<InventoryPage />} />
+                    <Route path="/vehicles/maintenance" element={<MaintenancePage />} />
+                    <Route path="/vehicles/documents" element={<DocumentsPage />} />
+                    <Route path="/sales/orders" element={<SalesOrdersPage />} />
+                    <Route path="/sales/analytics" element={<AnalyticsPage />} />
+                    <Route path="/sales/reports" element={<ReportsPage />} />
+                    <Route path="/customers/database" element={<CustomerDatabasePage />} />
+                    <Route path="/customers/new" element={<NewLeadPage />} />
+                    <Route path="/customers/follow-ups" element={<FollowUpsPage />} />
+                    <Route path="/admin/settings" element={<SettingsPage />} />
+                    <Route path="/admin/reports" element={<AdminReportsPage />} />
+                    <Route path="/admin/logs" element={<SystemLogsPage />} />
+                    <Route path="/admin/users" element={<UsersPage />} />
+                    <Route path="/notifications/messages" element={<MessagesPage />} />
+                    <Route path="/notifications/calendar" element={<CalendarPage />} />
+                    <Route path="/notifications/mail" element={<MailPage />} />
+                    <Route path="/support/docs" element={<DocumentationPage />} />
+                    <Route path="/support/contact" element={<ContactPage />} />
+                    <Route path="/support/faqs" element={<FAQsPage />} />
+                    <Route path="/finance" element={<FinancePage />} />
+                    <Route path="/finance/paypal-integration" element={<PayPalIntegrationPage />} />
+                    <Route path="/shipping" element={<ShippingPage />} />
+                    <Route path="/shipping/orders" element={<ShippingOrdersPage />} />
+                    <Route path="/shipping/inventory" element={<InventoryShippingPage />} />
+                    <Route path="/shipping/tracking" element={<TrackingPage />} />
+                    <Route path="/shipping/warehouses" element={<WarehousesPage />} />
+                    <Route path="/shipping/freight-forwarders" element={<FreightForwardersPage />} />
+                    {/* BackOffice Routes */}
+                    <Route path="/backoffice/invoices" element={<InvoiceManagement />} />
+                    <Route path="/backoffice/calculator" element={<CostCalculator />} />
+                    <Route path="/backoffice/reports" element={<BackofficeReports />} />
+                    {/* Purchasing Routes */}
+                    <Route path="/purchasing/data-entry" element={<DataEntryPage />} />
+                    <Route path="/purchasing/document-scanner" element={<DocumentScannerPage />} />
+                    {/* Customer Care Routes */}
+                    <Route path="/customer-care/dashboard" element={<CustomerCareDashboard />} />
+                    <Route path="/customer-care/vendors" element={<VendorManagementPage />} />
+                    <Route path="/customer-care/add-vendor" element={<AddVendorPage />} />
+                    <Route path="/customer-care/approvals" element={<PurchaseApprovalsPage />} />
+                    {/* Accounting Routes */}
+                    <Route path="/accounting/automated-entries" element={<AutomatedEntriesPage />} />
+                    <Route path="/accounting/discrepancy-detection" element={<DiscrepancyDetectionPage />} />
+                    <Route path="/accounting/chart-of-accounts" element={<ChartOfAccountsPage />} />
+                    <Route path="/accounting/bank-accounts" element={<BankAccountsPage />} />
+                  </Routes>
+                </AppLayout>
+              </SidebarProvider>
+            </BrowserRouter>
+          </ChatProvider>
+        </LanguageProvider>
+      </TooltipProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
 
 export default App;
