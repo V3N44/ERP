@@ -60,16 +60,11 @@ export const EarningsChart = () => {
     setIsEditing(true);
   };
 
-  // Calculate the date range for the title
-  const endMonth = monthNames[currentMonth];
-  const startMonthIndex = (currentMonth - 5 + 12) % 12;
-  const startMonth = monthNames[startMonthIndex];
-
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-heading font-semibold text-gray-700">
-          Monthly Earnings: {startMonth} - {endMonth}
+          Earnings for the last 6 months
         </CardTitle>
         <Button
           variant="ghost"
