@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const ShipmentUpdateForm = () => {
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState("");
+  const [trackingNumber, setTrackingNumber] = useState("");
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  const handleUpdateShipment = (e: React.FormEvent) => {
+  const handleUpdateShipment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!location || !status) {
+    if (!trackingNumber || !location || !status) {
       toast({
         variant: "destructive",
         title: "Error",
@@ -22,11 +25,43 @@ export const ShipmentUpdateForm = () => {
       return;
     }
 
-    // Here you would typically make an API call to update the shipment
-    toast({
-      title: "Success",
-      description: "Shipment details updated successfully",
-    });
+    try {
+      const response = await fetch(`${process.env.VITE_API_URL}/shipments/update-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify({
+          stock_number: trackingNumber,
+          current_location: location,
+          status: status
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update shipment status');
+      }
+
+      // Invalidate and refetch shipping orders query
+      await queryClient.invalidateQueries({ queryKey: ['shipping-orders'] });
+
+      toast({
+        title: "Success",
+        description: "Shipment details updated successfully",
+      });
+
+      // Reset form
+      setTrackingNumber("");
+      setLocation("");
+      setStatus("");
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update shipment status",
+      });
+    }
   };
 
   return (
@@ -39,6 +74,14 @@ export const ShipmentUpdateForm = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleUpdateShipment} className="space-y-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Tracking Number</label>
+            <Input
+              placeholder="Enter tracking number"
+              value={trackingNumber}
+              onChange={(e) => setTrackingNumber(e.target.value)}
+            />
+          </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Current Location</label>
             <Input
