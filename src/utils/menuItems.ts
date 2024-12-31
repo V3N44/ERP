@@ -1,4 +1,3 @@
-import { UserRole } from "@/types/auth";
 import { 
   LayoutDashboard,
   Wrench,
@@ -31,9 +30,14 @@ import {
   Receipt,
   PieChart,
   ScanLine,
-  FileInput
+  FileInput,
+  CreditCard,
+  Box,
+  BriefcaseIcon,
+  ChartBar
 } from "lucide-react";
 import { MenuItem } from "@/types/menu";
+import { UserRole } from "@/types/auth";
 
 const allMenuItems = [
   {
@@ -54,6 +58,7 @@ const allMenuItems = [
     path: "/vehicles",
     roles: ["admin", "sales", "shipping"],
     requirements: [
+      { name: "Inventory", icon: PackageSearch, path: "/vehicles/inventory", roles: ["admin", "sales"] },
       { name: "Maintenance", icon: Wrench, path: "/vehicles/maintenance", roles: ["admin"] },
       { name: "Documents", icon: FileText, path: "/vehicles/documents", roles: ["admin", "sales"] }
     ],
@@ -246,7 +251,7 @@ const allMenuItems = [
     requirements: [
       { 
         name: "Overview", 
-        icon: LayoutDashboard, 
+        icon: ChartBar, 
         path: "/finance", 
         roles: ["admin", "accounting"] 
       },
@@ -260,7 +265,7 @@ const allMenuItems = [
   },
   {
     name: "Accounting",
-    icon: FileText,
+    icon: BriefcaseIcon,
     path: "/accounting",
     roles: ["admin", "accounting"],
     requirements: [
@@ -274,6 +279,18 @@ const allMenuItems = [
         name: "AI Discrepancy Detection",
         icon: FileText,
         path: "/accounting/discrepancy-detection",
+        roles: ["admin", "accounting"]
+      },
+      {
+        name: "Chart of Accounts",
+        icon: BookOpen,
+        path: "/accounting/chart-of-accounts",
+        roles: ["admin", "accounting"]
+      },
+      {
+        name: "Bank Accounts",
+        icon: CreditCard,
+        path: "/accounting/bank-accounts",
         roles: ["admin", "accounting"]
       }
     ]
