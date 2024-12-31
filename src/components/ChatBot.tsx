@@ -5,7 +5,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Input } from "./ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChat } from "@/contexts/ChatContext";
-import { sendMessageToGoogleApi } from "@/utils/googleApi";
+import { sendChatMessage } from "@/services/chatService";
 import { MessageCircle, X, Maximize2, Minimize2, Plus, Paperclip, Mic, StopCircle } from "lucide-react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import { toast } from "./ui/use-toast";
@@ -29,6 +29,7 @@ export const ChatBot = () => {
   const handleSendMessage = async (text: string) => {
     if (!currentChatId) return;
 
+    // Add user message to chat
     addMessageToChat(currentChatId, {
       text,
       isBot: false,
@@ -37,13 +38,10 @@ export const ChatBot = () => {
     });
 
     try {
-      const apiKey = process.env.GOOGLE_API_KEY;
-      if (!apiKey) {
-        throw new Error('Google API key not found');
-      }
+      // Send message to API and get response
+      const response = await sendChatMessage(text);
 
-      const response = await sendMessageToGoogleApi(text, apiKey);
-
+      // Add bot response to chat
       addMessageToChat(currentChatId, {
         text: response,
         isBot: true,
@@ -52,11 +50,10 @@ export const ChatBot = () => {
       });
     } catch (error) {
       console.error('Error processing message:', error);
-      addMessageToChat(currentChatId, {
-        text: "I apologize, but I'm having trouble connecting to the service right now. Please try again later.",
-        isBot: true,
-        timestamp: new Date(),
-        type: "text"
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
       });
     }
   };
@@ -130,7 +127,6 @@ export const ChatBot = () => {
   );
 };
 
-// ChatWindow Component
 const ChatWindow = ({
   isExpanded,
   onClose,
