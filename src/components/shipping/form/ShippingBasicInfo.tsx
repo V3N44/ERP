@@ -57,6 +57,8 @@ export const ShippingBasicInfo = ({ formData, setFormData }: ShippingBasicInfoPr
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Asking">Asking</SelectItem>
+            <SelectItem value="Booking Waiting">Booking Waiting</SelectItem>
             <SelectItem value="Confirmed">Confirmed</SelectItem>
             <SelectItem value="Canceled">Canceled</SelectItem>
           </SelectContent>
