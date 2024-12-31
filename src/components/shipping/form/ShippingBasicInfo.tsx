@@ -7,11 +7,13 @@ import { getFreightForwarders } from "@/services/freightForwarderService";
 
 interface ShippingBasicInfoProps {
   formData: {
+    soNumber: string;
     stockNumber: string;
     shipType: ShipType;
     forwarder: Forwarder;
     freightType: FreightType;
     freightForwarderId?: number;
+    bookingStatus: string;
   };
   setFormData: (data: any) => void;
 }
@@ -25,6 +27,16 @@ export const ShippingBasicInfo = ({ formData, setFormData }: ShippingBasicInfoPr
   return (
     <div className="space-y-4">
       <div className="space-y-2">
+        <Label htmlFor="soNumber">SO Number</Label>
+        <Input
+          id="soNumber"
+          value={formData.soNumber}
+          onChange={(e) => setFormData({ ...formData, soNumber: e.target.value })}
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="stockNumber">Stock Number</Label>
         <Input
           id="stockNumber"
@@ -32,6 +44,23 @@ export const ShippingBasicInfo = ({ formData, setFormData }: ShippingBasicInfoPr
           onChange={(e) => setFormData({ ...formData, stockNumber: e.target.value })}
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="bookingStatus">Status</Label>
+        <Select
+          value={formData.bookingStatus}
+          onValueChange={(value) => setFormData({ ...formData, bookingStatus: value })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Pending">Pending</SelectItem>
+            <SelectItem value="Confirmed">Confirmed</SelectItem>
+            <SelectItem value="Canceled">Canceled</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2">

@@ -18,7 +18,9 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
+    soNumber: "",
     stockNumber: "",
+    bookingStatus: "Pending",
     shipType: "RoRo" as ShipType,
     forwarder: "FWT" as Forwarder,
     freightType: "Prepaid" as FreightType,
@@ -65,11 +67,12 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
     }
 
     createMutation.mutate({
+      so_number: formData.soNumber,
       stock_number: formData.stockNumber,
-      country: formData.pod, // Using POD as country
-      status: "Pending",
+      status: formData.bookingStatus,
+      country: formData.pod,
       etd: formData.etd,
-      shipping_cost: 0, // Default values as per requirements
+      shipping_cost: 0,
       insurance: 0,
       freight_forwarder_id: formData.freightForwarderId,
     });
