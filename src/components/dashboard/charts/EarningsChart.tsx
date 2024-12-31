@@ -41,6 +41,11 @@ export const EarningsChart = () => {
     };
   }).reverse();
 
+  // Generate chart title based on data range
+  const startMonth = lastSixMonths[0].month;
+  const endMonth = lastSixMonths[lastSixMonths.length - 1].month;
+  const chartTitle = `Customer Earnings: ${startMonth} - ${endMonth} (Total: $${totalEarnings.toLocaleString()})`;
+
   const handleInputChange = (month: string, value: string) => {
     const numValue = parseFloat(value) || 0;
     setTempEarnings(prev => 
@@ -64,7 +69,7 @@ export const EarningsChart = () => {
     <Card className="bg-white border-none shadow-sm rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-heading font-semibold text-gray-700">
-          Earnings for the last 6 months
+          {chartTitle}
         </CardTitle>
         <Button
           variant="ghost"
