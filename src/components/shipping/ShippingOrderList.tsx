@@ -63,7 +63,7 @@ export const ShippingOrderList = ({ orders, isLoading }: ShippingOrderListProps)
             <TableHead className="font-semibold">ETD</TableHead>
             <TableHead className="font-semibold">Shipping Cost</TableHead>
             <TableHead className="font-semibold">Insurance</TableHead>
-            <TableHead className="font-semibold">Forwarder ID</TableHead>
+            <TableHead className="font-semibold">Freight Forwarder</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -79,7 +79,9 @@ export const ShippingOrderList = ({ orders, isLoading }: ShippingOrderListProps)
               <TableCell>{formatDate(order.etd)}</TableCell>
               <TableCell>{formatCurrency(order.shipping_cost)}</TableCell>
               <TableCell>{formatCurrency(order.insurance)}</TableCell>
-              <TableCell>{order.freight_forwarder_id || '-'}</TableCell>
+              <TableCell>
+                {order.freight_forwarder ? order.freight_forwarder.name : '-'}
+              </TableCell>
             </TableRow>
           ))}
           {orders.length === 0 && (
