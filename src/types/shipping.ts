@@ -19,7 +19,6 @@ export interface FreightForwarder {
 }
 
 export interface CreateShipmentDTO {
-  so_number: string;
   stock_number: string;
   status: ShippingStatus;
   country: string;
@@ -27,34 +26,17 @@ export interface CreateShipmentDTO {
   shipping_cost: number;
   insurance: number;
   freight_forwarder_id: number;
-  ship_type?: ShipType;
-  freight_type?: FreightType;
-  pol?: string;
-  pod?: string;
-  eta?: string;
-  consignor?: string;
-  consignee?: string;
-  notify?: string;
 }
 
 export interface ShippingOrder {
   id: string;
-  soNumber: string;
-  stockNumber: string;
-  bookingStatus: ShippingStatus;
-  shipType: ShipType;
-  forwarder: Forwarder;
-  freightType: FreightType;
-  pol: string;
-  pod: string;
+  stock_number: string;
+  country: string;
+  status: ShippingStatus;
   etd: string;
-  eta: string;
-  bookingNumber?: string;
-  consignor?: string;
-  consignee?: string;
-  notify?: string;
-  vessel?: string;
-  voyageNo?: string;
-  createdAt: string;
-  updatedAt: string;
+  shipping_cost: number;
+  insurance: number;
+  freight_forwarder_id: number;
+  createdAt?: string;
+  updatedAt?: string;
 }

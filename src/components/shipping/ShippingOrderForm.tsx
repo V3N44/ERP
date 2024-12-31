@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShippingBasicInfo } from "./form/ShippingBasicInfo";
 import { ShippingPortInfo } from "./form/ShippingPortInfo";
 import { ShippingPartyInfo } from "./form/ShippingPartyInfo";
+import { ShippingCostInfo } from "./form/ShippingCostInfo";
 
 interface ShippingOrderFormProps {
   onClose: () => void;
@@ -34,6 +35,9 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
     notify: "",
     vessel: "",
     voyageNo: "",
+    shippingCost: 0,
+    insurance: 0,
+    country: ""
   });
 
   const createMutation = useMutation({
@@ -67,22 +71,13 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
     }
 
     createMutation.mutate({
-      so_number: formData.soNumber,
       stock_number: formData.stockNumber,
       status: formData.bookingStatus,
-      country: formData.pod, // Using POD as country
+      country: formData.country,
       etd: formData.etd,
-      shipping_cost: 0, // Default values as required by DTO
-      insurance: 0, // Default values as required by DTO
+      shipping_cost: formData.shippingCost,
+      insurance: formData.insurance,
       freight_forwarder_id: formData.freightForwarderId,
-      ship_type: formData.shipType,
-      freight_type: formData.freightType,
-      pol: formData.pol,
-      pod: formData.pod,
-      eta: formData.eta,
-      consignor: formData.consignor,
-      consignee: formData.consignee,
-      notify: formData.notify
     });
   };
 
@@ -98,6 +93,7 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
               <ShippingBasicInfo formData={formData} setFormData={setFormData} />
               <ShippingPortInfo formData={formData} setFormData={setFormData} />
               <ShippingPartyInfo formData={formData} setFormData={setFormData} />
+              <ShippingCostInfo formData={formData} setFormData={setFormData} />
             </div>
 
             <div className="flex justify-end gap-4">
