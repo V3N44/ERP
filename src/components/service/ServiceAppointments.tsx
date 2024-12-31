@@ -23,10 +23,10 @@ export const ServiceAppointments = () => {
     notes: "",
   });
 
-  // Fetch services
+  // Fetch services - removed the parameters since getServices doesn't accept any
   const { data: services = [] } = useQuery({
     queryKey: ['services'],
-    queryFn: () => getServices({ skip: 0, limit: 100 }),
+    queryFn: getServices,
   });
 
   // Create appointment mutation
