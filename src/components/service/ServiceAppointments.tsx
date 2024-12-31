@@ -5,31 +5,72 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { createAppointment } from "@/services/appointmentService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getServices } from "@/services/serviceService";
+import { useToast } from "@/hooks/use-toast";
 
 export const ServiceAppointments = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     date: "",
-    customer: "",
-    serviceType: "",
-    status: "",
+    customer_id: 0,
+    service_id: 0,
+    status: "scheduled" as const,
+    notes: "",
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
+  // Fetch services
+  const { data: services = [] } = useQuery({
+    queryKey: ['services'],
+    queryFn: () => getServices({ skip: 0, limit: 100 }),
+  });
+
+  // Create appointment mutation
+  const createAppointmentMutation = useMutation({
+    mutationFn: createAppointment,
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Appointment created successfully",
+      });
+      setIsOpen(false);
+      setFormData({
+        date: "",
+        customer_id: 0,
+        service_id: 0,
+        status: "scheduled",
+        notes: "",
+      });
+      // Optionally refresh appointments list if you have one
+      // queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    },
+    onError: (error: Error) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    },
+  });
+
+  const handleInputChange = (name: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Appointment Added:", formData);
-    setIsOpen(false);
-    setFormData({ date: "", customer: "", serviceType: "", status: "" });
+    createAppointmentMutation.mutate({
+      ...formData,
+      date: new Date(formData.date).toISOString(),
+    });
   };
 
   return (
     <div className="space-y-4">
-      {/* Add Button */}
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-bold">Service Appointments</h2>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -51,50 +92,56 @@ export const ServiceAppointments = () => {
                 <Input
                   id="date"
                   name="date"
-                  type="date"
+                  type="datetime-local"
                   value={formData.date}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange("date", e.target.value)}
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" htmlFor="customer">
-                  Customer
+                <label className="block text-sm font-medium mb-1" htmlFor="customer_id">
+                  Customer ID
                 </label>
                 <Input
-                  id="customer"
-                  name="customer"
-                  type="text"
-                  value={formData.customer}
-                  onChange={handleInputChange}
-                  placeholder="Enter customer name"
+                  id="customer_id"
+                  name="customer_id"
+                  type="number"
+                  value={formData.customer_id || ""}
+                  onChange={(e) => handleInputChange("customer_id", parseInt(e.target.value))}
+                  placeholder="Enter customer ID"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" htmlFor="serviceType">
-                  Service Type
+                <label className="block text-sm font-medium mb-1" htmlFor="service_id">
+                  Service
                 </label>
-                <Input
-                  id="serviceType"
-                  name="serviceType"
-                  type="text"
-                  value={formData.serviceType}
-                  onChange={handleInputChange}
-                  placeholder="Enter service type"
-                  required
-                />
+                <Select
+                  value={formData.service_id.toString()}
+                  onValueChange={(value) => handleInputChange("service_id", parseInt(value))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {services.map((service) => (
+                      <SelectItem key={service.id} value={service.id.toString()}>
+                        {service.service_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1" htmlFor="status">
-                  Status
+                <label className="block text-sm font-medium mb-1" htmlFor="notes">
+                  Notes
                 </label>
                 <Textarea
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  placeholder="Enter status (e.g., Scheduled, Confirmed)"
+                  id="notes"
+                  name="notes"
+                  value={formData.notes}
+                  onChange={(e) => handleInputChange("notes", e.target.value)}
+                  placeholder="Enter appointment notes"
                   required
                 />
               </div>
@@ -102,7 +149,12 @@ export const ServiceAppointments = () => {
                 <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit">Save</Button>
+                <Button 
+                  type="submit" 
+                  disabled={createAppointmentMutation.isPending}
+                >
+                  {createAppointmentMutation.isPending ? "Creating..." : "Save"}
+                </Button>
               </div>
             </form>
           </DialogContent>
