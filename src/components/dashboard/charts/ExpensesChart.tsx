@@ -29,7 +29,7 @@ export const ExpensesChart = () => {
   // Calculate total spent and income for the title
   const totalSpent = expensesData.reduce((sum, item) => sum + item.spent, 0);
   const totalIncome = expensesData.reduce((sum, item) => sum + item.income, 0);
-  const chartTitle = `Weekly Expenses Overview: $${totalSpent.toLocaleString()} spent of $${totalIncome.toLocaleString()} income`;
+  const chartTitle = "Weekly Expenses Overview";
 
   const handleInputChange = (day: string, field: 'income' | 'spent', value: string) => {
     const numValue = parseFloat(value) || 0;
