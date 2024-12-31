@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ShipType, Forwarder, FreightType } from "@/types/shipping";
+import { ShipType, Forwarder, FreightType, ShippingStatus } from "@/types/shipping";
 import { getFreightForwarders } from "@/services/freightForwarderService";
 
 interface ShippingBasicInfoProps {
@@ -13,7 +13,7 @@ interface ShippingBasicInfoProps {
     forwarder: Forwarder;
     freightType: FreightType;
     freightForwarderId?: number;
-    bookingStatus: string;
+    bookingStatus: ShippingStatus;
   };
   setFormData: (data: any) => void;
 }
@@ -50,7 +50,7 @@ export const ShippingBasicInfo = ({ formData, setFormData }: ShippingBasicInfoPr
         <Label htmlFor="bookingStatus">Status</Label>
         <Select
           value={formData.bookingStatus}
-          onValueChange={(value) => setFormData({ ...formData, bookingStatus: value })}
+          onValueChange={(value: ShippingStatus) => setFormData({ ...formData, bookingStatus: value })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select status" />

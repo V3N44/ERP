@@ -19,6 +19,7 @@ export const ShippingPartyInfo = ({ formData, setFormData }: ShippingPartyInfoPr
           id="consignor"
           value={formData.consignor}
           onChange={(e) => setFormData({ ...formData, consignor: e.target.value })}
+          placeholder="Enter consignor"
         />
       </div>
 
@@ -28,6 +29,7 @@ export const ShippingPartyInfo = ({ formData, setFormData }: ShippingPartyInfoPr
           id="consignee"
           value={formData.consignee}
           onChange={(e) => setFormData({ ...formData, consignee: e.target.value })}
+          placeholder="Enter consignee"
         />
       </div>
 
@@ -37,6 +39,7 @@ export const ShippingPartyInfo = ({ formData, setFormData }: ShippingPartyInfoPr
           id="notify"
           value={formData.notify}
           onChange={(e) => setFormData({ ...formData, notify: e.target.value })}
+          placeholder="Enter notify party"
         />
       </div>
     </div>

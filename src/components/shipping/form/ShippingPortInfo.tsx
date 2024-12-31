@@ -42,6 +42,7 @@ export const ShippingPortInfo = ({ formData, setFormData }: ShippingPortInfoProp
           value={formData.etd}
           onChange={(e) => setFormData({ ...formData, etd: e.target.value })}
           required
+          placeholder="dd-mm-yyyy"
         />
       </div>
 
@@ -53,6 +54,7 @@ export const ShippingPortInfo = ({ formData, setFormData }: ShippingPortInfoProp
           value={formData.eta}
           onChange={(e) => setFormData({ ...formData, eta: e.target.value })}
           required
+          placeholder="dd-mm-yyyy"
         />
       </div>
     </div>

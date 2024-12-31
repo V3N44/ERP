@@ -4,7 +4,7 @@ import { createShippingOrder } from "@/services/shippingService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ShipType, Forwarder, FreightType } from "@/types/shipping";
+import { ShipType, Forwarder, FreightType, ShippingStatus } from "@/types/shipping";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ShippingBasicInfo } from "./form/ShippingBasicInfo";
 import { ShippingPortInfo } from "./form/ShippingPortInfo";
@@ -20,7 +20,7 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
   const [formData, setFormData] = useState({
     soNumber: "",
     stockNumber: "",
-    bookingStatus: "Pending",
+    bookingStatus: "Pending" as ShippingStatus,
     shipType: "RoRo" as ShipType,
     forwarder: "FWT" as Forwarder,
     freightType: "Prepaid" as FreightType,
