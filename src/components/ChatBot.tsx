@@ -1,10 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/button";
-import { MessageCircle } from "lucide-react";
+import { Card } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
+import { Input } from "./ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChat } from "@/contexts/ChatContext";
-import { ChatWindow } from "./chat/ChatWindow";
 import { sendMessageToGoogleApi } from "@/utils/googleApi";
+import { MessageCircle, X, Maximize2, Minimize2, Plus, Paperclip, Mic, StopCircle } from "lucide-react";
+import { useReactMediaRecorder } from "react-media-recorder";
+import { toast } from "./ui/use-toast";
+import { Message } from "@/contexts/ChatContext";
 
+// Main ChatBot Component
 export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -14,7 +21,7 @@ export const ChatBot = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsAnimating(false);
-    }, 60000); // 60000ms = 1 minute
+    }, 60000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -22,7 +29,6 @@ export const ChatBot = () => {
   const handleSendMessage = async (text: string) => {
     if (!currentChatId) return;
 
-    // Add user message
     addMessageToChat(currentChatId, {
       text,
       isBot: false,
@@ -31,7 +37,6 @@ export const ChatBot = () => {
     });
 
     try {
-      // Get response from Google API
       const apiKey = process.env.GOOGLE_API_KEY;
       if (!apiKey) {
         throw new Error('Google API key not found');
@@ -39,7 +44,6 @@ export const ChatBot = () => {
 
       const response = await sendMessageToGoogleApi(text, apiKey);
 
-      // Add bot response
       addMessageToChat(currentChatId, {
         text: response,
         isBot: true,
@@ -94,7 +98,7 @@ export const ChatBot = () => {
 
   const handleClose = () => {
     setIsOpen(false);
-    setIsExpanded(false); // Reset expanded state when closing
+    setIsExpanded(false);
   };
 
   return (
@@ -123,5 +127,262 @@ export const ChatBot = () => {
         </Button>
       )}
     </div>
+  );
+};
+
+// ChatWindow Component
+const ChatWindow = ({
+  isExpanded,
+  onClose,
+  onToggleExpand,
+  onSendMessage,
+  onSendAudio,
+  onSendFile
+}: {
+  isExpanded: boolean;
+  onClose: () => void;
+  onToggleExpand: () => void;
+  onSendMessage: (text: string) => void;
+  onSendAudio: (blobUrl: string) => void;
+  onSendFile: (file: File) => void;
+}) => {
+  const { chats, currentChatId, createNewChat } = useChat();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const currentChat = currentChatId ? chats.find(chat => chat.id === currentChatId) : null;
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [currentChat?.messages]);
+
+  return (
+    <Card className={`transition-all duration-300 ${
+      isExpanded 
+        ? "w-full h-full rounded-none"
+        : "w-96 h-[600px]"
+    } flex flex-col overflow-hidden`}>
+      <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground shrink-0 sticky top-0 z-10">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="h-5 w-5" />
+          <h3 className="font-semibold">RamaDBK Assistant</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={createNewChat}
+            className="h-8 w-8 hover:bg-primary-foreground/10"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onToggleExpand} 
+            className="h-8 w-8 hover:bg-primary-foreground/10"
+          >
+            {isExpanded ? (
+              <Minimize2 className="h-4 w-4" />
+            ) : (
+              <Maximize2 className="h-4 w-4" />
+            )}
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose} 
+            className="h-8 w-8 hover:bg-primary-foreground/10"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+      
+      <Tabs defaultValue="current" className="flex-1 flex flex-col min-h-0">
+        <TabsList className="px-4 py-2 shrink-0 sticky top-[57px] bg-white z-10">
+          <TabsTrigger value="current">Current Chat</TabsTrigger>
+          <TabsTrigger value="history">Chat History</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="current" className="flex-1 flex flex-col p-0 m-0 h-full">
+          <ScrollArea className="flex-1 p-4">
+            <div className="space-y-4">
+              {currentChat?.messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+          
+          <div className="mt-auto border-t">
+            <ChatInput 
+              onSendMessage={onSendMessage}
+              onSendAudio={onSendAudio}
+              onSendFile={onSendFile}
+            />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="history" className="flex-1 p-4 m-0">
+          <ScrollArea className="h-full">
+            <div className="space-y-4">
+              {chats.map((chat) => (
+                <Card key={chat.id} className="p-4 cursor-pointer hover:bg-accent">
+                  <div className="flex items-center gap-2 mb-2">
+                    <MessageCircle className="h-4 w-4" />
+                    <span className="font-medium">{chat.title}</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {chat.messages[chat.messages.length - 1]?.text || "No messages"}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(chat.createdAt).toLocaleDateString()}
+                  </p>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
+    </Card>
+  );
+};
+
+// ChatMessage Component
+const ChatMessage = ({ message }: { message: Message }) => {
+  const renderMessage = (message: Message) => {
+    switch (message.type) {
+      case "audio":
+        return (
+          <audio controls src={message.mediaUrl} className="max-w-full">
+            Your browser does not support the audio element.
+          </audio>
+        );
+      case "file":
+        return (
+          <div className="flex flex-col">
+            <span>{message.text}</span>
+            <a 
+              href={message.mediaUrl} 
+              download 
+              className="text-sm text-blue-500 hover:text-blue-700"
+            >
+              Download File
+            </a>
+          </div>
+        );
+      default:
+        return message.text;
+    }
+  };
+
+  return (
+    <div className={`flex ${message.isBot ? "justify-start" : "justify-end"}`}>
+      <div className={`rounded-lg px-4 py-2 max-w-[80%] ${
+        message.isBot
+          ? "bg-secondary text-secondary-foreground"
+          : "bg-primary text-primary-foreground"
+      }`}>
+        {renderMessage(message)}
+      </div>
+    </div>
+  );
+};
+
+// ChatInput Component
+const ChatInput = ({ 
+  onSendMessage, 
+  onSendAudio, 
+  onSendFile 
+}: { 
+  onSendMessage: (text: string) => void;
+  onSendAudio: (url: string) => void;
+  onSendFile: (file: File) => void;
+}) => {
+  const [input, setInput] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+
+  const { status, startRecording, stopRecording, mediaBlobUrl } = useReactMediaRecorder({
+    audio: true,
+    onStop: (blobUrl) => {
+      onSendAudio(blobUrl);
+      setIsRecording(false);
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+    onSendMessage(input);
+    setInput("");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please upload files smaller than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+      onSendFile(file);
+    }
+  };
+
+  const handleVoiceRecord = () => {
+    if (!isRecording) {
+      startRecording();
+      setIsRecording(true);
+    } else {
+      stopRecording();
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-4 border-t">
+      <div className="flex gap-2">
+        <Input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your message..."
+          className="flex-1"
+        />
+        <input
+          type="file"
+          id="file-upload"
+          className="hidden"
+          onChange={handleFileUpload}
+          accept="image/*,application/pdf,.doc,.docx"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => document.getElementById("file-upload")?.click()}
+        >
+          <Paperclip className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={handleVoiceRecord}
+          className={isRecording ? "bg-red-100" : ""}
+        >
+          {isRecording ? (
+            <StopCircle className="h-4 w-4 text-red-500" />
+          ) : (
+            <Mic className="h-4 w-4" />
+          )}
+        </Button>
+        <Button type="submit">Send</Button>
+      </div>
+    </form>
   );
 };
