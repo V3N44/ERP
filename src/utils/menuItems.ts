@@ -23,6 +23,7 @@ import {
   Ship,
   Container,
   Truck,
+  Box,
   Warehouse,
   Anchor,
   Plus,
@@ -31,7 +32,8 @@ import {
   Receipt,
   PieChart,
   ScanLine,
-  FileInput
+  FileInput,
+  CreditCard
 } from "lucide-react";
 import { MenuItem } from "@/types/menu";
 
@@ -54,6 +56,7 @@ const allMenuItems = [
     path: "/vehicles",
     roles: ["admin", "sales", "shipping"],
     requirements: [
+      { name: "Inventory", icon: PackageSearch, path: "/vehicles/inventory", roles: ["admin", "sales"] },
       { name: "Maintenance", icon: Wrench, path: "/vehicles/maintenance", roles: ["admin"] },
       { name: "Documents", icon: FileText, path: "/vehicles/documents", roles: ["admin", "sales"] }
     ],
@@ -78,18 +81,6 @@ const allMenuItems = [
       { name: "Database", icon: Building2, path: "/customers/database", roles: ["admin", "sales"] },
       { name: "New Lead", icon: UserPlus, path: "/customers/new", roles: ["admin", "sales"] },
       { name: "Follow-ups", icon: CheckSquare, path: "/customers/follow-ups", roles: ["admin", "sales"] }
-    ],
-  },
-  {
-    name: "Administration",
-    icon: Settings,
-    path: "/admin",
-    roles: ["admin"],
-    requirements: [
-      { name: "Users", icon: Users, path: "/admin/users", roles: ["admin"] },
-      { name: "Settings", icon: Settings, path: "/admin/settings", roles: ["admin"] },
-      { name: "Reports", icon: FileText, path: "/admin/reports", roles: ["admin"] },
-      { name: "System Logs", icon: FileCode, path: "/admin/logs", roles: ["admin"] }
     ],
   },
   {
@@ -127,6 +118,12 @@ const allMenuItems = [
         roles: ["admin", "shipping"] 
       },
       { 
+        name: "Inventory", 
+        icon: Box, 
+        path: "/shipping/inventory", 
+        roles: ["admin", "shipping"] 
+      },
+      { 
         name: "Tracking", 
         icon: Truck, 
         path: "/shipping/tracking", 
@@ -150,7 +147,7 @@ const allMenuItems = [
     name: "Inventory",
     icon: Box,
     path: "/inventory",
-    roles: ["admin", "sales"],
+    roles: ["admin", "sales", "shipping"],
     requirements: [
       { 
         name: "Add Item", 
@@ -237,46 +234,6 @@ const allMenuItems = [
         roles: ["admin", "user", "sales"] 
       }
     ],
-  },
-  {
-    name: "Finance",
-    icon: DollarSign,
-    path: "/finance",
-    roles: ["admin", "accounting"],
-    requirements: [
-      { 
-        name: "Overview", 
-        icon: LayoutDashboard, 
-        path: "/finance", 
-        roles: ["admin", "accounting"] 
-      },
-      { 
-        name: "PayPal Integration", 
-        icon: CreditCard, 
-        path: "/finance/paypal-integration", 
-        roles: ["admin", "accounting"] 
-      }
-    ],
-  },
-  {
-    name: "Accounting",
-    icon: FileText,
-    path: "/accounting",
-    roles: ["admin", "accounting"],
-    requirements: [
-      {
-        name: "Automated Entries",
-        icon: FileText,
-        path: "/accounting/automated-entries",
-        roles: ["admin", "accounting"]
-      },
-      {
-        name: "AI Discrepancy Detection",
-        icon: FileText,
-        path: "/accounting/discrepancy-detection",
-        roles: ["admin", "accounting"]
-      }
-    ]
   }
 ];
 
