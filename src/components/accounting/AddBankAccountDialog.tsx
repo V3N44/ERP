@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { API_URL } from "@/config";
 
 interface AddBankAccountDialogProps {
   open: boolean;
@@ -12,12 +13,15 @@ interface AddBankAccountDialogProps {
 }
 
 export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankAccountDialogProps) {
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     bank_name: "",
+    account_name: "",
     account_number: "",
-    account_type: "",
-    routing_number: ""
+    branch: "",
+    signature_picture: "",
+    balance: 0
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,7 +29,7 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/accounting/bank-accounts/', {
+      const response = await fetch(`${API_URL}/banks/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -33,13 +37,32 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) throw new Error('Failed to add bank account');
+      if (!response.ok) {
+        throw new Error('Failed to add bank account');
+      }
 
+      toast({
+        title: "Success",
+        description: "Bank account added successfully",
+      });
+      
       onSuccess();
       onOpenChange(false);
-      setFormData({ bank_name: "", account_number: "", account_type: "", routing_number: "" });
+      setFormData({
+        bank_name: "",
+        account_name: "",
+        account_number: "",
+        branch: "",
+        signature_picture: "",
+        balance: 0
+      });
     } catch (error) {
       console.error('Error adding bank account:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add bank account. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -50,6 +73,9 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Bank Account</DialogTitle>
+          <DialogDescription>
+            Fill in the details to add a new bank account.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -62,20 +88,13 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="account_type">Account Type</Label>
-            <Select
-              value={formData.account_type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, account_type: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select account type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="checking">Checking</SelectItem>
-                <SelectItem value="savings">Savings</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-              </SelectContent>
-            </Select>
+            <Label htmlFor="account_name">Account Name</Label>
+            <Input
+              id="account_name"
+              value={formData.account_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, account_name: e.target.value }))}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="account_number">Account Number</Label>
@@ -87,11 +106,30 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="routing_number">Routing Number</Label>
+            <Label htmlFor="branch">Branch</Label>
             <Input
-              id="routing_number"
-              value={formData.routing_number}
-              onChange={(e) => setFormData(prev => ({ ...prev, routing_number: e.target.value }))}
+              id="branch"
+              value={formData.branch}
+              onChange={(e) => setFormData(prev => ({ ...prev, branch: e.target.value }))}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="signature_picture">Signature Picture URL</Label>
+            <Input
+              id="signature_picture"
+              value={formData.signature_picture}
+              onChange={(e) => setFormData(prev => ({ ...prev, signature_picture: e.target.value }))}
+              placeholder="https://example.com/signature.jpg"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="balance">Initial Balance</Label>
+            <Input
+              id="balance"
+              type="number"
+              value={formData.balance}
+              onChange={(e) => setFormData(prev => ({ ...prev, balance: parseFloat(e.target.value) }))}
               required
             />
           </div>
