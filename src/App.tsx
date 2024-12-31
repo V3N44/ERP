@@ -1,20 +1,20 @@
 import { ThemeProvider } from "next-themes";
 import { Routes, Route } from "react-router-dom";
-import { Home } from "./pages/Home";
-import { About } from "./pages/About";
-import { SettingsPage } from "./pages/admin/settings";
-import { SalesOrdersPage } from "./pages/sales/orders";
-import { ShippingPage } from "./pages/shipping/index";
-import { ServiceCenterPage } from "./pages/service/index";
-import { InventoryPage } from "./pages/shipping/inventory";
-import { FreightForwardersPage } from "./pages/shipping/freight-forwarders";
-import { TrackingPage } from "./pages/shipping/tracking";
-import { WarehousesPage } from "./pages/shipping/warehouses";
-import { FAQsPage } from "./pages/support/faqs";
-import { ContactPage } from "./pages/support/contact";
-import { DocumentationPage } from "./pages/support/docs";
-import { DocumentsPage } from "./pages/vehicles/documents";
-import { MaintenancePage } from "./pages/vehicles/maintenance";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import SettingsPage from "./pages/admin/settings";
+import SalesOrdersPage from "./pages/sales/orders";
+import ShippingPage from "./pages/shipping/index";
+import ServiceCenterPage from "./pages/service/index";
+import InventoryPage from "./pages/shipping/inventory";
+import FreightForwardersPage from "./pages/shipping/freight-forwarders";
+import TrackingPage from "./pages/shipping/tracking";
+import WarehousesPage from "./pages/shipping/warehouses";
+import FAQsPage from "./pages/support/faqs";
+import ContactPage from "./pages/support/contact";
+import DocumentationPage from "./pages/support/docs";
+import DocumentsPage from "./pages/vehicles/documents";
+import MaintenancePage from "./pages/vehicles/maintenance";
 
 function App() {
   return (
