@@ -29,16 +29,24 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
     setIsLoading(true);
 
     try {
+      const accessToken = localStorage.getItem('access_token');
+      
+      if (!accessToken) {
+        throw new Error('No access token found. Please login again.');
+      }
+
       const response = await fetch(`${API_URL}/banks/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to add bank account');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to add bank account');
       }
 
       toast({
@@ -60,7 +68,7 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
       console.error('Error adding bank account:', error);
       toast({
         title: "Error",
-        description: "Failed to add bank account. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to add bank account. Please try again.",
         variant: "destructive",
       });
     } finally {
