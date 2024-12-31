@@ -29,19 +29,22 @@ export const getShippingOrders = async () => {
     // Transform the API response to match our ShippingOrder type
     return data.map((order: any) => ({
       id: order.id,
-      stock_number: order.stock_number || '',
-      status: order.status || 'Pending',
-      country: order.country || '',
+      soNumber: order.so_number || '',
+      stockNumber: order.stock_number || '',
+      bookingStatus: order.status || 'Pending',
+      shipType: order.ship_type || 'Container',
+      forwarder: order.freight_forwarder ? order.freight_forwarder.name : '-',
+      freightType: order.freight_type || 'Prepaid',
+      pol: order.port_of_loading || '',
+      pod: order.port_of_discharge || '',
       etd: order.etd || '',
-      shipping_cost: order.shipping_cost || 0,
-      insurance: order.insurance || 0,
-      freight_forwarder_id: order.freight_forwarder_id,
-      freight_forwarder: order.freight_forwarder ? {
-        id: order.freight_forwarder.id,
-        name: order.freight_forwarder.name,
-        contact: order.freight_forwarder.contact,
-        country: order.freight_forwarder.country
-      } : undefined,
+      eta: order.eta || '',
+      bookingNumber: order.booking_number,
+      consignor: order.consignor,
+      consignee: order.consignee,
+      notify: order.notify,
+      vessel: order.vessel,
+      voyageNo: order.voyage_no,
       createdAt: order.created_at,
       updatedAt: order.updated_at
     }));

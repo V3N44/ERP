@@ -37,7 +37,6 @@ export interface ShippingOrder {
   shipping_cost: number;
   insurance: number;
   freight_forwarder_id: number;
-  freight_forwarder?: FreightForwarder;
   createdAt?: string;
   updatedAt?: string;
 }
