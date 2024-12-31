@@ -18,12 +18,15 @@ export const VehicleInventory = () => {
     setIsSubmitting(true);
 
     try {
+      // Get the first image file if available
+      const imageFile = selectedImages[0];
+      
       // Update the image_url if there are any images
       if (imageUrls.length > 0) {
         formData.image_url = imageUrls[0];
       }
 
-      await createInventoryItem(formData);
+      await createInventoryItem(formData, imageFile);
       
       toast({
         title: "Success",
