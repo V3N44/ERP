@@ -86,7 +86,6 @@ export const InvoiceManagement = () => {
       </div>
 
       <div className="grid gap-4">
-        {/* Recent Invoices */}
         <Card>
           <CardHeader>
             <CardTitle>Recent Invoices</CardTitle>
