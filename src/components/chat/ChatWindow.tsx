@@ -43,8 +43,8 @@ export const ChatWindow = ({
         ? "w-full h-full rounded-none"
         : "w-96 h-[600px]"
     } flex flex-col overflow-hidden`}>
-      {/* Header */}
-      <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground shrink-0">
+      {/* Fixed Header */}
+      <div className="p-3 border-b flex justify-between items-center bg-primary text-primary-foreground shrink-0 sticky top-0 z-10">
         <div className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5" />
           <h3 className="font-semibold">RamaDBK Assistant</h3>
@@ -83,7 +83,7 @@ export const ChatWindow = ({
       
       {/* Main Content */}
       <Tabs defaultValue="current" className="flex-1 flex flex-col min-h-0">
-        <TabsList className="px-4 py-2 shrink-0">
+        <TabsList className="px-4 py-2 shrink-0 sticky top-[57px] bg-white z-10">
           <TabsTrigger value="current">Current Chat</TabsTrigger>
           <TabsTrigger value="history">Chat History</TabsTrigger>
         </TabsList>
