@@ -70,11 +70,19 @@ export const ShippingOrderForm = ({ onClose }: ShippingOrderFormProps) => {
       so_number: formData.soNumber,
       stock_number: formData.stockNumber,
       status: formData.bookingStatus,
-      country: formData.pod,
+      country: formData.pod, // Using POD as country
       etd: formData.etd,
-      shipping_cost: 0,
-      insurance: 0,
+      shipping_cost: 0, // Default values as required by DTO
+      insurance: 0, // Default values as required by DTO
       freight_forwarder_id: formData.freightForwarderId,
+      ship_type: formData.shipType,
+      freight_type: formData.freightType,
+      pol: formData.pol,
+      pod: formData.pod,
+      eta: formData.eta,
+      consignor: formData.consignor,
+      consignee: formData.consignee,
+      notify: formData.notify
     });
   };
 
