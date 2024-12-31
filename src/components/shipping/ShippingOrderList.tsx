@@ -41,8 +41,15 @@ export const ShippingOrderList = ({ orders, isLoading }: ShippingOrderListProps)
     try {
       return format(new Date(dateString), 'dd/MM/yyyy');
     } catch {
-      return dateString;
+      return '-';
     }
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
   };
 
   return (
@@ -50,36 +57,34 @@ export const ShippingOrderList = ({ orders, isLoading }: ShippingOrderListProps)
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="font-semibold">SO Number</TableHead>
             <TableHead className="font-semibold">Stock Number</TableHead>
             <TableHead className="font-semibold">Status</TableHead>
-            <TableHead className="font-semibold">Forwarder</TableHead>
+            <TableHead className="font-semibold">Country</TableHead>
             <TableHead className="font-semibold">ETD</TableHead>
-            <TableHead className="font-semibold">ETA</TableHead>
-            <TableHead className="font-semibold">POL</TableHead>
-            <TableHead className="font-semibold">POD</TableHead>
+            <TableHead className="font-semibold">Shipping Cost</TableHead>
+            <TableHead className="font-semibold">Insurance</TableHead>
+            <TableHead className="font-semibold">Forwarder ID</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {orders.map((order) => (
             <TableRow key={order.id}>
-              <TableCell className="font-medium">{order.soNumber || '-'}</TableCell>
-              <TableCell>{order.stockNumber || '-'}</TableCell>
+              <TableCell className="font-medium">{order.stock_number || '-'}</TableCell>
               <TableCell>
-                <Badge variant={getStatusVariant(order.bookingStatus)}>
-                  {order.bookingStatus}
+                <Badge variant={getStatusVariant(order.status)}>
+                  {order.status || 'Pending'}
                 </Badge>
               </TableCell>
-              <TableCell>{order.forwarder || '-'}</TableCell>
+              <TableCell>{order.country || '-'}</TableCell>
               <TableCell>{formatDate(order.etd)}</TableCell>
-              <TableCell>{formatDate(order.eta)}</TableCell>
-              <TableCell>{order.pol || '-'}</TableCell>
-              <TableCell>{order.pod || '-'}</TableCell>
+              <TableCell>{formatCurrency(order.shipping_cost)}</TableCell>
+              <TableCell>{formatCurrency(order.insurance)}</TableCell>
+              <TableCell>{order.freight_forwarder_id || '-'}</TableCell>
             </TableRow>
           ))}
           {orders.length === 0 && (
             <TableRow>
-              <TableCell colSpan={8} className="text-center py-4 text-gray-500">
+              <TableCell colSpan={7} className="text-center py-4 text-gray-500">
                 No shipping orders found
               </TableCell>
             </TableRow>
