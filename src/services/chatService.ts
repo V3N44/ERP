@@ -24,12 +24,19 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
       }
     };
 
+    console.log('Sending chat request:', requestBody);
+
     const response = await fetch(CHAT_API_URL, {
       method: 'POST',
       headers: {
         ...API_CONFIG.headers,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
       },
+      credentials: 'omit',
       body: JSON.stringify(requestBody)
     });
 
