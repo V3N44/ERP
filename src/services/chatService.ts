@@ -11,7 +11,7 @@ interface ChatResponse {
 
 export const sendChatMessage = async (message: string, contextData?: Record<string, unknown[]>): Promise<string> => {
   try {
-    const response = await fetch(`${API_CONFIG.baseURL}/api/chat`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/chat`, {
       method: 'POST',
       headers: API_CONFIG.headers,
       body: JSON.stringify({
