@@ -1,17 +1,24 @@
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+
+// Function to fetch system errors from localStorage
+const getSystemErrors = () => {
+  try {
+    const errors = localStorage.getItem('system_errors');
+    return errors ? JSON.parse(errors) : [];
+  } catch (error) {
+    console.error('Error parsing system errors:', error);
+    return [];
+  }
+};
 
 // Mock data for demonstration
-const errorLogs = [
-  { id: 1, timestamp: "2024-01-10 14:30:25", level: "ERROR", message: "Database connection failed", source: "DatabaseService" },
-  { id: 2, timestamp: "2024-01-10 14:28:15", level: "ERROR", message: "Authentication token expired", source: "AuthService" },
-  { id: 3, timestamp: "2024-01-10 14:25:10", level: "CRITICAL", message: "Payment processing error", source: "PaymentService" },
-];
-
 const accessLogs = [
   { id: 1, timestamp: "2024-01-10 14:30:00", user: "john.doe", action: "LOGIN", status: "SUCCESS", ip: "192.168.1.100" },
   { id: 2, timestamp: "2024-01-10 14:29:30", user: "jane.smith", action: "LOGOUT", status: "SUCCESS", ip: "192.168.1.101" },
@@ -30,7 +37,10 @@ const LogLevelBadge = ({ level }: { level: string }) => {
     CRITICAL: "bg-red-200 text-red-900",
     WARNING: "bg-yellow-100 text-yellow-800",
     INFO: "bg-blue-100 text-blue-800",
-    SUCCESS: "bg-green-100 text-green-800"
+    SUCCESS: "bg-green-100 text-green-800",
+    "401": "bg-red-100 text-red-800",
+    "404": "bg-yellow-100 text-yellow-800",
+    "500": "bg-red-200 text-red-900"
   };
 
   return (
@@ -41,6 +51,21 @@ const LogLevelBadge = ({ level }: { level: string }) => {
 };
 
 export default function SystemLogsPage() {
+  const { data: errorLogs = [] } = useQuery({
+    queryKey: ['systemErrors'],
+    queryFn: getSystemErrors,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
+  // Format error logs
+  const formattedErrorLogs = errorLogs.map((error: any, index: number) => ({
+    id: index + 1,
+    timestamp: new Date().toISOString(),
+    level: error.status ? String(error.status) : "ERROR",
+    message: error.message || error.detail || "Unknown error",
+    source: new URL(error.url || "").pathname || "SystemService"
+  }));
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">System Logs</h1>
@@ -77,7 +102,7 @@ export default function SystemLogsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {errorLogs.map((log) => (
+                    {formattedErrorLogs.map((log) => (
                       <TableRow key={log.id}>
                         <TableCell className="font-mono">{log.timestamp}</TableCell>
                         <TableCell><LogLevelBadge level={log.level} /></TableCell>
