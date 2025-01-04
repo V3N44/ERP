@@ -44,7 +44,7 @@ export const EarningsChart = () => {
   // Generate chart title based on data range
   const startMonth = lastSixMonths[0].month;
   const endMonth = lastSixMonths[lastSixMonths.length - 1].month;
-  const chartTitle = `Customer Earnings: ${startMonth} - ${endMonth} (Total: $${totalEarnings.toLocaleString()})`;
+  const chartTitle = `Customer Balance Overview: ${startMonth} - ${endMonth} (Total: $${totalEarnings.toLocaleString()})`;
 
   const handleInputChange = (month: string, value: string) => {
     const numValue = parseFloat(value) || 0;
