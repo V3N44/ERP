@@ -33,6 +33,7 @@ export const DatePickerSection = ({ date, onDateChange }: DatePickerSectionProps
             mode="single"
             selected={date}
             onSelect={onDateChange}
+            defaultMonth={date}
             initialFocus
           />
         </PopoverContent>

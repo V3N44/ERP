@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePickerSection } from "./purchase-form/DatePickerSection";
 
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
-  const [date, setDate] = useState<Date>();
+  const [date, setDate] = useState<Date>(new Date());
   const [items, setItems] = useState<PurchaseItem[]>([]);
   const [paymentType, setPaymentType] = useState<string>("credit");
   const [paidAmount, setPaidAmount] = useState<number>(0);
@@ -70,8 +70,8 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || items.length === 0) {
-      toast.error("Please fill in all required fields");
+    if (!date) {
+      toast.error("Please select a date");
       return;
     }
 
@@ -115,7 +115,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <DatePickerSection date={date} onDateChange={setDate} />
+        <DatePickerSection date={date} onDateChange={(newDate) => setDate(newDate || new Date())} />
 
         <div>
           <Label>Payment Type</Label>
