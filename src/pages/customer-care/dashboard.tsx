@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VendorManagement } from "@/components/customer-care/VendorManagement";
 import { PurchaseApprovals } from "@/components/customer-care/PurchaseApprovals";
 import { RealTimeMetrics } from "@/components/customer-care/RealTimeMetrics";
+import { PurchaseHistory } from "@/components/customer-care/PurchaseHistory";
 
 const CustomerCareDashboard = () => {
   return (
@@ -15,6 +16,7 @@ const CustomerCareDashboard = () => {
         <TabsList>
           <TabsTrigger value="approvals">Purchase Approvals</TabsTrigger>
           <TabsTrigger value="vendors">Vendor Management</TabsTrigger>
+          <TabsTrigger value="history">Purchase History</TabsTrigger>
         </TabsList>
         
         <TabsContent value="approvals">
@@ -26,6 +28,12 @@ const CustomerCareDashboard = () => {
         <TabsContent value="vendors">
           <Card className="p-4">
             <VendorManagement />
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history">
+          <Card className="p-4">
+            <PurchaseHistory />
           </Card>
         </TabsContent>
       </Tabs>
