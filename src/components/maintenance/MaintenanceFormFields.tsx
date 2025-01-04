@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -9,6 +10,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MaintenanceRecord } from "@/services/maintenanceService";
+import { useState } from "react";
+import { VehicleSelectionModal } from "@/components/sales/VehicleSelectionModal";
+import { Search } from "lucide-react";
 
 interface MaintenanceFormFieldsProps {
   formData: Partial<MaintenanceRecord>;
@@ -17,23 +21,33 @@ interface MaintenanceFormFieldsProps {
 }
 
 export const MaintenanceFormFields = ({ formData, errors, onChange }: MaintenanceFormFieldsProps) => {
+  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+
+  const handleVehicleSelect = (vehicle: any) => {
+    setSelectedVehicle(vehicle);
+    onChange("inventory_item_id", parseInt(vehicle.stockNo));
+  };
+
   return (
     <>
       <div className="space-y-2">
-        <Label>Vehicle ID</Label>
-        <Select
-          value={formData.inventory_item_id?.toString()}
-          onValueChange={(value) => onChange("inventory_item_id", parseInt(value))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select Vehicle" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="1">VH001 - Toyota Camry</SelectItem>
-            <SelectItem value="2">VH002 - Honda Civic</SelectItem>
-            <SelectItem value="3">VH003 - Ford F-150</SelectItem>
-          </SelectContent>
-        </Select>
+        <Label>Vehicle</Label>
+        <div className="flex gap-2">
+          <Input
+            value={selectedVehicle ? `${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.stockNo})` : ''}
+            placeholder="Select a vehicle"
+            readOnly
+            className="bg-gray-50"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsVehicleModalOpen(true)}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </div>
         {errors.inventory_item_id && (
           <p className="text-sm text-red-500">{errors.inventory_item_id}</p>
         )}
@@ -93,6 +107,12 @@ export const MaintenanceFormFields = ({ formData, errors, onChange }: Maintenanc
           <p className="text-sm text-red-500">{errors.description}</p>
         )}
       </div>
+
+      <VehicleSelectionModal
+        open={isVehicleModalOpen}
+        onClose={() => setIsVehicleModalOpen(false)}
+        onSelect={handleVehicleSelect}
+      />
     </>
   );
 };
