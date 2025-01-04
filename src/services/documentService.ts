@@ -16,7 +16,7 @@ export const createDocument = async (documentData: Document): Promise<Document> 
   try {
     console.log('Creating document with data:', documentData);
     
-    const response = await fetch('/documents/', {
+    const response = await fetch('/api/documents/', {
       method: 'POST',
       headers: {
         'Authorization': getAuthHeader(),
@@ -42,7 +42,7 @@ export const getDocuments = async (): Promise<Document[]> => {
   try {
     console.log('Fetching documents');
     
-    const response = await fetch('/documents/', {
+    const response = await fetch('/api/documents/', {
       headers: {
         'Authorization': getAuthHeader(),
       },
