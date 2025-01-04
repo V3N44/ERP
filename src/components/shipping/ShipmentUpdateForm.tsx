@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { API_URL } from "@/config";
 
 export const ShipmentUpdateForm = () => {
   const [location, setLocation] = useState("");
@@ -33,7 +34,7 @@ export const ShipmentUpdateForm = () => {
       });
 
       // First update shipment status
-      const updateResponse = await fetch(`${process.env.VITE_API_URL}/shipments/update-status`, {
+      const updateResponse = await fetch(`${API_URL}/shipments/update-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -56,7 +57,7 @@ export const ShipmentUpdateForm = () => {
       console.log('Successfully updated shipment status:', updateData);
 
       // Then create shipment location history
-      const locationResponse = await fetch(`${process.env.VITE_API_URL}/shipment_locations/`, {
+      const locationResponse = await fetch(`${API_URL}/shipment_locations/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
