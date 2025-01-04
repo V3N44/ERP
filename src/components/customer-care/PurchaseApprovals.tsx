@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Purchase } from "@/types/purchases";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const fetchPurchases = async (): Promise<Purchase[]> => {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/purchases/`, {
@@ -45,7 +46,7 @@ const updatePurchaseStatus = async (id: number, status: 'approved' | 'rejected')
 export const PurchaseApprovals = () => {
   const [open, setOpen] = useState(false);
   
-  const { data: purchases = [], refetch } = useQuery({
+  const { data: purchases = [], refetch, isLoading } = useQuery({
     queryKey: ['purchases'],
     queryFn: fetchPurchases,
   });
@@ -65,6 +66,13 @@ export const PurchaseApprovals = () => {
       toast.error("Failed to update purchase status");
     }
   };
+
+  if (isLoading) {
+    return <div className="flex justify-center p-4">Loading purchases...</div>;
+  }
+
+  const pendingPurchases = purchases.filter(p => p.status === 'pending');
+  const historyPurchases = purchases.filter(p => p.status !== 'pending');
 
   return (
     <div className="space-y-4">
@@ -89,58 +97,96 @@ export const PurchaseApprovals = () => {
           </DialogContent>
         </Dialog>
       </div>
-      
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Challan No</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Payment Type</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {purchases.map((purchase) => (
-            <TableRow key={purchase.id}>
-              <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
-              <TableCell>{purchase.challan_no}</TableCell>
-              <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
-              <TableCell>
-                <Badge variant={
-                  purchase.status === 'approved' ? 'success' : 
-                  purchase.status === 'rejected' ? 'destructive' : 
-                  'warning'
-                }>
-                  {purchase.status || 'pending'}
-                </Badge>
-              </TableCell>
-              <TableCell>{purchase.payment_type}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleStatusUpdate(purchase.id!, 'approved')}
-                    disabled={purchase.status !== 'pending'}
-                  >
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="icon"
-                    onClick={() => handleStatusUpdate(purchase.id!, 'rejected')}
-                    disabled={purchase.status !== 'pending'}
-                  >
-                    <XCircle className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+
+      <Tabs defaultValue="pending" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="pending">Pending Approvals</TabsTrigger>
+          <TabsTrigger value="history">Purchase History</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pending">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Challan No</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Payment Type</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pendingPurchases.map((purchase) => (
+                <TableRow key={purchase.id}>
+                  <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{purchase.challan_no}</TableCell>
+                  <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Badge variant="warning">
+                      {purchase.status || 'pending'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{purchase.payment_type}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleStatusUpdate(purchase.id!, 'approved')}
+                      >
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleStatusUpdate(purchase.id!, 'rejected')}
+                      >
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TabsContent>
+
+        <TabsContent value="history">
+          <ScrollArea className="h-[500px]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Challan No</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {historyPurchases.map((purchase) => (
+                  <TableRow key={purchase.id}>
+                    <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
+                    <TableCell>{purchase.challan_no}</TableCell>
+                    <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        purchase.status === 'approved' ? 'success' : 
+                        purchase.status === 'rejected' ? 'destructive' : 
+                        'warning'
+                      }>
+                        {purchase.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{purchase.payment_type}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
