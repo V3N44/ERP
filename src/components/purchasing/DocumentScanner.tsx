@@ -1,45 +1,91 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, FileScan, RotateCw, Upload, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { createDocument } from "@/services/documentService";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const DocumentScanner = () => {
   const { toast } = useToast();
   const [isScanning, setIsScanning] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
+  const [scannedFile, setScannedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
   const handleScan = () => {
-    setIsScanning(true);
-    toast({
-      title: "Scanner activated",
-      description: "Please position the document for scanning.",
-    });
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
 
-    // Simulate scanning process
-    setTimeout(() => {
-      setIsScanning(false);
-      setPreview("/placeholder.svg"); // Using placeholder image for demo
-      toast({
-        title: "Scan complete",
-        description: "Document has been successfully scanned.",
-      });
-    }, 2000);
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIsScanning(true);
+      setScannedFile(file);
+
+      // Create a preview URL for the selected file
+      const previewUrl = URL.createObjectURL(file);
+      
+      // Simulate scanning process
+      setTimeout(() => {
+        setIsScanning(false);
+        setPreview(previewUrl);
+        toast({
+          title: "Scan complete",
+          description: "Document has been successfully scanned.",
+        });
+      }, 2000);
+    }
   };
 
   const handleReset = () => {
+    if (preview) {
+      URL.revokeObjectURL(preview);
+    }
     setPreview(null);
+    setScannedFile(null);
     setIsScanning(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  const handleUpload = () => {
-    if (preview) {
-      toast({
-        title: "Success",
-        description: "Document has been uploaded successfully.",
-      });
-      handleReset();
+  const handleUpload = async () => {
+    if (scannedFile) {
+      try {
+        const formData = new FormData();
+        formData.append('file', scannedFile);
+        
+        // Create a fake URL for demo purposes
+        const fakeFileUrl = URL.createObjectURL(scannedFile);
+        
+        await createDocument({
+          customer_id: 1, // You might want to make this dynamic
+          file_name: scannedFile.name,
+          file_path: fakeFileUrl,
+          uploaded_at: new Date().toISOString(),
+        });
+
+        queryClient.invalidateQueries({ queryKey: ['documents'] });
+        
+        toast({
+          title: "Success",
+          description: "Document has been uploaded successfully.",
+        });
+        
+        handleReset();
+      } catch (error) {
+        console.error('Error uploading document:', error);
+        toast({
+          title: "Error",
+          description: "Failed to upload document",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -52,6 +98,14 @@ export const DocumentScanner = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        <input
+          type="file"
+          ref={fileInputRef}
+          className="hidden"
+          accept="image/*,.pdf"
+          onChange={handleFileSelect}
+        />
+        
         <div
           className={cn(
             "border-2 border-dashed rounded-lg p-8",
@@ -60,11 +114,18 @@ export const DocumentScanner = () => {
         >
           {preview ? (
             <div className="relative">
-              <img
-                src={preview}
-                alt="Scanned document"
-                className="max-w-full h-auto rounded"
-              />
+              {scannedFile?.type.startsWith('image/') ? (
+                <img
+                  src={preview}
+                  alt="Scanned document"
+                  className="max-w-full h-auto rounded"
+                />
+              ) : (
+                <div className="bg-gray-100 p-4 rounded text-center">
+                  <FileScan className="mx-auto h-16 w-16 text-gray-400 mb-2" />
+                  <p>{scannedFile?.name}</p>
+                </div>
+              )}
               <Button
                 variant="destructive"
                 size="icon"
@@ -87,7 +148,7 @@ export const DocumentScanner = () => {
               <p className="mt-4 text-sm text-gray-600">
                 {isScanning
                   ? "Scanning in progress..."
-                  : "Position your document here"}
+                  : "Click 'Start Scanning' to scan a document"}
               </p>
             </div>
           )}
@@ -104,7 +165,11 @@ export const DocumentScanner = () => {
                 <RotateCw className="h-4 w-4" />
                 Rescan
               </Button>
-              <Button onClick={handleUpload} className="gap-2">
+              <Button 
+                onClick={handleUpload} 
+                className="gap-2"
+                disabled={!scannedFile}
+              >
                 <Upload className="h-4 w-4" />
                 Upload Document
               </Button>
