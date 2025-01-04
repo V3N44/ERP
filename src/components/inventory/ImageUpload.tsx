@@ -18,7 +18,7 @@ export const ImageUpload = ({
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setSelectedImages(prev => [...prev, ...files]);
+      setSelectedImages((prev: File[]) => [...prev, ...files]);
       
       // Create URLs for preview using the blob data
       const newImageUrls = await Promise.all(
@@ -32,13 +32,13 @@ export const ImageUpload = ({
         })
       );
       
-      setImageUrls(prev => [...prev, ...newImageUrls]);
+      setImageUrls((prev: string[]) => [...prev, ...newImageUrls]);
     }
   };
 
   const removeImage = (index: number) => {
-    setSelectedImages(prev => prev.filter((_, i) => i !== index));
-    setImageUrls(prev => prev.filter((_, i) => i !== index));
+    setSelectedImages((prev: File[]) => prev.filter((_, i) => i !== index));
+    setImageUrls((prev: string[]) => prev.filter((_, i) => i !== index));
   };
 
   return (
