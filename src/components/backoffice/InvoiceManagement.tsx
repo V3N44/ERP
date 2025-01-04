@@ -3,12 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, FileText, Download } from "lucide-react";
+import { Plus, FileText, Download, Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { VehicleSelectionModal } from "../sales/VehicleSelectionModal";
 
 export const InvoiceManagement = () => {
   const [showNewInvoice, setShowNewInvoice] = useState(false);
+  const [showVehicleModal, setShowVehicleModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+
+  const handleVehicleSelect = (vehicle: any) => {
+    setSelectedVehicle(vehicle);
+    setShowVehicleModal(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -50,8 +58,42 @@ export const InvoiceManagement = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="vehicle">Vehicle Details</Label>
-                    <Input id="vehicle" placeholder="Search vehicle..." />
+                    <Label>Vehicle Details</Label>
+                    {selectedVehicle ? (
+                      <div className="p-4 border rounded-lg bg-white/50 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{selectedVehicle.make} {selectedVehicle.model}</h4>
+                            <p className="text-sm text-gray-600">Stock No: {selectedVehicle.stockNo}</p>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setShowVehicleModal(true)}
+                          >
+                            Change Vehicle
+                          </Button>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                          <div>Year: {selectedVehicle.year}</div>
+                          <div>Color: {selectedVehicle.color}</div>
+                          <div>VIN: {selectedVehicle.vin}</div>
+                          <div className="font-semibold text-purple-700">
+                            Price: ${selectedVehicle.price?.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => setShowVehicleModal(true)}
+                      >
+                        <Search className="mr-2 h-4 w-4" />
+                        Select Vehicle from Inventory
+                      </Button>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -111,6 +153,12 @@ export const InvoiceManagement = () => {
           </CardContent>
         </Card>
       </div>
+
+      <VehicleSelectionModal
+        open={showVehicleModal}
+        onClose={() => setShowVehicleModal(false)}
+        onSelect={handleVehicleSelect}
+      />
     </div>
   );
 };
