@@ -26,6 +26,12 @@ export const ShipmentUpdateForm = () => {
     }
 
     try {
+      console.log('Updating shipment status with:', {
+        stock_number: trackingNumber,
+        current_location: location,
+        status: status
+      });
+
       // First update shipment status
       const updateResponse = await fetch(`${process.env.VITE_API_URL}/shipments/update-status`, {
         method: 'PUT',
@@ -40,9 +46,14 @@ export const ShipmentUpdateForm = () => {
         }),
       });
 
+      const updateData = await updateResponse.json();
+      
       if (!updateResponse.ok) {
-        throw new Error('Failed to update shipment status');
+        console.error('Update response error:', updateData);
+        throw new Error(updateData.detail || 'Failed to update shipment status');
       }
+
+      console.log('Successfully updated shipment status:', updateData);
 
       // Then create shipment location history
       const locationResponse = await fetch(`${process.env.VITE_API_URL}/shipment_locations/`, {
@@ -59,9 +70,14 @@ export const ShipmentUpdateForm = () => {
         }),
       });
 
+      const locationData = await locationResponse.json();
+
       if (!locationResponse.ok) {
-        throw new Error('Failed to create location history');
+        console.error('Location response error:', locationData);
+        throw new Error(locationData.detail || 'Failed to create location history');
       }
+
+      console.log('Successfully created location history:', locationData);
 
       // Invalidate and refetch shipping orders query
       await queryClient.invalidateQueries({ queryKey: ['shipping-orders'] });
@@ -77,10 +93,11 @@ export const ShipmentUpdateForm = () => {
       setLocation("");
       setStatus("");
     } catch (error) {
+      console.error('Error updating shipment:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update shipment details",
+        description: error instanceof Error ? error.message : "Failed to update shipment details",
       });
     }
   };
