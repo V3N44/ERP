@@ -6,6 +6,38 @@ import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { ErrorLogsTable } from "@/components/admin/logs/ErrorLogsTable";
 import { getSystemErrors, getAccessLogs, formatErrorLogs, formatAccessLogs } from "@/utils/logs";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+
+// LogLevelBadge component
+const LogLevelBadge = ({ level }: { level: string }) => {
+  const getVariant = (level: string) => {
+    switch (level.toLowerCase()) {
+      case 'error':
+        return 'destructive';
+      case 'warning':
+        return 'warning';
+      case 'info':
+        return 'secondary';
+      case 'success':
+        return 'success';
+      default:
+        return 'default';
+    }
+  };
+
+  return (
+    <Badge variant={getVariant(level)}>{level}</Badge>
+  );
+};
 
 // Mock data for system events
 const systemEvents = [
