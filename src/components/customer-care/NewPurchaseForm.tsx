@@ -2,14 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon, Plus, Trash } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Plus, Trash } from "lucide-react";
 import { Purchase, PurchaseItem } from "@/types/purchases";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DatePickerSection } from "./purchase-form/DatePickerSection";
 
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [date, setDate] = useState<Date>();
@@ -80,7 +77,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
     const totals = calculateTotals();
     const purchase: Purchase = {
-      supplier_id: 1, // This should be selected by the user in a real application
+      supplier_id: 1,
       purchase_date: date.toISOString(),
       challan_no: "CH-" + Date.now(),
       details: "Purchase order",
@@ -118,31 +115,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <Label>Purchase Date</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : <span>Pick a date</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={setDate}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        <DatePickerSection date={date} onDateChange={setDate} />
 
         <div>
           <Label>Payment Type</Label>
