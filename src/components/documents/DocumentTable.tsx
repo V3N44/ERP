@@ -18,12 +18,14 @@ export const DocumentTable = () => {
   const { data: documents, isLoading, error } = useQuery({
     queryKey: ['documents'],
     queryFn: () => getDocuments(0, 100),
-    onError: (error) => {
-      toast({
-        title: "Error",
-        description: "Failed to fetch documents. Please try again later.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to fetch documents. Please try again later.",
+          variant: "destructive",
+        });
+      },
     },
   });
 

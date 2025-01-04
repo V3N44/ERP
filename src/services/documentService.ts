@@ -1,7 +1,7 @@
 import { API_CONFIG, buildUrl, getAuthHeader } from '@/config/api';
 
 export interface Document {
-  id: number;
+  id?: number; // Make id optional since we don't have it when creating a new document
   customer_id: number;
   file_name: string;
   file_path: string;
