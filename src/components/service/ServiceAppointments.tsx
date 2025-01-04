@@ -1,15 +1,16 @@
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createAppointment } from "@/services/appointmentService";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { createAppointment, getAppointments } from "@/services/appointmentService";
 import { getServices } from "@/services/serviceService";
 import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
 export const ServiceAppointments = () => {
   const { toast } = useToast();
@@ -23,10 +24,16 @@ export const ServiceAppointments = () => {
     notes: "",
   });
 
-  // Fetch services - removed the parameters since getServices doesn't accept any
+  // Fetch services
   const { data: services = [] } = useQuery({
     queryKey: ['services'],
     queryFn: getServices,
+  });
+
+  // Fetch appointments
+  const { data: appointments = [], isLoading: isLoadingAppointments } = useQuery({
+    queryKey: ['appointments'],
+    queryFn: getAppointments,
   });
 
   // Create appointment mutation
@@ -45,8 +52,7 @@ export const ServiceAppointments = () => {
         status: "scheduled",
         notes: "",
       });
-      // Optionally refresh appointments list if you have one
-      // queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
     },
     onError: (error: Error) => {
       toast({
@@ -153,7 +159,14 @@ export const ServiceAppointments = () => {
                   type="submit" 
                   disabled={createAppointmentMutation.isPending}
                 >
-                  {createAppointmentMutation.isPending ? "Creating..." : "Save"}
+                  {createAppointmentMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Appointment"
+                  )}
                 </Button>
               </div>
             </form>
@@ -161,39 +174,44 @@ export const ServiceAppointments = () => {
         </Dialog>
       </div>
 
-      {/* Table */}
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Customer</TableHead>
-            <TableHead>Service Type</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell>2024-03-15</TableCell>
-            <TableCell>John Smith</TableCell>
-            <TableCell>Oil Change</TableCell>
-            <TableCell>
-              <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm">
-                Scheduled
-              </span>
-            </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>2024-03-16</TableCell>
-            <TableCell>Sarah Johnson</TableCell>
-            <TableCell>Brake Service</TableCell>
-            <TableCell>
-              <span className="px-2 py-1 rounded-full bg-green-100 text-green-800 text-sm">
-                Confirmed
-              </span>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+      {isLoadingAppointments ? (
+        <div className="flex justify-center items-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Customer ID</TableHead>
+              <TableHead>Service</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Notes</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {appointments.map((appointment) => (
+              <TableRow key={appointment.id}>
+                <TableCell>{format(new Date(appointment.date), 'PPpp')}</TableCell>
+                <TableCell>{appointment.customer_id}</TableCell>
+                <TableCell>
+                  {services.find(s => s.id === appointment.service_id)?.service_name || 'Unknown Service'}
+                </TableCell>
+                <TableCell>
+                  <span className={`px-2 py-1 rounded-full text-sm ${
+                    appointment.status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
+                    appointment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {appointment.status}
+                  </span>
+                </TableCell>
+                <TableCell>{appointment.notes}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
     </div>
   );
 };
