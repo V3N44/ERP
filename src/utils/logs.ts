@@ -1,11 +1,14 @@
-export const formatErrorLogs = (logs: any[]) => {
+import { ErrorLog } from "@/types/logs";
+
+export const formatErrorLogs = (logs: any[]): ErrorLog[] => {
   return logs.map(log => ({
     id: log.id || Math.random().toString(36).substr(2, 9),
     timestamp: log.timestamp || new Date().toISOString(),
-    error: log.error || log.message || 'Unknown error',
+    message: log.error || log.message || 'Unknown error',
+    source: log.source || 'System',
     stack_trace: log.stack_trace || log.stackTrace || 'No stack trace available',
     severity: log.severity || 'medium',
-    component: log.component || log.source || 'Unknown'
+    component: log.component || 'Unknown'
   }));
 };
 

@@ -23,7 +23,6 @@ export const getAuthHeader = () => {
     throw new Error('No access token found - please login first');
   }
   
-  // Return complete headers object with auth
   return {
     ...API_CONFIG.headers,
     'Authorization': `Bearer ${token}`
