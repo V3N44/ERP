@@ -5,14 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useMutation } from "@tanstack/react-query";
-import { createLead, type Lead } from "@/services/leadService";
+import { createLead, type CreateLeadDTO } from "@/services/leadService";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const NewLeadPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<Lead>({
+  const [formData, setFormData] = useState<CreateLeadDTO>({
     first_name: '',
     last_name: '',
     email: '',
@@ -28,7 +28,7 @@ const NewLeadPage = () => {
         title: "Success",
         description: "Lead has been created successfully",
       });
-      navigate("/customers/database");
+      navigate("/customers/leads");
     },
     onError: (error: Error) => {
       toast({
@@ -136,7 +136,7 @@ const NewLeadPage = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate("/customers/database")}
+                onClick={() => navigate("/customers/leads")}
               >
                 Cancel
               </Button>
