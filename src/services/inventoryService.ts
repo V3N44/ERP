@@ -1,4 +1,4 @@
-import { API_URL } from "@/config";
+import { API_CONFIG, buildUrl } from '@/config/api';
 import { InventoryFormData } from "@/types/inventory";
 import { convertImageToBase64 } from "@/utils/imageUtils";
 
@@ -24,31 +24,25 @@ export const createInventoryItem = async (data: InventoryFormData, imageFile?: F
     const authHeader = getAuthHeader();
     console.log('Using auth header:', authHeader);
 
-    // Convert image to base64 if provided
     let imageData = null;
     if (imageFile) {
       imageData = await convertImageToBase64(imageFile);
       console.log('Image converted to base64');
     }
 
-    const response = await fetch(`${API_URL}/inventory/`, {
+    const response = await fetch(buildUrl('/inventory/'), {
       method: 'POST',
       headers: {
         'Authorization': authHeader,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
+        ...API_CONFIG.headers,
       },
-      mode: 'cors',
-      credentials: 'include',
       body: JSON.stringify({
         ...data,
         category: data.category || "Vehicle",
         quantity: data.quantity || 1,
         price: data.price || 0,
         supplier_id: data.supplier_id || 0,
-        image_data: imageData // Send base64 image data
+        image_data: imageData
       }),
     });
 
@@ -89,21 +83,15 @@ export const getInventoryItems = async (
     const authHeader = getAuthHeader();
     console.log('Using auth header:', authHeader);
 
-    // Add cache-busting query parameter
     const timestamp = new Date().getTime();
     const response = await fetch(
-      `${API_URL}/inventory/?skip=${skip}&limit=${limit}&_=${timestamp}`,
+      buildUrl(`/inventory/?skip=${skip}&limit=${limit}&_=${timestamp}`),
       {
         method: 'GET',
         headers: {
           'Authorization': authHeader,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          ...API_CONFIG.headers,
         },
-        mode: 'cors',
-        credentials: 'include',
       }
     );
 
