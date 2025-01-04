@@ -1,53 +1,37 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Wrench } from "lucide-react";
 import { MaintenanceStats } from "@/components/maintenance/MaintenanceStats";
 import { MaintenanceTable } from "@/components/maintenance/MaintenanceTable";
 import { MaintenanceForm } from "@/components/maintenance/MaintenanceForm";
-
-interface MaintenanceRecord {
-  id: number;
-  vehicleId: string;
-  type: string;
-  date: string;
-  status: "completed" | "scheduled" | "overdue";
-  notes: string;
-}
+import { MaintenanceRecord, getMaintenanceRecords } from "@/services/maintenanceService";
+import { useToast } from "@/hooks/use-toast";
 
 const MaintenancePage = () => {
-  const [records, setRecords] = useState<MaintenanceRecord[]>([
-    {
-      id: 1,
-      vehicleId: "VH001",
-      type: "Oil Change",
-      date: "2024-01-15",
-      status: "completed",
-      notes: "Regular maintenance completed"
-    },
-    {
-      id: 2,
-      vehicleId: "VH002",
-      type: "Tire Rotation",
-      date: "2024-01-20",
-      status: "scheduled",
-      notes: "Scheduled maintenance"
-    },
-    {
-      id: 3,
-      vehicleId: "VH003",
-      type: "Brake Inspection",
-      date: "2024-01-10",
-      status: "overdue",
-      notes: "Urgent maintenance required"
-    }
-  ]);
+  const [records, setRecords] = useState<MaintenanceRecord[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
 
-  const handleAddRecord = (data: Omit<MaintenanceRecord, "id">) => {
-    const newRecord = {
-      ...data,
-      id: records.length + 1,
-    } as MaintenanceRecord;
-    
-    setRecords([...records, newRecord]);
+  const fetchRecords = async () => {
+    try {
+      const data = await getMaintenanceRecords();
+      setRecords(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to fetch maintenance records",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
+
+  const handleAddRecord = (data: MaintenanceRecord) => {
+    setRecords([...records, data]);
   };
 
   return (
@@ -61,7 +45,7 @@ const MaintenancePage = () => {
       </div>
 
       <MaintenanceStats records={records} />
-      <MaintenanceTable records={records} />
+      <MaintenanceTable records={records} isLoading={isLoading} />
     </div>
   );
 };
