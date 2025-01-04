@@ -76,7 +76,6 @@ export const baseMenuItems: MenuItem[] = [
     requirements: [
       { name: "Database", icon: Building2, path: "/customers/database", roles: ["admin", "sales"] },
       { name: "New Lead", icon: UserPlus, path: "/customers/new", roles: ["admin", "sales"] },
-      { name: "Leads List", icon: List, path: "/customers/leads", roles: ["admin", "sales"] },
       { name: "Follow-ups", icon: CheckSquare, path: "/customers/follow-ups", roles: ["admin", "sales"] }
     ],
   },
@@ -112,6 +111,12 @@ export const baseMenuItems: MenuItem[] = [
         name: "Orders", 
         icon: Container, 
         path: "/shipping/orders", 
+        roles: ["admin", "shipping"] 
+      },
+      { 
+        name: "Inventory", 
+        icon: Box, 
+        path: "/shipping/inventory", 
         roles: ["admin", "shipping"] 
       },
       { 

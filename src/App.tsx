@@ -58,7 +58,6 @@ import DiscrepancyDetectionPage from "./pages/accounting/discrepancy-detection";
 import ChartOfAccountsPage from "./pages/accounting/chart-of-accounts";
 import BankAccountsPage from "./pages/accounting/bank-accounts";
 import AddVendorPage from "./pages/customer-care/add-vendor";
-import LeadsPage from "./pages/customers/leads";
 
 const queryClient = new QueryClient();
 
@@ -142,11 +141,6 @@ const App = () => (
                     <Route path="/sales/reports" element={<ReportsPage />} />
                     <Route path="/customers/database" element={<CustomerDatabasePage />} />
                     <Route path="/customers/new" element={<NewLeadPage />} />
-                    <Route path="/customers/leads" element={
-                      <ProtectedRoute allowedRoles={["admin", "sales"]}>
-                        <LeadsPage />
-                      </ProtectedRoute>
-                    } />
                     <Route path="/customers/follow-ups" element={<FollowUpsPage />} />
                     <Route path="/admin/settings" element={<SettingsPage />} />
                     <Route path="/admin/reports" element={<AdminReportsPage />} />

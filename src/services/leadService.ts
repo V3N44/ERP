@@ -1,26 +1,28 @@
-import { api } from "@/config/api"
+import { API_CONFIG } from "@/config/api";
 
 export interface Lead {
-  id: number
-  first_name: string
-  last_name: string
-  email: string
-  phone: string
-  interested_in: string
-  notes: string
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  interested_in: string;
+  notes: string;
 }
 
-interface LeadsParams {
-  skip: number
-  limit: number
-}
+export const createLead = async (leadData: Lead) => {
+  const response = await fetch(`${API_CONFIG.baseURL}/leads/`, {
+    method: 'POST',
+    headers: {
+      ...API_CONFIG.headers,
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+    },
+    body: JSON.stringify(leadData),
+  });
 
-export const createLead = async (data: Omit<Lead, "id">) => {
-  const response = await api.post("/leads/", data)
-  return response.data
-}
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create lead');
+  }
 
-export const getLeads = async ({ skip, limit }: LeadsParams) => {
-  const response = await api.get(`/leads/?skip=${skip}&limit=${limit}`)
-  return response.data
-}
+  return response.json();
+};
