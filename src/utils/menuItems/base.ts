@@ -3,12 +3,8 @@ import {
   Wrench,
   Car,
   DollarSign,
-  Users,
   Bell,
   HelpCircle,
-  Building2,
-  UserPlus,
-  CheckSquare,
   ClipboardList,
   BarChart3,
   FileText,
@@ -24,14 +20,10 @@ import {
   Warehouse,
   Anchor,
   Plus,
-  List,
-  Calculator,
-  Receipt,
-  PieChart,
-  ScanLine,
-  FileInput
+  List
 } from "lucide-react";
 import { MenuItem } from "@/types/menu";
+import { customerMenuItems } from "./customer";
 
 export const baseMenuItems: MenuItem[] = [
   {
@@ -68,18 +60,7 @@ export const baseMenuItems: MenuItem[] = [
       { name: "Reports", icon: FileText, path: "/sales/reports", roles: ["admin", "accounting"] }
     ],
   },
-  {
-    name: "Customers",
-    icon: Users,
-    path: "/customers",
-    roles: ["admin", "sales"],
-    requirements: [
-      { name: "Database", icon: Building2, path: "/customers/database", roles: ["admin", "sales"] },
-      { name: "New Lead", icon: UserPlus, path: "/customers/new", roles: ["admin", "sales"] },
-      { name: "Leads List", icon: List, path: "/customers/leads", roles: ["admin", "sales"] },
-      { name: "Follow-ups", icon: CheckSquare, path: "/customers/follow-ups", roles: ["admin", "sales"] }
-    ],
-  },
+  ...customerMenuItems,
   {
     name: "Notifications",
     icon: Bell,
@@ -157,78 +138,6 @@ export const baseMenuItems: MenuItem[] = [
         icon: List, 
         path: "/inventory/list", 
         roles: ["admin", "sales", "shipping"] 
-      }
-    ],
-  },
-  {
-    name: "BackOffice",
-    icon: Building2,
-    path: "/backoffice",
-    roles: ["admin", "accounting"],
-    requirements: [
-      { 
-        name: "Invoice Management", 
-        icon: Receipt, 
-        path: "/backoffice/invoices", 
-        roles: ["admin", "accounting"] 
-      },
-      { 
-        name: "Cost Calculator", 
-        icon: Calculator, 
-        path: "/backoffice/calculator", 
-        roles: ["admin", "accounting"] 
-      },
-      { 
-        name: "Reports", 
-        icon: PieChart, 
-        path: "/backoffice/reports", 
-        roles: ["admin", "accounting"] 
-      }
-    ],
-  },
-  {
-    name: "Purchasing",
-    icon: FileInput,
-    path: "/purchasing",
-    roles: ["admin", "purchasing"],
-    requirements: [
-      { 
-        name: "Data Entry", 
-        icon: FileInput, 
-        path: "/purchasing/data-entry", 
-        roles: ["admin", "purchasing"] 
-      },
-      { 
-        name: "Document Scanner", 
-        icon: ScanLine, 
-        path: "/purchasing/document-scanner", 
-        roles: ["admin", "purchasing"] 
-      }
-    ],
-  },
-  {
-    name: "Customer Care",
-    icon: Users,
-    path: "/customer-care",
-    roles: ["admin", "user", "sales"],
-    requirements: [
-      { 
-        name: "Dashboard", 
-        icon: LayoutDashboard, 
-        path: "/customer-care/dashboard", 
-        roles: ["admin", "user", "sales"] 
-      },
-      { 
-        name: "Vendor Management", 
-        icon: Building2, 
-        path: "/customer-care/vendors", 
-        roles: ["admin", "user"] 
-      },
-      { 
-        name: "Purchase Approvals", 
-        icon: CheckSquare, 
-        path: "/customer-care/approvals", 
-        roles: ["admin", "user", "sales"] 
       }
     ],
   }

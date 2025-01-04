@@ -3,6 +3,7 @@ import { UserRole } from "@/types/auth";
 import { adminMenuItems } from "./admin";
 import { accountingMenuItems } from "./accounting";
 import { baseMenuItems } from "./base";
+import { customerMenuItems } from "./customer";
 
 const allMenuItems = [
   ...baseMenuItems,
