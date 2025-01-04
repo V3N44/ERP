@@ -12,6 +12,7 @@ import { FinanceSection } from "@/components/dashboard/FinanceSection";
 import { AccountingSection } from "@/components/dashboard/AccountingSection";
 import { FinancialGoals } from "@/components/dashboard/FinancialGoals";
 import { useAuth } from "@/contexts/AuthContext";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -19,12 +20,12 @@ const DashboardPage = () => {
   const isAccountingUser = user?.role === "accounting" || user?.role === "admin";
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-4">
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
           <Button 
             variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full md:w-auto"
             onClick={() => navigate("/service")}
           >
             <PhoneCall className="h-4 w-4" />
@@ -32,10 +33,10 @@ const DashboardPage = () => {
           </Button>
           <h1 className="text-2xl font-bold text-purple-900">Dashboard</h1>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
           <Button 
             variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full md:w-auto"
             onClick={() => navigate("/customers/database")}
           >
             <Users className="h-4 w-4" />
@@ -43,7 +44,7 @@ const DashboardPage = () => {
           </Button>
           <Button 
             variant="outline" 
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 w-full md:w-auto"
             onClick={() => navigate("/finance")}
           >
             <DollarSign className="h-4 w-4" />
@@ -56,42 +57,44 @@ const DashboardPage = () => {
       <DashboardCharts />
       <FinancialGoals />
 
-      <Tabs defaultValue="service" className="space-y-4">
-        <TabsList className="bg-white/50 backdrop-blur-sm">
-          <TabsTrigger value="service">Service Center</TabsTrigger>
-          <TabsTrigger value="inventory">Vehicle Inventory</TabsTrigger>
-          <TabsTrigger value="sales">Sales Management</TabsTrigger>
-          <TabsTrigger value="customers">Customer Relations</TabsTrigger>
-          <TabsTrigger value="finance">Finance</TabsTrigger>
-          {isAccountingUser && <TabsTrigger value="accounting">Accounting</TabsTrigger>}
-        </TabsList>
-        
-        <TabsContent value="service" className="space-y-4">
-          <ServiceSection />
-        </TabsContent>
-
-        <TabsContent value="inventory" className="space-y-4">
-          <VehicleInventory />
-        </TabsContent>
-        
-        <TabsContent value="sales" className="space-y-4">
-          <SalesManagement />
-        </TabsContent>
-
-        <TabsContent value="customers" className="space-y-4">
-          <CustomerSection />
-        </TabsContent>
-
-        <TabsContent value="finance" className="space-y-4">
-          <FinanceSection />
-        </TabsContent>
-
-        {isAccountingUser && (
-          <TabsContent value="accounting" className="space-y-4">
-            <AccountingSection />
+      <ScrollArea className="w-full">
+        <Tabs defaultValue="service" className="space-y-4">
+          <TabsList className="bg-white/50 backdrop-blur-sm flex flex-wrap md:flex-nowrap">
+            <TabsTrigger value="service">Service Center</TabsTrigger>
+            <TabsTrigger value="inventory">Vehicle Inventory</TabsTrigger>
+            <TabsTrigger value="sales">Sales Management</TabsTrigger>
+            <TabsTrigger value="customers">Customer Relations</TabsTrigger>
+            <TabsTrigger value="finance">Finance</TabsTrigger>
+            {isAccountingUser && <TabsTrigger value="accounting">Accounting</TabsTrigger>}
+          </TabsList>
+          
+          <TabsContent value="service" className="space-y-4">
+            <ServiceSection />
           </TabsContent>
-        )}
-      </Tabs>
+
+          <TabsContent value="inventory" className="space-y-4">
+            <VehicleInventory />
+          </TabsContent>
+          
+          <TabsContent value="sales" className="space-y-4">
+            <SalesManagement />
+          </TabsContent>
+
+          <TabsContent value="customers" className="space-y-4">
+            <CustomerSection />
+          </TabsContent>
+
+          <TabsContent value="finance" className="space-y-4">
+            <FinanceSection />
+          </TabsContent>
+
+          {isAccountingUser && (
+            <TabsContent value="accounting" className="space-y-4">
+              <AccountingSection />
+            </TabsContent>
+          )}
+        </Tabs>
+      </ScrollArea>
     </div>
   );
 };

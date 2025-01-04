@@ -82,6 +82,7 @@ const ProtectedRoute = ({ children, allowedRoles = ["admin", "sales"] }: {
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const isLoginPage = location.pathname === "/";
+  const isMobile = useIsMobile();
 
   if (isLoginPage) {
     return (
@@ -95,8 +96,10 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen w-full">
       <AppSidebar />
-      <div className="flex-1 ml-16 flex flex-col">
-        {children}
+      <div className="flex-1 ml-0 md:ml-16 flex flex-col">
+        <div className="p-4 md:p-6 overflow-x-hidden">
+          {children}
+        </div>
         <Footer />
       </div>
       <ChatBot />
@@ -188,3 +191,4 @@ const App = () => (
 );
 
 export default App;
+
