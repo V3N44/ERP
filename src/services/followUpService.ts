@@ -11,15 +11,24 @@ export interface FollowUp {
   user_id: number;
 }
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('access_token');
+  return {
+    ...API_CONFIG.headers,
+    'Authorization': `Bearer ${token}`
+  };
+};
+
 export const createFollowUp = async (followUp: Omit<FollowUp, 'id'>) => {
   const response = await fetch(buildUrl('/follow-ups/'), {
     method: 'POST',
-    headers: API_CONFIG.headers,
+    headers: getAuthHeaders(),
     body: JSON.stringify(followUp)
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create follow-up');
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to create follow-up');
   }
 
   return response.json();
@@ -27,11 +36,12 @@ export const createFollowUp = async (followUp: Omit<FollowUp, 'id'>) => {
 
 export const getFollowUps = async () => {
   const response = await fetch(buildUrl('/follow-ups/'), {
-    headers: API_CONFIG.headers
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch follow-ups');
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to fetch follow-ups');
   }
 
   return response.json();
