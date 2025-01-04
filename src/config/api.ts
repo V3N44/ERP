@@ -5,7 +5,13 @@ export const API_CONFIG = {
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'ngrok-skip-browser-warning': 'true', // Add this header to skip ngrok browser warning
+    'ngrok-skip-browser-warning': 'true',
     'Access-Control-Allow-Origin': '*'
   }
+};
+
+// Helper function to build URLs
+export const buildUrl = (path: string) => {
+  const baseUrl = API_CONFIG.baseURL;
+  return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
 };

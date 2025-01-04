@@ -1,4 +1,4 @@
-import { API_CONFIG } from '@/config/api';
+import { API_CONFIG, buildUrl } from '@/config/api';
 
 interface LoginCredentials {
   grant_type: string;
@@ -34,14 +34,13 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
       formData.append('client_secret', credentials.client_secret);
     }
 
-    const response = await fetch(`${API_CONFIG.baseURL}/auth/login`, {
+    const response = await fetch(buildUrl('/auth/login'), {
       method: 'POST',
       headers: {
         ...API_CONFIG.headers,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: formData,
-      credentials: 'include', // Include cookies
     });
 
     if (!response.ok) {
@@ -51,6 +50,7 @@ export const loginUser = async (credentials: LoginCredentials): Promise<LoginRes
     }
 
     const data = await response.json();
+    console.log('Login response:', data);
 
     // Store the token type and access token
     localStorage.setItem('token_type', data.token_type);
