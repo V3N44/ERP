@@ -17,11 +17,13 @@ export const ImageUpload = ({
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setSelectedImages([...selectedImages, ...files]);
+      const newSelectedImages = [...selectedImages, ...files];
+      setSelectedImages(newSelectedImages);
       
       // Create URLs for preview
       const newImageUrls = files.map(file => URL.createObjectURL(file));
-      setImageUrls([...imageUrls, ...newImageUrls]);
+      const updatedImageUrls = [...imageUrls, ...newImageUrls];
+      setImageUrls(updatedImageUrls);
     }
   };
 
