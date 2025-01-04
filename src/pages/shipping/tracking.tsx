@@ -8,8 +8,9 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ShipmentUpdateForm } from "@/components/shipping/ShipmentUpdateForm";
 import { useQuery } from "@tanstack/react-query";
-import { getShippingOrders } from "@/services/shippingService";
+import { getShippingOrders, getShipmentLocations } from "@/services/shippingService";
 import { format } from "date-fns";
+import { ShipmentLocationHistory } from "@/components/shipping/ShipmentLocationHistory";
 
 const TrackingPage = () => {
   const [trackingNumber, setTrackingNumber] = useState("");
@@ -20,6 +21,13 @@ const TrackingPage = () => {
   const { data: shipments = [] } = useQuery({
     queryKey: ['shipping-orders'],
     queryFn: getShippingOrders,
+  });
+
+  // Fetch shipment locations when a tracking number is searched
+  const { data: locations = [] } = useQuery({
+    queryKey: ['shipment-locations', searchedShipment?.id],
+    queryFn: () => searchedShipment ? getShipmentLocations(searchedShipment.id) : Promise.resolve([]),
+    enabled: !!searchedShipment,
   });
 
   const handleTrackingSearch = (e: React.FormEvent) => {
@@ -87,49 +95,61 @@ const TrackingPage = () => {
 
       {/* Searched Shipment Details */}
       {searchedShipment && (
-        <Card className="bg-white dark:bg-gray-800">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">Shipment Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium">Tracking Number</p>
-                <p className="text-lg">{searchedShipment.stock_number}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Status</p>
-                <Badge variant={searchedShipment.status === "Delivered" ? "success" : "warning"}>
-                  {searchedShipment.status || 'Pending'}
-                </Badge>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Destination Country</p>
-                <p className="text-lg">{searchedShipment.country || '-'}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Estimated Delivery Date</p>
-                <p className="text-lg">
-                  {searchedShipment.etd ? format(new Date(searchedShipment.etd), 'PPP') : '-'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Shipping Cost</p>
-                <p className="text-lg">{formatCurrency(searchedShipment.shipping_cost || 0)}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Insurance</p>
-                <p className="text-lg">{formatCurrency(searchedShipment.insurance || 0)}</p>
-              </div>
-              {searchedShipment.freight_forwarder && (
-                <div className="col-span-2">
-                  <p className="text-sm font-medium">Freight Forwarder</p>
-                  <p className="text-lg">{searchedShipment.freight_forwarder.name || '-'}</p>
+        <>
+          <Card className="bg-white dark:bg-gray-800">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Shipment Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium">Tracking Number</p>
+                  <p className="text-lg">{searchedShipment.stock_number}</p>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                <div>
+                  <p className="text-sm font-medium">Status</p>
+                  <Badge variant={searchedShipment.status === "Delivered" ? "success" : "warning"}>
+                    {searchedShipment.status || 'Pending'}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Destination Country</p>
+                  <p className="text-lg">{searchedShipment.country || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Estimated Delivery Date</p>
+                  <p className="text-lg">
+                    {searchedShipment.etd ? format(new Date(searchedShipment.etd), 'PPP') : '-'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Shipping Cost</p>
+                  <p className="text-lg">{formatCurrency(searchedShipment.shipping_cost || 0)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Insurance</p>
+                  <p className="text-lg">{formatCurrency(searchedShipment.insurance || 0)}</p>
+                </div>
+                {searchedShipment.freight_forwarder && (
+                  <div className="col-span-2">
+                    <p className="text-sm font-medium">Freight Forwarder</p>
+                    <p className="text-lg">{searchedShipment.freight_forwarder.name || '-'}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Location History */}
+          <Card className="bg-white dark:bg-gray-800">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Location History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ShipmentLocationHistory locations={locations} />
+            </CardContent>
+          </Card>
+        </>
       )}
 
       {/* Shipment Update Form */}

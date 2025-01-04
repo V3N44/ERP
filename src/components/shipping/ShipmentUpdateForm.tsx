@@ -26,7 +26,8 @@ export const ShipmentUpdateForm = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.VITE_API_URL}/shipments/update-status`, {
+      // First update shipment status
+      const updateResponse = await fetch(`${process.env.VITE_API_URL}/shipments/update-status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -39,16 +40,36 @@ export const ShipmentUpdateForm = () => {
         }),
       });
 
-      if (!response.ok) {
+      if (!updateResponse.ok) {
         throw new Error('Failed to update shipment status');
+      }
+
+      // Then create shipment location history
+      const locationResponse = await fetch(`${process.env.VITE_API_URL}/shipment_locations/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        },
+        body: JSON.stringify({
+          shipment_id: trackingNumber,
+          location: location,
+          date: new Date().toISOString(),
+          status: status
+        }),
+      });
+
+      if (!locationResponse.ok) {
+        throw new Error('Failed to create location history');
       }
 
       // Invalidate and refetch shipping orders query
       await queryClient.invalidateQueries({ queryKey: ['shipping-orders'] });
+      await queryClient.invalidateQueries({ queryKey: ['shipment-locations'] });
 
       toast({
         title: "Success",
-        description: "Shipment details updated successfully",
+        description: "Shipment details and location updated successfully",
       });
 
       // Reset form
@@ -59,7 +80,7 @@ export const ShipmentUpdateForm = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to update shipment status",
+        description: "Failed to update shipment details",
       });
     }
   };

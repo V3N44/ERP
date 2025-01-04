@@ -81,3 +81,32 @@ export const createShippingOrder = async (data: CreateShipmentDTO): Promise<Ship
     throw error;
   }
 };
+
+export const getShipmentLocations = async (shipmentId: string) => {
+  try {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_URL}/shipment_locations/?shipment_id=${shipmentId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Authentication expired. Please login again.');
+      }
+      throw new Error('Failed to fetch shipment locations');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching shipment locations:', error);
+    throw error;
+  }
+};
