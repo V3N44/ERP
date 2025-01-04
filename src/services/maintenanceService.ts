@@ -9,13 +9,27 @@ export interface MaintenanceRecord {
   status: "Pending" | "In Progress" | "Completed";
 }
 
+const getAuthHeader = () => {
+  const token = localStorage.getItem('access_token');
+  const tokenType = localStorage.getItem('token_type') || 'Bearer';
+  
+  if (!token) {
+    throw new Error('No access token found - please login first');
+  }
+
+  return `${tokenType} ${token}`;
+};
+
 export const createMaintenance = async (data: MaintenanceRecord): Promise<MaintenanceRecord> => {
   try {
     console.log('Creating maintenance record:', data);
     
     const response = await fetch(buildUrl('/maintenances/'), {
       method: 'POST',
-      headers: API_CONFIG.headers,
+      headers: {
+        ...API_CONFIG.headers,
+        'Authorization': getAuthHeader(),
+      },
       body: JSON.stringify(data)
     });
 
@@ -37,7 +51,10 @@ export const getMaintenanceRecords = async (skip: number = 0, limit: number = 10
     console.log('Fetching maintenance records...');
     
     const response = await fetch(buildUrl(`/maintenances/?skip=${skip}&limit=${limit}`), {
-      headers: API_CONFIG.headers
+      headers: {
+        ...API_CONFIG.headers,
+        'Authorization': getAuthHeader(),
+      }
     });
 
     if (!response.ok) {
