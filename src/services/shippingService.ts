@@ -1,18 +1,12 @@
 import { ShippingOrder, CreateShipmentDTO } from "@/types/shipping";
-import { API_URL } from "@/config";
+import { API_CONFIG, buildUrl, getAuthHeader } from "@/config/api";
 
 export const getShippingOrders = async () => {
   try {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${API_URL}/shipments/`, {
+    const response = await fetch(buildUrl('/shipments/'), {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        ...API_CONFIG.headers,
+        'Authorization': getAuthHeader(),
       },
     });
 
@@ -20,54 +14,19 @@ export const getShippingOrders = async () => {
       throw new Error('Failed to fetch shipping orders');
     }
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('Error fetching shipping orders:', error);
     throw error;
   }
 };
 
-export const createShippingOrder = async (data: CreateShipmentDTO): Promise<ShippingOrder> => {
-  try {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${API_URL}/shipments/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create shipping order');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error creating shipping order:', error);
-    throw error;
-  }
-};
-
 export const getShipmentLocations = async (shipmentId: string | number) => {
   try {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${API_URL}/shipment_locations/?shipment_id=${shipmentId}`, {
+    const response = await fetch(buildUrl(`/shipment_locations/${shipmentId}`), {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        ...API_CONFIG.headers,
+        'Authorization': getAuthHeader(),
       },
     });
 
@@ -89,17 +48,11 @@ export const createShipmentLocation = async (data: {
   status: string;
 }) => {
   try {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${API_URL}/shipment_locations/`, {
+    const response = await fetch(buildUrl('/shipment_locations/'), {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
+        ...API_CONFIG.headers,
+        'Authorization': getAuthHeader(),
       },
       body: JSON.stringify(data),
     });
@@ -111,6 +64,28 @@ export const createShipmentLocation = async (data: {
     return await response.json();
   } catch (error) {
     console.error('Error creating shipment location:', error);
+    throw error;
+  }
+};
+
+export const createShippingOrder = async (data: CreateShipmentDTO): Promise<ShippingOrder> => {
+  try {
+    const response = await fetch(buildUrl('/shipments/'), {
+      method: 'POST',
+      headers: {
+        ...API_CONFIG.headers,
+        'Authorization': getAuthHeader(),
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create shipping order');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating shipping order:', error);
     throw error;
   }
 };
