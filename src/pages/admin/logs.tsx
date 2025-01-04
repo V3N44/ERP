@@ -18,6 +18,17 @@ const getSystemErrors = () => {
   }
 };
 
+// Function to fetch access logs from localStorage
+const getAccessLogs = () => {
+  try {
+    const logs = localStorage.getItem('access_logs');
+    return logs ? JSON.parse(logs) : [];
+  } catch (error) {
+    console.error('Error parsing access logs:', error);
+    return [];
+  }
+};
+
 // Mock data for demonstration
 const accessLogs = [
   { id: 1, timestamp: "2024-01-10 14:30:00", user: "john.doe", action: "LOGIN", status: "SUCCESS", ip: "192.168.1.100" },
@@ -57,6 +68,12 @@ export default function SystemLogsPage() {
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
+  const { data: accessLogs = [] } = useQuery({
+    queryKey: ['accessLogs'],
+    queryFn: getAccessLogs,
+    refetchInterval: 5000, // Refresh every 5 seconds
+  });
+
   // Format error logs
   const formattedErrorLogs = errorLogs.map((error: any, index: number) => ({
     id: index + 1,
@@ -64,6 +81,16 @@ export default function SystemLogsPage() {
     level: error.status ? String(error.status) : "ERROR",
     message: error.message || error.detail || "Unknown error",
     source: new URL(error.url || "").pathname || "SystemService"
+  }));
+
+  // Format access logs
+  const formattedAccessLogs = accessLogs.map((log: any, index: number) => ({
+    id: index + 1,
+    timestamp: new Date(log.timestamp || new Date()).toISOString(),
+    user: log.user || 'anonymous',
+    action: log.action || log.method || 'ACCESS',
+    status: log.status || 'SUCCESS',
+    ip: log.ip || log.clientIP || '127.0.0.1'
   }));
 
   return (
@@ -133,7 +160,7 @@ export default function SystemLogsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {accessLogs.map((log) => (
+                    {formattedAccessLogs.map((log) => (
                       <TableRow key={log.id}>
                         <TableCell className="font-mono">{log.timestamp}</TableCell>
                         <TableCell>{log.user}</TableCell>
