@@ -1,6 +1,5 @@
 import { ImagePlus, X } from "lucide-react";
 import { Label } from "@/components/ui/label";
-import { getImagePreviewUrl } from "@/utils/imageUtils";
 
 interface ImageUploadProps {
   selectedImages: File[];
@@ -15,30 +14,28 @@ export const ImageUpload = ({
   imageUrls,
   setImageUrls
 }: ImageUploadProps) => {
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setSelectedImages((prev: File[]) => [...prev, ...files]);
+      setSelectedImages([...selectedImages, ...files]);
       
-      // Create URLs for preview using the blob data
-      const newImageUrls = await Promise.all(
-        files.map(async (file) => {
-          const blobData = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.readAsDataURL(file);
-          });
-          return blobData;
-        })
-      );
-      
-      setImageUrls((prev: string[]) => [...prev, ...newImageUrls]);
+      // Create URLs for preview
+      const newImageUrls = files.map(file => URL.createObjectURL(file));
+      setImageUrls([...imageUrls, ...newImageUrls]);
     }
   };
 
   const removeImage = (index: number) => {
-    setSelectedImages((prev: File[]) => prev.filter((_, i) => i !== index));
-    setImageUrls((prev: string[]) => prev.filter((_, i) => i !== index));
+    const newImages = selectedImages.filter((_, i) => i !== index);
+    setSelectedImages(newImages);
+    
+    const newUrls = imageUrls.filter((_, i) => {
+      if (i === index) {
+        URL.revokeObjectURL(imageUrls[i]);
+      }
+      return i !== index;
+    });
+    setImageUrls(newUrls);
   };
 
   return (
@@ -48,7 +45,7 @@ export const ImageUpload = ({
         {imageUrls.map((url, index) => (
           <div key={index} className="relative group">
             <img
-              src={getImagePreviewUrl(url)}
+              src={url}
               alt={`Vehicle preview ${index + 1}`}
               className="w-full h-32 object-cover rounded-lg border-2 border-purple-200"
             />

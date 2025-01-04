@@ -24,11 +24,10 @@ export const createInventoryItem = async (data: InventoryFormData, imageFile?: F
     const authHeader = getAuthHeader();
     console.log('Using auth header:', authHeader);
 
-    let imageBlob = null;
+    let imageData = null;
     if (imageFile) {
-      // Convert image to base64 string (will be converted to BLOB on server)
-      imageBlob = await convertImageToBase64(imageFile);
-      console.log('Image converted to binary data');
+      imageData = await convertImageToBase64(imageFile);
+      console.log('Image converted to base64');
     }
 
     const response = await fetch(buildUrl('/inventory/'), {
@@ -43,7 +42,7 @@ export const createInventoryItem = async (data: InventoryFormData, imageFile?: F
         quantity: data.quantity || 1,
         price: data.price || 0,
         supplier_id: data.supplier_id || 0,
-        image_data: imageBlob // Send as base64 string, server will convert to BLOB
+        image_data: imageData
       }),
     });
 
