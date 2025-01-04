@@ -11,11 +11,20 @@ import { useQuery } from "@tanstack/react-query";
 import { getDocuments } from "@/services/documentService";
 import { FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 
 export const DocumentTable = () => {
+  const { toast } = useToast();
   const { data: documents, isLoading, error } = useQuery({
     queryKey: ['documents'],
-    queryFn: getDocuments,
+    queryFn: () => getDocuments(0, 100),
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to fetch documents. Please try again later.",
+        variant: "destructive",
+      });
+    },
   });
 
   if (isLoading) {
