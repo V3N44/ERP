@@ -9,10 +9,13 @@ import { CalendarIcon, Plus, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Purchase, PurchaseItem } from "@/types/purchases";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [date, setDate] = useState<Date>();
   const [items, setItems] = useState<PurchaseItem[]>([]);
+  const [paymentType, setPaymentType] = useState<string>("credit");
+  const [paidAmount, setPaidAmount] = useState<number>(0);
 
   const addItem = () => {
     setItems([...items, {
@@ -36,25 +39,36 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   const updateItem = (index: number, field: keyof PurchaseItem, value: string | number) => {
     const newItems = [...items];
-    newItems[index] = {
-      ...newItems[index],
-      [field]: value,
-      total: calculateItemTotal(newItems[index], field, value)
-    };
+    const item = { ...newItems[index] };
+
+    if (field === 'quantity' || field === 'rate' || field === 'discount_percent' || field === 'vat_percent') {
+      item[field] = Number(value);
+      
+      // Calculate totals
+      const subtotal = item.quantity * item.rate;
+      item.discount_value = (subtotal * item.discount_percent) / 100;
+      item.vat_value = ((subtotal - item.discount_value) * item.vat_percent) / 100;
+      item.total = subtotal - item.discount_value + item.vat_value;
+    } else {
+      item[field] = value;
+    }
+
+    newItems[index] = item;
     setItems(newItems);
   };
 
-  const calculateItemTotal = (item: PurchaseItem, field: keyof PurchaseItem, newValue: string | number) => {
-    const quantity = field === 'quantity' ? Number(newValue) : item.quantity;
-    const rate = field === 'rate' ? Number(newValue) : item.rate;
-    const discountPercent = field === 'discount_percent' ? Number(newValue) : item.discount_percent;
-    const vatPercent = field === 'vat_percent' ? Number(newValue) : item.vat_percent;
-
-    const subtotal = quantity * rate;
-    const discountValue = (subtotal * discountPercent) / 100;
-    const vatValue = ((subtotal - discountValue) * vatPercent) / 100;
+  const calculateTotals = () => {
+    const totalPurchaseAmount = items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+    const totalDiscount = items.reduce((sum, item) => sum + item.discount_value, 0);
+    const totalVat = items.reduce((sum, item) => sum + item.vat_value, 0);
+    const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
     
-    return subtotal - discountValue + vatValue;
+    return {
+      totalPurchaseAmount,
+      totalDiscount,
+      totalVat,
+      grandTotal
+    };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,18 +78,19 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       return;
     }
 
+    const totals = calculateTotals();
     const purchase: Purchase = {
       supplier_id: 1, // This should be selected by the user in a real application
       purchase_date: date.toISOString(),
       challan_no: "CH-" + Date.now(),
       details: "Purchase order",
-      total_purchase_amount: items.reduce((sum, item) => sum + (item.quantity * item.rate), 0),
-      total_discount: items.reduce((sum, item) => sum + item.discount_value, 0),
-      total_vat: items.reduce((sum, item) => sum + item.vat_value, 0),
-      grand_total: items.reduce((sum, item) => sum + item.total, 0),
-      paid_amount: 0,
-      due_amount: items.reduce((sum, item) => sum + item.total, 0),
-      payment_type: "credit",
+      total_purchase_amount: totals.totalPurchaseAmount,
+      total_discount: totals.totalDiscount,
+      total_vat: totals.totalVat,
+      grand_total: totals.grandTotal,
+      paid_amount: paidAmount,
+      due_amount: totals.grandTotal - paidAmount,
+      payment_type: paymentType,
       items: items,
       status: 'pending'
     };
@@ -102,8 +117,8 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
           <Label>Purchase Date</Label>
           <Popover>
             <PopoverTrigger asChild>
@@ -127,6 +142,29 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
               />
             </PopoverContent>
           </Popover>
+        </div>
+
+        <div>
+          <Label>Payment Type</Label>
+          <Select value={paymentType} onValueChange={setPaymentType}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select payment type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="cash">Cash</SelectItem>
+              <SelectItem value="credit">Credit</SelectItem>
+              <SelectItem value="bank">Bank Transfer</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label>Paid Amount</Label>
+          <Input
+            type="number"
+            value={paidAmount}
+            onChange={(e) => setPaidAmount(Number(e.target.value))}
+          />
         </div>
       </div>
 
@@ -181,6 +219,17 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Total Amount</Label>
+          <Input value={calculateTotals().grandTotal.toFixed(2)} readOnly />
+        </div>
+        <div>
+          <Label>Due Amount</Label>
+          <Input value={(calculateTotals().grandTotal - paidAmount).toFixed(2)} readOnly />
+        </div>
       </div>
 
       <Button type="submit" className="w-full">Create Purchase</Button>
