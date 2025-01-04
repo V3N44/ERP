@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,7 +9,6 @@ import {
   Table,
   TableHeader,
   TableBody,
-  TableFooter,
   TableHead,
   TableRow,
   TableCell,
@@ -39,7 +37,6 @@ const LogLevelBadge = ({ level }: { level: string }) => {
   );
 };
 
-// Mock data for system events
 const systemEvents = [
   { id: 1, timestamp: "2024-01-10 14:30:00", type: "INFO", message: "System backup completed", component: "BackupService" },
   { id: 2, timestamp: "2024-01-10 14:29:00", type: "WARNING", message: "High CPU usage detected", component: "MonitoringService" },
