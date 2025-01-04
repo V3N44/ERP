@@ -7,6 +7,7 @@ import { Purchase, PurchaseItem } from "@/types/purchases";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerSection } from "./purchase-form/DatePickerSection";
+import { API_URL } from "@/config";
 
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
   const [date, setDate] = useState<Date>(new Date());
@@ -97,12 +98,11 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
     };
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL;
-      if (!apiUrl) {
+      if (!API_URL) {
         throw new Error('API URL is not configured');
       }
 
-      const response = await fetch(`${apiUrl}/purchases/`, {
+      const response = await fetch(`${API_URL}/purchases/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
