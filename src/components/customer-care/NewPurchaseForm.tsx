@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,11 +9,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePickerSection } from "./purchase-form/DatePickerSection";
 import { API_URL } from "@/config";
 
-export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
+interface NewPurchaseFormProps {
+  onSuccess: () => void;
+  initialData?: Purchase;
+  mode?: 'create' | 'edit';
+}
+
+export const NewPurchaseForm = ({ onSuccess, initialData, mode = 'create' }: NewPurchaseFormProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [items, setItems] = useState<PurchaseItem[]>([]);
   const [paymentType, setPaymentType] = useState<string>("credit");
   const [paidAmount, setPaidAmount] = useState<number>(0);
+
+  useEffect(() => {
+    if (initialData && mode === 'edit') {
+      setDate(new Date(initialData.purchase_date));
+      setItems(initialData.items);
+      setPaymentType(initialData.payment_type);
+      setPaidAmount(initialData.paid_amount);
+    }
+  }, [initialData, mode]);
 
   const addItem = () => {
     setItems([...items, {
@@ -82,10 +97,10 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
 
     const totals = calculateTotals();
     const purchase: Purchase = {
-      supplier_id: 1,
+      supplier_id: initialData?.supplier_id || 1,
       purchase_date: date.toISOString(),
-      challan_no: "CH-" + Date.now(),
-      details: "Purchase order",
+      challan_no: initialData?.challan_no || "CH-" + Date.now(),
+      details: initialData?.details || "Purchase order",
       total_purchase_amount: totals.totalPurchaseAmount,
       total_discount: totals.totalDiscount,
       total_vat: totals.totalVat,
@@ -94,7 +109,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       due_amount: totals.grandTotal - paidAmount,
       payment_type: paymentType,
       items: items,
-      status: 'pending'
+      status: initialData?.status || 'pending'
     };
 
     try {
@@ -102,8 +117,12 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
         throw new Error('API URL is not configured');
       }
 
-      const response = await fetch(`${API_URL}/purchases/`, {
-        method: 'POST',
+      const url = mode === 'edit' && initialData?.id 
+        ? `${API_URL}/purchases/${initialData.id}`
+        : `${API_URL}/purchases/`;
+
+      const response = await fetch(url, {
+        method: mode === 'edit' ? 'PUT' : 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
           'Content-Type': 'application/json',
@@ -112,14 +131,14 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create purchase');
+        throw new Error(`Failed to ${mode} purchase`);
       }
 
       onSuccess();
-      toast.success("Purchase created successfully");
+      toast.success(`Purchase ${mode === 'edit' ? 'updated' : 'created'} successfully`);
     } catch (error) {
-      console.error('Purchase creation error:', error);
-      toast.error(error instanceof Error ? error.message : "Failed to create purchase");
+      console.error('Purchase operation error:', error);
+      toast.error(error instanceof Error ? error.message : `Failed to ${mode} purchase`);
     }
   };
 
@@ -176,7 +195,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
               <Input
                 type="number"
                 value={item.quantity}
-                onChange={(e) => updateItem(index, 'quantity', e.target.value)}
+                onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
               />
             </div>
             <div>
@@ -184,7 +203,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
               <Input
                 type="number"
                 value={item.rate}
-                onChange={(e) => updateItem(index, 'rate', e.target.value)}
+                onChange={(e) => updateItem(index, 'rate', Number(e.target.value))}
               />
             </div>
             <div>
@@ -216,7 +235,9 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
         </div>
       </div>
 
-      <Button type="submit" className="w-full">Create Purchase</Button>
+      <Button type="submit" className="w-full">
+        {mode === 'edit' ? 'Update' : 'Create'} Purchase
+      </Button>
     </form>
   );
 };
