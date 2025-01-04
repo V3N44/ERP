@@ -5,26 +5,48 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-
-type FollowUpFormData = {
-  customerName: string;
-  type: string;
-  date: Date;
-  time: string;
-};
+import { createFollowUp } from "@/services/followUpService";
+import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FollowUpFormProps {
   onSuccess: () => void;
+  leadId?: number;
 }
 
-export const FollowUpForm = ({ onSuccess }: FollowUpFormProps) => {
-  const form = useForm<FollowUpFormData>();
+export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const form = useForm({
+    defaultValues: {
+      customerName: "",
+      type: "",
+      date: new Date(),
+      time: "",
+    }
+  });
 
-  const onSubmit = (data: FollowUpFormData) => {
-    console.log("Form submitted:", data);
-    toast.success("Follow-up scheduled successfully!");
-    form.reset();
-    onSuccess();
+  const onSubmit = async (data: any) => {
+    try {
+      const followUpData = {
+        customer: data.customerName,
+        type: data.type,
+        date: data.date.toISOString(),
+        time: data.time,
+        status: "Scheduled",
+        lead_id: leadId || 1, // Default to 1 if no lead_id provided
+        user_id: user?.id || 1 // Default to 1 if no user_id available
+      };
+
+      await createFollowUp(followUpData);
+      queryClient.invalidateQueries({ queryKey: ['followUps'] });
+      toast.success("Follow-up scheduled successfully!");
+      form.reset();
+      onSuccess();
+    } catch (error) {
+      console.error('Failed to create follow-up:', error);
+      toast.error("Failed to schedule follow-up");
+    }
   };
 
   return (
@@ -57,9 +79,9 @@ export const FollowUpForm = ({ onSuccess }: FollowUpFormProps) => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="test_drive">Test Drive</SelectItem>
-                  <SelectItem value="price_quote">Price Quote</SelectItem>
-                  <SelectItem value="document_review">Document Review</SelectItem>
+                  <SelectItem value="Call">Call</SelectItem>
+                  <SelectItem value="Meeting">Meeting</SelectItem>
+                  <SelectItem value="Email">Email</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />

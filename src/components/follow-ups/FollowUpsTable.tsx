@@ -1,8 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Calendar, Clock } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getFollowUps } from "@/services/followUpService";
+import { format } from "date-fns";
 
 export const FollowUpsTable = () => {
+  const { data: followUps, isLoading, error } = useQuery({
+    queryKey: ['followUps'],
+    queryFn: getFollowUps
+  });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading follow-ups</div>;
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -16,54 +32,32 @@ export const FollowUpsTable = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell> Harsha Subasinghe </TableCell>
-          <TableCell>Test Drive</TableCell>
-          <TableCell>
-            <div className="flex items-center">
-              <Calendar className="mr-2 h-4 w-4" />
-              2024-03-25
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="flex items-center">
-              <Clock className="mr-2 h-4 w-4" />
-              14:00
-            </div>
-          </TableCell>
-          <TableCell>
-            <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
-              Scheduled
-            </span>
-          </TableCell>
-          <TableCell>
-            <Button variant="ghost" size="sm">Reschedule</Button>
-          </TableCell>
-        </TableRow>
-        <TableRow>
-          <TableCell>Ramanayake</TableCell>
-          <TableCell>Price Quote</TableCell>
-          <TableCell>
-            <div className="flex items-center">
-              <Calendar className="mr-2 h-4 w-4" />
-              2024-03-26
-            </div>
-          </TableCell>
-          <TableCell>
-            <div className="flex items-center">
-              <Clock className="mr-2 h-4 w-4" />
-              10:30
-            </div>
-          </TableCell>
-          <TableCell>
-            <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm">
-              Pending
-            </span>
-          </TableCell>
-          <TableCell>
-            <Button variant="ghost" size="sm">Reschedule</Button>
-          </TableCell>
-        </TableRow>
+        {followUps?.map((followUp: any) => (
+          <TableRow key={followUp.id}>
+            <TableCell>{followUp.customer}</TableCell>
+            <TableCell>{followUp.type}</TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                <Calendar className="mr-2 h-4 w-4" />
+                {format(new Date(followUp.date), 'yyyy-MM-dd')}
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                <Clock className="mr-2 h-4 w-4" />
+                {followUp.time}
+              </div>
+            </TableCell>
+            <TableCell>
+              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-sm">
+                {followUp.status}
+              </span>
+            </TableCell>
+            <TableCell>
+              <Button variant="ghost" size="sm">Reschedule</Button>
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );
