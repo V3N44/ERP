@@ -28,7 +28,6 @@ import NewLeadPage from "./pages/customers/new";
 import FollowUpsPage from "./pages/customers/follow-ups";
 import SettingsPage from "./pages/admin/settings";
 import AdminReportsPage from "./pages/admin/reports";
-import SystemLogsPage from "./pages/admin/logs";
 import UsersPage from "./pages/admin/users";
 import MessagesPage from "./pages/notifications/messages";
 import CalendarPage from "./pages/notifications/calendar";
@@ -150,7 +149,6 @@ const App = () => (
                     <Route path="/customers/follow-ups" element={<FollowUpsPage />} />
                     <Route path="/admin/settings" element={<SettingsPage />} />
                     <Route path="/admin/reports" element={<AdminReportsPage />} />
-                    <Route path="/admin/logs" element={<SystemLogsPage />} />
                     <Route path="/admin/users" element={<UsersPage />} />
                     <Route path="/notifications/messages" element={<MessagesPage />} />
                     <Route path="/notifications/calendar" element={<CalendarPage />} />
@@ -165,19 +163,15 @@ const App = () => (
                     <Route path="/shipping/tracking" element={<TrackingPage />} />
                     <Route path="/shipping/warehouses" element={<WarehousesPage />} />
                     <Route path="/shipping/freight-forwarders" element={<FreightForwardersPage />} />
-                    {/* BackOffice Routes */}
                     <Route path="/backoffice/invoices" element={<InvoiceManagement />} />
                     <Route path="/backoffice/calculator" element={<CostCalculator />} />
                     <Route path="/backoffice/reports" element={<BackofficeReports />} />
-                    {/* Purchasing Routes */}
                     <Route path="/purchasing/data-entry" element={<DataEntryPage />} />
                     <Route path="/purchasing/document-scanner" element={<DocumentScannerPage />} />
-                    {/* Customer Care Routes */}
                     <Route path="/customer-care/dashboard" element={<CustomerCareDashboard />} />
                     <Route path="/customer-care/vendors" element={<VendorManagementPage />} />
                     <Route path="/customer-care/add-vendor" element={<AddVendorPage />} />
                     <Route path="/customer-care/approvals" element={<PurchaseApprovalsPage />} />
-                    {/* Accounting Routes */}
                     <Route path="/accounting/automated-entries" element={<AutomatedEntriesPage />} />
                     <Route path="/accounting/discrepancy-detection" element={<DiscrepancyDetectionPage />} />
                     <Route path="/accounting/chart-of-accounts" element={<ChartOfAccountsPage />} />
