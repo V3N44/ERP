@@ -26,6 +26,7 @@ export const formatErrorLogs = (errorLogs: any[]) => {
     id: index + 1,
     timestamp: new Date().toISOString(),
     level: error.status ? String(error.status) : "ERROR",
+    severity: error.status >= 500 ? "high" : error.status >= 400 ? "medium" : "low",
     message: error.message || error.detail || "Unknown error",
     source: error.url ? new URL(error.url).pathname : "SystemService"
   }));
