@@ -17,48 +17,56 @@ export const getShippingOrders = async () => {
     });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Authentication expired. Please login again.');
-      }
       throw new Error('Failed to fetch shipping orders');
     }
 
     const data = await response.json();
-    console.log('Shipping orders response:', data);
-
-    // Transform the API response to match our ShippingOrder type
-    return data.map((order: any) => ({
-      id: order.id,
-      stock_number: order.stock_number || '',
-      status: order.status || 'Pending',
-      country: order.country || '',
-      etd: order.etd || '',
-      shipping_cost: order.shipping_cost || 0,
-      insurance: order.insurance || 0,
-      freight_forwarder_id: order.freight_forwarder_id,
-      freight_forwarder: order.freight_forwarder ? {
-        id: order.freight_forwarder.id,
-        name: order.freight_forwarder.name,
-        contact: order.freight_forwarder.contact,
-        country: order.freight_forwarder.country
-      } : undefined,
-      createdAt: order.created_at,
-      updatedAt: order.updated_at
-    }));
+    return data;
   } catch (error) {
     console.error('Error fetching shipping orders:', error);
     throw error;
   }
 };
 
-export const createShippingOrder = async (data: CreateShipmentDTO): Promise<ShippingOrder> => {
+export const getShipmentLocations = async (shipmentId: string | number) => {
   try {
     const token = localStorage.getItem('access_token');
     if (!token) {
       throw new Error('Authentication required');
     }
 
-    const response = await fetch(`${API_URL}/shipments/`, {
+    const response = await fetch(`${API_URL}/shipments/${shipmentId}/locations`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': 'true'
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch shipment locations');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching shipment locations:', error);
+    throw error;
+  }
+};
+
+export const createShipmentLocation = async (data: {
+  shipment_id: number;
+  location: string;
+  date: string;
+  status: string;
+}) => {
+  try {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('Authentication required');
+    }
+
+    const response = await fetch(`${API_URL}/shipment_locations/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -67,46 +75,14 @@ export const createShippingOrder = async (data: CreateShipmentDTO): Promise<Ship
       },
       body: JSON.stringify(data),
     });
-    
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Authentication expired. Please login again.');
-      }
-      throw new Error('Failed to create shipping order');
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Error creating shipping order:', error);
-    throw error;
-  }
-};
-
-export const getShipmentLocations = async (shipmentId: string) => {
-  try {
-    const token = localStorage.getItem('access_token');
-    if (!token) {
-      throw new Error('Authentication required');
-    }
-
-    const response = await fetch(`${API_URL}/shipment_locations/?shipment_id=${shipmentId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true'
-      },
-    });
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error('Authentication expired. Please login again.');
-      }
-      throw new Error('Failed to fetch shipment locations');
+      throw new Error('Failed to create shipment location');
     }
 
     return await response.json();
   } catch (error) {
-    console.error('Error fetching shipment locations:', error);
+    console.error('Error creating shipment location:', error);
     throw error;
   }
 };
