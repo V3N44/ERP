@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { CalendarIcon, Plus, Trash } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Purchase, PurchaseItem } from "@/types/purchases";
-import { createPurchase } from "@/services/purchaseService";
 import { toast } from "sonner";
 
 export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
@@ -19,7 +18,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
     setItems([...items, {
       product_name: "",
       stock_quantity: 0,
-      expiry_date: "",
+      expiry_date: new Date().toISOString(),
       batch_no: "",
       quantity: 0,
       rate: 0,
@@ -66,7 +65,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
     }
 
     const purchase: Purchase = {
-      supplier_id: 1,
+      supplier_id: 1, // This should be selected by the user in a real application
       purchase_date: date.toISOString(),
       challan_no: "CH-" + Date.now(),
       details: "Purchase order",
@@ -77,12 +76,24 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       paid_amount: 0,
       due_amount: items.reduce((sum, item) => sum + item.total, 0),
       payment_type: "credit",
-      items: items
+      items: items,
+      status: 'pending'
     };
 
     try {
-      await createPurchase(purchase);
-      toast.success("Purchase created successfully");
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/purchases/`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(purchase),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create purchase');
+      }
+
       onSuccess();
     } catch (error) {
       toast.error("Failed to create purchase");
@@ -156,7 +167,7 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
             </div>
             <div>
               <Label>Total</Label>
-              <Input value={item.total} readOnly />
+              <Input value={item.total.toFixed(2)} readOnly />
             </div>
             <div className="flex items-end">
               <Button

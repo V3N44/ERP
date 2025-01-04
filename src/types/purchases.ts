@@ -13,6 +13,7 @@ export interface PurchaseItem {
 }
 
 export interface Purchase {
+  id?: number;
   supplier_id: number;
   purchase_date: string;
   challan_no: string;
@@ -25,4 +26,6 @@ export interface Purchase {
   due_amount: number;
   payment_type: string;
   items: PurchaseItem[];
+  status?: 'pending' | 'approved' | 'rejected';
+  requester?: string;
 }
