@@ -5,17 +5,10 @@ import { AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { ErrorLogsTable } from "@/components/admin/logs/ErrorLogsTable";
 import { getSystemErrors, getAccessLogs, formatErrorLogs, formatAccessLogs } from "@/utils/logs";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableRow,
-  TableCell,
-} from "@/components/ui/table";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-// LogLevelBadge component
+// LogLevelBadge component for access logs
 const LogLevelBadge = ({ level }: { level: string }) => {
   const getVariant = (level: string) => {
     switch (level.toLowerCase()) {
