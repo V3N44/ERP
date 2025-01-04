@@ -12,8 +12,8 @@ const CustomerCareDashboard = () => {
       
       <RealTimeMetrics />
       
-      <Tabs defaultValue="approvals" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="history" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="approvals">Purchase Approvals</TabsTrigger>
           <TabsTrigger value="vendors">Vendor Management</TabsTrigger>
           <TabsTrigger value="history">Purchase History</TabsTrigger>

@@ -1,12 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { API_URL } from "@/config";
+import { useQuery } from "@tanstack/react-query";
 import { Purchase } from "@/types/purchases";
 
-const fetchPurchaseHistory = async (): Promise<Purchase[]> => {
-  const response = await fetch(`${API_URL}/purchases/`, {
+const fetchPurchases = async (): Promise<Purchase[]> => {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/purchases/`, {
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
       'Content-Type': 'application/json',
@@ -14,24 +13,20 @@ const fetchPurchaseHistory = async (): Promise<Purchase[]> => {
   });
   
   if (!response.ok) {
-    throw new Error('Failed to fetch purchase history');
+    throw new Error('Failed to fetch purchases');
   }
   
   return response.json();
 };
 
 export const PurchaseHistory = () => {
-  const { data: purchases = [], isLoading, error } = useQuery({
+  const { data: purchases = [], isLoading } = useQuery({
     queryKey: ['purchases-history'],
-    queryFn: fetchPurchaseHistory,
+    queryFn: fetchPurchases,
   });
 
   if (isLoading) {
     return <div className="flex justify-center p-4">Loading purchase history...</div>;
-  }
-
-  if (error) {
-    return <div className="text-red-500 p-4">Error loading purchase history</div>;
   }
 
   return (
@@ -43,8 +38,7 @@ export const PurchaseHistory = () => {
             <TableRow>
               <TableHead>Date</TableHead>
               <TableHead>Challan No</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead>Total Amount</TableHead>
+              <TableHead>Amount</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Payment Type</TableHead>
             </TableRow>
@@ -54,7 +48,6 @@ export const PurchaseHistory = () => {
               <TableRow key={purchase.id}>
                 <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
                 <TableCell>{purchase.challan_no}</TableCell>
-                <TableCell>{purchase.supplier_id}</TableCell>
                 <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
                 <TableCell>
                   <Badge variant={
