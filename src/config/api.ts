@@ -11,7 +11,7 @@ export const API_CONFIG = {
 };
 
 // Helper function to build URLs
-export const buildUrl = (path: string) => {
+export const buildUrl = (path: string): string => {
   const baseUrl = API_CONFIG.baseURL;
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
 };
