@@ -38,16 +38,15 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
     const newItems = [...items];
     const item = { ...newItems[index] };
 
+    // Type assertion to handle the field type properly
+    (item[field] as string | number) = value;
+
     if (field === 'quantity' || field === 'rate' || field === 'discount_percent' || field === 'vat_percent') {
-      item[field] = Number(value);
-      
       // Calculate totals
       const subtotal = item.quantity * item.rate;
       item.discount_value = (subtotal * item.discount_percent) / 100;
       item.vat_value = ((subtotal - item.discount_value) * item.vat_percent) / 100;
       item.total = subtotal - item.discount_value + item.vat_value;
-    } else {
-      item[field] = value;
     }
 
     newItems[index] = item;
@@ -75,6 +74,11 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       return;
     }
 
+    if (items.length === 0) {
+      toast.error("Please add at least one item");
+      return;
+    }
+
     const totals = calculateTotals();
     const purchase: Purchase = {
       supplier_id: 1,
@@ -93,7 +97,12 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
     };
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/purchases/`, {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      if (!apiUrl) {
+        throw new Error('API URL is not configured');
+      }
+
+      const response = await fetch(`${apiUrl}/purchases/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -107,8 +116,10 @@ export const NewPurchaseForm = ({ onSuccess }: { onSuccess: () => void }) => {
       }
 
       onSuccess();
+      toast.success("Purchase created successfully");
     } catch (error) {
-      toast.error("Failed to create purchase");
+      console.error('Purchase creation error:', error);
+      toast.error(error instanceof Error ? error.message : "Failed to create purchase");
     }
   };
 
