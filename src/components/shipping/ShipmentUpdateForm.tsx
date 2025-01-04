@@ -12,51 +12,51 @@ export const ShipmentUpdateForm = () => {
   const [location, setLocation] = useState("");
   const [status, setStatus] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
+  const [country, setCountry] = useState("");
+  const [shippingCost, setShippingCost] = useState<number>(0);
+  const [insurance, setInsurance] = useState<number>(0);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const handleUpdateShipment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!trackingNumber || !location || !status) {
+    if (!trackingNumber || !location || !status || !country) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please fill in all fields",
+        description: "Please fill in all required fields",
       });
       return;
     }
 
     try {
-      console.log('Updating shipment status with:', {
+      const updateData = {
         stock_number: trackingNumber,
         current_location: location,
-        status: status
-      });
+        status: status,
+        country: country,
+        shipping_cost: shippingCost,
+        insurance: insurance
+      };
 
-      // First update shipment status
-      const updateResponse = await fetch(`${API_URL}/shipments/update-status`, {
+      console.log('Updating shipment status with:', updateData);
+
+      // Update shipment status
+      const updateResponse = await fetch(`${API_URL}/shipments/${trackingNumber}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
         },
-        body: JSON.stringify({
-          stock_number: trackingNumber,
-          current_location: location,
-          status: status
-        }),
+        body: JSON.stringify(updateData),
       });
 
-      const updateData = await updateResponse.json();
-      
       if (!updateResponse.ok) {
-        console.error('Update response error:', updateData);
-        throw new Error(updateData.detail || 'Failed to update shipment status');
+        const errorData = await updateResponse.json();
+        throw new Error(errorData.detail || 'Failed to update shipment status');
       }
 
-      console.log('Successfully updated shipment status:', updateData);
-
-      // Then create shipment location history
+      // Create shipment location history
       const locationResponse = await fetch(`${API_URL}/shipment_locations/`, {
         method: 'POST',
         headers: {
@@ -71,16 +71,12 @@ export const ShipmentUpdateForm = () => {
         }),
       });
 
-      const locationData = await locationResponse.json();
-
       if (!locationResponse.ok) {
-        console.error('Location response error:', locationData);
-        throw new Error(locationData.detail || 'Failed to create location history');
+        const errorData = await locationResponse.json();
+        throw new Error(errorData.detail || 'Failed to create location history');
       }
 
-      console.log('Successfully created location history:', locationData);
-
-      // Invalidate and refetch shipping orders query
+      // Invalidate and refetch queries
       await queryClient.invalidateQueries({ queryKey: ['shipping-orders'] });
       await queryClient.invalidateQueries({ queryKey: ['shipment-locations'] });
 
@@ -93,6 +89,9 @@ export const ShipmentUpdateForm = () => {
       setTrackingNumber("");
       setLocation("");
       setStatus("");
+      setCountry("");
+      setShippingCost(0);
+      setInsurance(0);
     } catch (error) {
       console.error('Error updating shipment:', error);
       toast({
@@ -127,6 +126,32 @@ export const ShipmentUpdateForm = () => {
               placeholder="Enter current location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Country</label>
+            <Input
+              placeholder="Enter country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Shipping Cost</label>
+            <Input
+              type="number"
+              placeholder="Enter shipping cost"
+              value={shippingCost}
+              onChange={(e) => setShippingCost(Number(e.target.value))}
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Insurance</label>
+            <Input
+              type="number"
+              placeholder="Enter insurance amount"
+              value={insurance}
+              onChange={(e) => setInsurance(Number(e.target.value))}
             />
           </div>
           <div className="space-y-2">
