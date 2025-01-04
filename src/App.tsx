@@ -10,6 +10,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ChatBot } from "@/components/ChatBot";
 import Footer from "@/components/Footer";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./pages/admin/settings"
@@ -191,4 +192,3 @@ const App = () => (
 );
 
 export default App;
-
