@@ -1,67 +1,31 @@
-export interface ErrorLog {
-  id: number;
-  timestamp: string;
-  severity: string;
-  message: string;
-  source: string;
-}
-
-export interface AccessLog {
-  id: number;
-  timestamp: string;
-  user: string;
-  action: string;
-  status: string;
-  ip: string;
-}
-
-export const formatErrorLogs = (logs: any[]): ErrorLog[] => {
+export const formatErrorLogs = (logs: any[]) => {
   return logs.map(log => ({
-    id: log.id,
-    timestamp: log.timestamp,
-    severity: log.level || 'info', // Map level to severity
-    message: log.message,
-    source: log.source || 'system'
+    id: log.id || Math.random().toString(36).substr(2, 9),
+    timestamp: log.timestamp || new Date().toISOString(),
+    error: log.error || log.message || 'Unknown error',
+    stack_trace: log.stack_trace || log.stackTrace,
+    severity: log.severity || 'medium',
+    component: log.component || log.source
   }));
 };
 
-export const formatAccessLogs = (logs: any[]): AccessLog[] => {
+export const formatAccessLogs = (logs: any[]) => {
   return logs.map(log => ({
-    id: log.id,
-    timestamp: log.timestamp,
-    user: log.user,
-    action: log.action,
-    status: log.status,
-    ip: log.ip
+    id: log.id || Math.random().toString(36).substr(2, 9),
+    timestamp: log.timestamp || new Date().toISOString(),
+    user: log.user || 'anonymous',
+    action: log.action || 'unknown',
+    status: log.status || 'info',
+    ip: log.ip || '0.0.0.0'
   }));
 };
 
-export const getSystemErrors = async (): Promise<any[]> => {
-  try {
-    const response = await fetch(`${process.env.VITE_API_URL}/system/errors`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to fetch system errors');
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching system errors:', error);
-    return [];
-  }
+export const getSystemErrors = async () => {
+  // Mock implementation - replace with actual API call
+  return [];
 };
 
-export const getAccessLogs = async (): Promise<any[]> => {
-  try {
-    const response = await fetch(`${process.env.VITE_API_URL}/system/access-logs`, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
-    });
-    if (!response.ok) throw new Error('Failed to fetch access logs');
-    return response.json();
-  } catch (error) {
-    console.error('Error fetching access logs:', error);
-    return [];
-  }
+export const getAccessLogs = async () => {
+  // Mock implementation - replace with actual API call
+  return [];
 };
