@@ -1,10 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, AlertTriangle, Info } from "lucide-react";
+import { Info, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { ErrorLogsTable } from "@/components/admin/logs/ErrorLogsTable";
-import { getSystemErrors, getAccessLogs, formatErrorLogs, formatAccessLogs } from "@/utils/logs";
+import { getAccessLogs, formatAccessLogs } from "@/utils/logs";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
@@ -37,30 +36,19 @@ const systemEvents = [
 ];
 
 export default function SystemLogsPage() {
-  const { data: errorLogs = [] } = useQuery({
-    queryKey: ['systemErrors'],
-    queryFn: getSystemErrors,
-    refetchInterval: 5000, // Refresh every 5 seconds
-  });
-
   const { data: accessLogs = [] } = useQuery({
     queryKey: ['accessLogs'],
     queryFn: getAccessLogs,
     refetchInterval: 5000, // Refresh every 5 seconds
   });
 
-  const formattedErrorLogs = formatErrorLogs(errorLogs);
   const formattedAccessLogs = formatAccessLogs(accessLogs);
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">System Logs</h1>
-      <Tabs defaultValue="error" className="w-full">
+      <Tabs defaultValue="access" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="error" className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            Error Logs
-          </TabsTrigger>
           <TabsTrigger value="access" className="flex items-center gap-2">
             <Info className="h-4 w-4" />
             Access Logs
@@ -72,10 +60,6 @@ export default function SystemLogsPage() {
         </TabsList>
 
         <ScrollArea className="h-[calc(100vh-12rem)]">
-          <TabsContent value="error">
-            <ErrorLogsTable logs={formattedErrorLogs} />
-          </TabsContent>
-
           <TabsContent value="access">
             <Card>
               <CardHeader>
