@@ -15,3 +15,9 @@ export const buildUrl = (path) => {
   const baseUrl = API_CONFIG.baseURL;
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
 };
+
+// Helper function to get auth header
+export const getAuthHeader = () => {
+  const token = localStorage.getItem('access_token');
+  return token ? `Bearer ${token}` : '';
+};
