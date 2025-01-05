@@ -13,14 +13,21 @@ export const API_CONFIG = {
 // Create and export the api object for making HTTP requests
 export const api = {
   post: async (path, data) => {
+    const token = localStorage.getItem('access_token');
+    const headers = {
+      ...API_CONFIG.headers,
+      'Authorization': token ? `Bearer ${token}` : '',
+    };
+
     const response = await fetch(`${API_CONFIG.baseURL}${path}`, {
       method: 'POST',
-      headers: API_CONFIG.headers,
+      headers,
       body: JSON.stringify(data)
     });
     
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
     }
     
     return response.json();
