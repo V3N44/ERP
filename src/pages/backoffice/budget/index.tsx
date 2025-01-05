@@ -17,30 +17,72 @@ export default function BudgetManagementPage() {
   const { toast } = useToast();
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
+  // Fetch existing budget on component mount
+  useEffect(() => {
+    fetchExistingBudget();
+  }, []);
+
+  const fetchExistingBudget = async () => {
+    try {
+      const date = new Date();
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+      
+      const response = await fetch(
+        `${API_CONFIG.baseURL}/monthly-budgets/current/?month=${month}&year=${year}`,
+        {
+          headers: {
+            ...API_CONFIG.headers,
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setMonthlyBudgetId(data.id);
+        setMonthlyBudget(data.budget_amount);
+        setRemainingBudget(data.remaining_amount || data.budget_amount);
+      }
+    } catch (error) {
+      console.error('Error fetching existing budget:', error);
+    }
+  };
+
   const handleUpdateBudget = async (newBudget: number) => {
     try {
       const date = new Date();
-      const response = await fetch(`${API_CONFIG.baseURL}/monthly-budgets/`, {
-        method: 'POST',
+      const month = date.getMonth() + 1;
+      const year = date.getFullYear();
+
+      // If we already have a budget ID, update it instead of creating new
+      const method = monthlyBudgetId ? 'PUT' : 'POST';
+      const url = monthlyBudgetId 
+        ? `${API_CONFIG.baseURL}/monthly-budgets/${monthlyBudgetId}/`
+        : `${API_CONFIG.baseURL}/monthly-budgets/`;
+
+      const response = await fetch(url, {
+        method,
         headers: {
           ...API_CONFIG.headers,
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
         body: JSON.stringify({
-          month: date.getMonth() + 1,
-          year: date.getFullYear(),
+          month,
+          year,
           budget_amount: newBudget
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update budget');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to update budget');
       }
 
       const data = await response.json();
       setMonthlyBudgetId(data.id);
       setMonthlyBudget(newBudget);
-      setRemainingBudget(newBudget);
+      setRemainingBudget(data.remaining_amount || newBudget);
       
       toast({
         title: "Budget Updated",
@@ -50,7 +92,7 @@ export default function BudgetManagementPage() {
       console.error('Error updating budget:', error);
       toast({
         title: "Error",
-        description: "Failed to update monthly budget. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update monthly budget. Please try again.",
         variant: "destructive",
       });
     }
