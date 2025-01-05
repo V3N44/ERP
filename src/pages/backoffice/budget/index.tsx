@@ -28,8 +28,9 @@ export default function BudgetManagementPage() {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
       
+      // Changed to use /monthly-budgets/ endpoint with query parameters
       const response = await fetch(
-        `${API_CONFIG.baseURL}/monthly-budgets/current/?month=${month}&year=${year}`,
+        `${API_CONFIG.baseURL}/monthly-budgets/?month=${month}&year=${year}`,
         {
           headers: {
             ...API_CONFIG.headers,
@@ -40,12 +41,29 @@ export default function BudgetManagementPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setMonthlyBudgetId(data.id);
-        setMonthlyBudget(data.budget_amount);
-        setRemainingBudget(data.remaining_amount || data.budget_amount);
+        // Assuming the API returns an array of budgets, we take the first one
+        if (data && data.length > 0) {
+          const currentBudget = data[0];
+          setMonthlyBudgetId(currentBudget.id);
+          setMonthlyBudget(currentBudget.budget_amount);
+          setRemainingBudget(currentBudget.remaining_amount || currentBudget.budget_amount);
+        }
+      } else {
+        const errorData = await response.json();
+        console.error('Error fetching budget:', errorData);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: errorData.detail || "Failed to fetch budget information",
+        });
       }
     } catch (error) {
       console.error('Error fetching existing budget:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to fetch budget information",
+      });
     }
   };
 
