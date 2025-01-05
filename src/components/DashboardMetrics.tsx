@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getCustomers } from "@/services/customerService";
 import { getInventoryItems } from "@/services/inventoryService";
 import { getFreightForwarders } from "@/services/freightForwarderService";
+import { getOrders } from "@/services/orderService";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const DashboardMetrics = () => {
@@ -20,6 +21,11 @@ export const DashboardMetrics = () => {
   const { data: forwarders, isLoading: isLoadingForwarders, error: forwardersError } = useQuery({
     queryKey: ['freight-forwarders'],
     queryFn: () => getFreightForwarders(),
+  });
+
+  const { data: orders, isLoading: isLoadingOrders, error: ordersError } = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => getOrders(0, 100),
   });
 
   const renderCustomerCount = () => {
@@ -118,6 +124,41 @@ export const DashboardMetrics = () => {
     );
   };
 
+  const renderSalesCount = () => {
+    if (isLoadingOrders) {
+      return (
+        <>
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-4 w-32 mt-1" />
+        </>
+      );
+    }
+
+    if (ordersError) {
+      return (
+        <>
+          <div className="text-2xl font-heading font-bold text-gray-800">Error</div>
+          <p className="text-xs font-sans text-red-500 mt-1">Failed to load orders</p>
+        </>
+      );
+    }
+
+    const orderCount = orders?.length || 0;
+    const totalRevenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0;
+    const formattedRevenue = (totalRevenue / 1000000).toFixed(2);
+
+    return (
+      <>
+        <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">
+          ${formattedRevenue}M
+        </div>
+        <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">
+          From {orderCount} orders
+        </p>
+      </>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -157,8 +198,7 @@ export const DashboardMetrics = () => {
             <CircleDollarSign className="h-4 w-4 text-violet-500 animate-pulse" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-heading font-bold text-gray-800 animate-scale-in">23</div>
-            <p className="text-xs font-sans text-emerald-500 mt-1 animate-fade-in">This month</p>
+            {renderSalesCount()}
           </CardContent>
         </Card>
       </div>
