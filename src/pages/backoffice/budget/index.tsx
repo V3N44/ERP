@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { format } from "date-fns";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
@@ -31,7 +31,8 @@ const BudgetManagementPage = () => {
           description: "Failed to load current month's budget. Please try again later."
         });
       }
-    }
+    },
+    retry: 1
   });
 
   const formatMonth = (month: number) => {
