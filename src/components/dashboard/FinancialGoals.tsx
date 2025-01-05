@@ -22,9 +22,9 @@ export const FinancialGoals = () => {
       current: 75000,
       target: 100000,
       progress: 75,
-      timeLeft: "249 days left",
+      timeLeft: "10 days left",
       color: "bg-emerald-500",
-      deadline: "2024-12-31"
+      deadline: "2024-05-01"
     },
     {
       title: "Inventory Management",
