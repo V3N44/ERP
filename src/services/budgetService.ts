@@ -41,9 +41,13 @@ export const createMonthlyBudget = async (budget: Omit<MonthlyBudget, "id" | "re
   }
 };
 
-export const fetchMonthlyBudgets = async (): Promise<MonthlyBudget[]> => {
+export const fetchCurrentMonthBudget = async (): Promise<MonthlyBudget | null> => {
   try {
     const token = localStorage.getItem('access_token');
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+    const currentYear = currentDate.getFullYear();
+    
     const response = await fetch(`${api.baseURL}/monthly-budgets/`, {
       method: 'GET',
       headers: {
@@ -56,9 +60,12 @@ export const fetchMonthlyBudgets = async (): Promise<MonthlyBudget[]> => {
       throw new Error('Failed to fetch budgets');
     }
 
-    return await response.json();
+    const budgets = await response.json();
+    return budgets.find((budget: MonthlyBudget) => 
+      budget.month === currentMonth && budget.year === currentYear
+    ) || null;
   } catch (error) {
-    console.error('Error fetching monthly budgets:', error);
+    console.error('Error fetching current month budget:', error);
     throw error;
   }
 };
