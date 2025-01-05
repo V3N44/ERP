@@ -4,11 +4,11 @@ import { useToast } from "@/hooks/use-toast";
 import { MoneyOrderList } from "@/components/backoffice/budget/MoneyOrderList";
 import { AddMoneyOrderDialog } from "@/components/backoffice/budget/AddMoneyOrderDialog";
 import { BudgetCards } from "@/components/backoffice/budget/BudgetCards";
-import { fetchMonthlyBudget, updateMonthlyBudget } from "@/services/budgetService";
+import { createMonthlyBudget, fetchMonthlyBudget, updateMonthlyBudget } from "@/services/budgetService";
 
 export default function BudgetManagementPage() {
-  const [monthlyBudget, setMonthlyBudget] = useState(1000);
-  const [remainingBudget, setRemainingBudget] = useState(1000);
+  const [monthlyBudget, setMonthlyBudget] = useState(0);
+  const [remainingBudget, setRemainingBudget] = useState(0);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [monthlyBudgetId, setMonthlyBudgetId] = useState<number | null>(null);
   const [shouldRefreshOrders, setShouldRefreshOrders] = useState(false);
@@ -30,7 +30,17 @@ export default function BudgetManagementPage() {
         const currentBudget = budgets[0];
         setMonthlyBudgetId(currentBudget.id);
         setMonthlyBudget(currentBudget.budget_amount);
-        setRemainingBudget(currentBudget.remaining_amount || currentBudget.budget_amount);
+        setRemainingBudget(currentBudget.remaining_amount ?? currentBudget.budget_amount);
+      } else {
+        // If no budget exists for current month, create one
+        const newBudget = await createMonthlyBudget({
+          month,
+          year,
+          budget_amount: 0
+        });
+        setMonthlyBudgetId(newBudget.id);
+        setMonthlyBudget(newBudget.budget_amount);
+        setRemainingBudget(newBudget.budget_amount);
       }
     } catch (error) {
       console.error('Error fetching existing budget:', error);
@@ -56,11 +66,11 @@ export default function BudgetManagementPage() {
 
       setMonthlyBudgetId(updatedBudget.id);
       setMonthlyBudget(newBudget);
-      setRemainingBudget(updatedBudget.remaining_amount || newBudget);
+      setRemainingBudget(updatedBudget.remaining_amount ?? newBudget);
       
       toast({
-        title: "Budget Updated",
-        description: `Monthly budget has been set to $${newBudget}`,
+        title: "Success",
+        description: `Monthly budget has been set to $${newBudget.toLocaleString()}`,
       });
     } catch (error) {
       console.error('Error updating budget:', error);

@@ -9,7 +9,8 @@ interface BudgetCardsProps {
 }
 
 export const BudgetCards = ({ monthlyBudget, remainingBudget, onUpdateBudget }: BudgetCardsProps) => {
-  const currentMonth = format(new Date(), 'MMMM yyyy');
+  const currentDate = new Date();
+  const currentMonth = format(currentDate, 'MMMM yyyy');
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -24,6 +25,8 @@ export const BudgetCards = ({ monthlyBudget, remainingBudget, onUpdateBudget }: 
               value={monthlyBudget}
               onChange={(e) => onUpdateBudget(Number(e.target.value))}
               className="w-full"
+              min="0"
+              step="100"
             />
             <span className="text-sm text-gray-500">USD</span>
           </div>
@@ -32,7 +35,7 @@ export const BudgetCards = ({ monthlyBudget, remainingBudget, onUpdateBudget }: 
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Current Month</CardTitle>
+          <CardTitle className="text-sm font-medium">Current Period</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">{currentMonth}</p>
@@ -44,7 +47,7 @@ export const BudgetCards = ({ monthlyBudget, remainingBudget, onUpdateBudget }: 
           <CardTitle className="text-sm font-medium">Remaining Budget</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold">${remainingBudget}</p>
+          <p className="text-2xl font-bold">${remainingBudget.toLocaleString()}</p>
         </CardContent>
       </Card>
     </div>
