@@ -1,33 +1,70 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { 
+  LayoutDashboard, 
+  DollarSign, 
+  Package, 
+  Users,
+  Settings
+} from "lucide-react";
 
 export const AppSidebar = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const menuItems = [
+    {
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/dashboard"
+    },
+    {
+      label: "Sales Orders",
+      icon: DollarSign,
+      path: "/sales/orders"
+    },
+    {
+      label: "Inventory",
+      icon: Package,
+      path: "/inventory"
+    },
+    {
+      label: "Customers",
+      icon: Users,
+      path: "/customers"
+    }
+  ];
 
   return (
-    <aside className={`fixed inset-y-0 left-0 z-30 w-64 bg-white shadow-lg transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
-      <div className="flex items-center justify-between p-4">
-        <h2 className="text-lg font-bold">App Sidebar</h2>
-        <Button onClick={toggleSidebar} variant="outline">Toggle</Button>
-      </div>
-      <nav className="mt-4">
-        <ul>
-          <li>
-            <Link to="/sales/orders" className="block p-2 hover:bg-gray-200">Sales Orders</Link>
-          </li>
-          <li>
-            <Link to="/inventory" className="block p-2 hover:bg-gray-200">Inventory</Link>
-          </li>
-          <li>
-            <Link to="/customers" className="block p-2 hover:bg-gray-200">Customers</Link>
-          </li>
-        </ul>
-      </nav>
-    </aside>
+    <Sidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton asChild>
+                    <Link to={item.path}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };
