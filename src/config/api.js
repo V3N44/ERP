@@ -12,6 +12,8 @@ export const API_CONFIG = {
 
 // Create and export the api object for making HTTP requests
 export const api = {
+  baseURL: API_CONFIG.baseURL,
+  headers: API_CONFIG.headers,
   post: async (path, data) => {
     const token = localStorage.getItem('access_token');
     const headers = {

@@ -1,25 +1,15 @@
 import { api } from "@/config/api";
 
 export interface MonthlyBudget {
+  id: number;
   month: number;
   year: number;
   budget_amount: number;
-  id?: number;
-  created_at?: string;
-  remaining_budget?: number;
-  money_orders?: MoneyOrder[];
-}
-
-export interface MoneyOrder {
-  monthly_budget_id: number;
-  reason: string;
-  amount: number;
-  id: number;
-  status: string;
+  remaining_budget: number;
   created_at: string;
 }
 
-export const createMonthlyBudget = async (budget: MonthlyBudget) => {
+export const createMonthlyBudget = async (budget: Omit<MonthlyBudget, "id" | "remaining_budget" | "created_at">) => {
   try {
     console.log('Creating monthly budget:', budget);
     const response = await api.post('/monthly-budgets/', budget);
@@ -31,23 +21,20 @@ export const createMonthlyBudget = async (budget: MonthlyBudget) => {
   }
 };
 
-export const getMonthlyBudgetDetails = async (budgetId: number) => {
+export const fetchMonthlyBudgets = async () => {
   try {
-    const token = localStorage.getItem('access_token');
-    const response = await fetch(`${api.baseURL}/monthly-budgets/${budgetId}`, {
+    const response = await fetch(`${api.baseURL}/monthly-budgets/`, {
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        ...api.headers,
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
       },
     });
-    
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error('Failed to fetch budgets');
     }
-    
     return await response.json();
   } catch (error) {
-    console.error('Error fetching budget details:', error);
+    console.error('Error fetching monthly budgets:', error);
     throw error;
   }
 };
