@@ -5,6 +5,7 @@ import { MoneyOrderList } from "@/components/backoffice/budget/MoneyOrderList";
 import { AddMoneyOrderDialog } from "@/components/backoffice/budget/AddMoneyOrderDialog";
 import { BudgetCards } from "@/components/backoffice/budget/BudgetCards";
 import { createMonthlyBudget, fetchMonthlyBudget, updateMonthlyBudget } from "@/services/budgetService";
+import { Plus } from "lucide-react";
 
 export default function BudgetManagementPage() {
   const [monthlyBudget, setMonthlyBudget] = useState(0);
@@ -32,7 +33,6 @@ export default function BudgetManagementPage() {
         setMonthlyBudget(currentBudget.budget_amount);
         setRemainingBudget(currentBudget.remaining_amount ?? currentBudget.budget_amount);
       } else {
-        // If no budget exists for current month, create one
         const newBudget = await createMonthlyBudget({
           month,
           year,
@@ -99,8 +99,11 @@ export default function BudgetManagementPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-purple-900">Budget Management</h1>
+    <div className="space-y-8 p-6">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold text-purple-900">Budget Management</h1>
+        <p className="text-gray-500">Manage your monthly budget and money orders</p>
+      </div>
       
       <BudgetCards
         monthlyBudget={monthlyBudget}
@@ -115,6 +118,7 @@ export default function BudgetManagementPage() {
           disabled={!monthlyBudgetId}
           className="bg-purple-600 hover:bg-purple-700"
         >
+          <Plus className="h-4 w-4 mr-2" />
           New Money Order
         </Button>
       </div>
@@ -127,7 +131,7 @@ export default function BudgetManagementPage() {
           shouldRefresh={shouldRefreshOrders}
         />
       ) : (
-        <div className="text-center py-4 text-gray-500">
+        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
           Please set a monthly budget first to view and create money orders.
         </div>
       )}
