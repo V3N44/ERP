@@ -44,7 +44,7 @@ export const createMonthlyBudget = async (data: {
   const responseData = await response.json();
   
   if (!response.ok) {
-    // If budget already exists, try to fetch it
+    // If budget already exists, fetch and return the existing budget
     if (responseData.detail === "Budget already exists for this month and year") {
       const existingBudgets = await fetchMonthlyBudget(data.month, data.year);
       if (existingBudgets && existingBudgets.length > 0) {
