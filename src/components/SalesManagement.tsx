@@ -8,13 +8,69 @@ import { useState } from "react";
 import { VehicleSelectionModal } from "./sales/VehicleSelectionModal";
 import { Search } from "lucide-react";
 import { SelectedVehicleDisplay } from "./sales/SelectedVehicleDisplay";
+import { OrderData } from "@/services/orderService";
 
-export const SalesManagement = () => {
+interface SalesManagementProps {
+  onSubmit: (data: OrderData) => Promise<void>;
+  isSubmitting: boolean;
+}
+
+export const SalesManagement = ({ onSubmit, isSubmitting }: SalesManagementProps) => {
   const [showVehicleModal, setShowVehicleModal] = useState(false);
-  const [selectedVehicle, setSelectedVehicle] = useState<unknown>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+  const [formData, setFormData] = useState({
+    customerName: "",
+    contactNumber: "",
+    address: "",
+    email: "",
+    dateOfBirth: "",
+    occupation: "",
+    alternatePhone: "",
+    city: "",
+    state: "",
+    postalCode: "",
+    country: "",
+    idType: "",
+    idNumber: "",
+  });
 
-  const handleVehicleSelect = (vehicle: unknown) => {
+  const handleVehicleSelect = (vehicle: any) => {
     setSelectedVehicle(vehicle);
+    setShowVehicleModal(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedVehicle) {
+      return;
+    }
+
+    const orderData: OrderData = {
+      customer_id: 1, // This should be dynamically set based on customer selection
+      contact_number: formData.contactNumber,
+      address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.postalCode}, ${formData.country}`,
+      date: new Date().toISOString(),
+      total: selectedVehicle.price || 0,
+      status: "Pending",
+      items: [
+        {
+          item_name: selectedVehicle.product_name,
+          quantity: 1,
+          price: selectedVehicle.price,
+          total: selectedVehicle.price,
+        },
+      ],
+    };
+
+    await onSubmit(orderData);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
   };
 
   return (
@@ -24,7 +80,7 @@ export const SalesManagement = () => {
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[calc(100vh-12rem)] pr-4">
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Customer Information */}
               <div className="space-y-4">
@@ -33,62 +89,129 @@ export const SalesManagement = () => {
                 {/* Personal Information */}
                 <div className="space-y-2">
                   <Label htmlFor="customerName">Full Name</Label>
-                  <Input id="customerName" placeholder="Full Name" className="bg-white" />
+                  <Input 
+                    id="customerName" 
+                    placeholder="Full Name" 
+                    className="bg-white" 
+                    value={formData.customerName}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
                     <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                    <Input id="dateOfBirth" type="date" className="bg-white" />
+                    <Input 
+                      id="dateOfBirth" 
+                      type="date" 
+                      className="bg-white" 
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="occupation">Occupation</Label>
-                    <Input id="occupation" placeholder="Occupation" className="bg-white" />
+                    <Input 
+                      id="occupation" 
+                      placeholder="Occupation" 
+                      className="bg-white" 
+                      value={formData.occupation}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
 
                 {/* Contact Information */}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="Email Address" className="bg-white" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="Email Address" 
+                    className="bg-white" 
+                    value={formData.email}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Primary Phone</Label>
-                    <Input id="phone" placeholder="Primary Phone" className="bg-white" />
+                    <Label htmlFor="contactNumber">Primary Phone</Label>
+                    <Input 
+                      id="contactNumber" 
+                      placeholder="Primary Phone" 
+                      className="bg-white" 
+                      value={formData.contactNumber}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="alternatePhone">Alternate Phone</Label>
-                    <Input id="alternatePhone" placeholder="Alternate Phone" className="bg-white" />
+                    <Input 
+                      id="alternatePhone" 
+                      placeholder="Alternate Phone" 
+                      className="bg-white" 
+                      value={formData.alternatePhone}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
                 
                 {/* Address Information */}
                 <div className="space-y-2">
-                  <Label htmlFor="streetAddress">Street Address</Label>
-                  <Input id="streetAddress" placeholder="Street Address" className="bg-white" />
+                  <Label htmlFor="address">Street Address</Label>
+                  <Input 
+                    id="address" 
+                    placeholder="Street Address" 
+                    className="bg-white" 
+                    value={formData.address}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>
-                    <Input id="city" placeholder="City" className="bg-white" />
+                    <Input 
+                      id="city" 
+                      placeholder="City" 
+                      className="bg-white" 
+                      value={formData.city}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="state">State/Province</Label>
-                    <Input id="state" placeholder="State/Province" className="bg-white" />
+                    <Input 
+                      id="state" 
+                      placeholder="State/Province" 
+                      className="bg-white" 
+                      value={formData.state}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
                     <Label htmlFor="postalCode">Postal Code</Label>
-                    <Input id="postalCode" placeholder="Postal Code" className="bg-white" />
+                    <Input 
+                      id="postalCode" 
+                      placeholder="Postal Code" 
+                      className="bg-white" 
+                      value={formData.postalCode}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
-                    <Input id="country" placeholder="Country" className="bg-white" />
+                    <Input 
+                      id="country" 
+                      placeholder="Country" 
+                      className="bg-white" 
+                      value={formData.country}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
 
@@ -96,7 +219,12 @@ export const SalesManagement = () => {
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-2">
                     <Label htmlFor="idType">ID Type</Label>
-                    <select id="idType" className="w-full rounded-md border border-input bg-white px-3 py-2">
+                    <select 
+                      id="idType" 
+                      className="w-full rounded-md border border-input bg-white px-3 py-2"
+                      value={formData.idType}
+                      onChange={handleInputChange}
+                    >
                       <option value="">Select ID Type</option>
                       <option value="passport">Passport</option>
                       <option value="driverLicense">Driver's License</option>
@@ -105,7 +233,13 @@ export const SalesManagement = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="idNumber">ID Number</Label>
-                    <Input id="idNumber" placeholder="ID Number" className="bg-white" />
+                    <Input 
+                      id="idNumber" 
+                      placeholder="ID Number" 
+                      className="bg-white" 
+                      value={formData.idNumber}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
               </div>
@@ -152,12 +286,13 @@ export const SalesManagement = () => {
             </div>
             
             <div className="flex justify-end gap-4">
-              <Button variant="outline">Cancel</Button>
+              <Button variant="outline" type="button">Cancel</Button>
               <Button 
+                type="submit"
                 className="bg-purple-600 hover:bg-purple-700"
-                disabled={!selectedVehicle}
+                disabled={!selectedVehicle || isSubmitting}
               >
-                Create Sales Order
+                {isSubmitting ? "Creating Order..." : "Create Sales Order"}
               </Button>
             </div>
           </form>
