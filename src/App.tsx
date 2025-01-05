@@ -12,9 +12,7 @@ import { ChatBot } from "@/components/ChatBot";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "./pages/admin/settings"
-
+// Import all page components
 import Index from "./pages/Index";
 import DashboardPage from "./pages/dashboard";
 import ServiceCenterPage from "./pages/service";
@@ -26,6 +24,7 @@ import AnalyticsPage from "./pages/sales/analytics";
 import ReportsPage from "./pages/sales/reports";
 import CustomerDatabasePage from "./pages/customers/database";
 import NewLeadPage from "./pages/customers/new";
+import LeadsPage from "./pages/customers/leads";
 import FollowUpsPage from "./pages/customers/follow-ups";
 import SettingsPage from "./pages/admin/settings";
 import AdminReportsPage from "./pages/admin/reports";
@@ -37,6 +36,7 @@ import DocumentationPage from "./pages/support/docs";
 import ContactPage from "./pages/support/contact";
 import FAQsPage from "./pages/support/faqs";
 import FinancePage from "./pages/finance";
+import PayPalIntegrationPage from "./pages/finance/paypal-integration";
 import ShippingPage from "./pages/shipping";
 import ShippingOrdersPage from "./pages/shipping/orders";
 import TrackingPage from "./pages/shipping/tracking";
@@ -51,15 +51,13 @@ import DataEntryPage from "./pages/purchasing/data-entry";
 import DocumentScannerPage from "./pages/purchasing/document-scanner";
 import CustomerCareDashboard from "./pages/customer-care/dashboard";
 import VendorManagementPage from "./pages/customer-care/vendors";
+import AddVendorPage from "./pages/customer-care/add-vendor";
 import PurchaseApprovalsPage from "./pages/customer-care/PurchaseApprovals";
-import PayPalIntegrationPage from "./pages/finance/paypal-integration";
 import AutomatedEntriesPage from "./pages/accounting/automated-entries";
 import DiscrepancyDetectionPage from "./pages/accounting/discrepancy-detection";
 import ChartOfAccountsPage from "./pages/accounting/chart-of-accounts";
 import BankAccountsPage from "./pages/accounting/bank-accounts";
-import AddVendorPage from "./pages/customer-care/add-vendor";
-import LeadsPage from "./pages/customers/leads";
-import BudgetManagementPage from "./pages/backoffice/budget/index";
+import BudgetManagementPage from "./pages/backoffice/budget";
 import AddMonthlyBudgetPage from "./pages/backoffice/budget/add";
 
 const queryClient = new QueryClient();
@@ -204,3 +202,4 @@ const App = () => (
 );
 
 export default App;
+

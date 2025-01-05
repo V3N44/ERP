@@ -7,34 +7,80 @@ export interface MonthlyBudget {
   budget_amount: number;
   remaining_budget: number;
   created_at: string;
+  money_orders?: {
+    id: number;
+    monthly_budget_id: number;
+    reason: string;
+    amount: number;
+    status: string;
+    created_at: string;
+  }[];
 }
 
-export const createMonthlyBudget = async (budget: Omit<MonthlyBudget, "id" | "remaining_budget" | "created_at">) => {
+export const createMonthlyBudget = async (budget: Omit<MonthlyBudget, "id" | "remaining_budget" | "created_at" | "money_orders">) => {
   try {
-    console.log('Creating monthly budget:', budget);
-    const response = await api.post('/monthly-budgets/', budget);
-    console.log('Monthly budget created:', response);
-    return response;
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${api.baseURL}/monthly-budgets/`, {
+      method: 'POST',
+      headers: {
+        ...api.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(budget),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to create budget');
+    }
+
+    return await response.json();
   } catch (error) {
     console.error('Error creating monthly budget:', error);
     throw error;
   }
 };
 
-export const fetchMonthlyBudgets = async () => {
+export const fetchMonthlyBudgets = async (): Promise<MonthlyBudget[]> => {
   try {
+    const token = localStorage.getItem('access_token');
     const response = await fetch(`${api.baseURL}/monthly-budgets/`, {
+      method: 'GET',
       headers: {
         ...api.headers,
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+        'Authorization': `Bearer ${token}`,
       },
     });
+
     if (!response.ok) {
       throw new Error('Failed to fetch budgets');
     }
+
     return await response.json();
   } catch (error) {
     console.error('Error fetching monthly budgets:', error);
+    throw error;
+  }
+};
+
+export const getMonthlyBudgetDetails = async (budgetId: number): Promise<MonthlyBudget> => {
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${api.baseURL}/monthly-budgets/${budgetId}`, {
+      method: 'GET',
+      headers: {
+        ...api.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch budget details');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching budget details:', error);
     throw error;
   }
 };

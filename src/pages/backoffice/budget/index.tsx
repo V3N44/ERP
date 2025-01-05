@@ -1,6 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
 import { fetchMonthlyBudgets } from "@/services/budgetService";
 import {
   Table,
@@ -20,15 +20,10 @@ const BudgetManagementPage = () => {
   const { data: budgets, isLoading, error } = useQuery({
     queryKey: ['monthly-budgets'],
     queryFn: fetchMonthlyBudgets,
+    onError: (err) => {
+      console.error('Error fetching monthly budgets:', err);
+    }
   });
-
-  if (error) {
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to fetch budgets",
-    });
-  }
 
   const formatMonth = (month: number) => {
     return format(new Date(2024, month - 1), 'MMMM');
@@ -56,6 +51,10 @@ const BudgetManagementPage = () => {
       <div className="rounded-md border">
         {isLoading ? (
           <div className="p-4 text-center">Loading budgets...</div>
+        ) : error ? (
+          <div className="p-4 text-center text-red-500">
+            Error loading budgets. Please try again later.
+          </div>
         ) : budgets && budgets.length > 0 ? (
           <Table>
             <TableHeader>
@@ -68,7 +67,7 @@ const BudgetManagementPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {budgets.map((budget: any) => (
+              {budgets.map((budget) => (
                 <TableRow key={budget.id}>
                   <TableCell>{formatMonth(budget.month)}</TableCell>
                   <TableCell>{budget.year}</TableCell>
