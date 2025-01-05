@@ -7,7 +7,8 @@ export interface OrderItem {
   total: number;
 }
 
-export interface OrderData {
+export interface Order {
+  id: number;
   customer_id: number;
   contact_number: string;
   address: string;
@@ -17,29 +18,24 @@ export interface OrderData {
   items: OrderItem[];
 }
 
-export const createOrder = async (data: OrderData) => {
+export const getOrders = async (skip = 0, limit = 100) => {
   const token = localStorage.getItem('access_token');
   if (!token) {
     throw new Error('No authentication token found');
   }
 
-  console.log('Creating order with data:', data);
-
-  const response = await fetch(buildUrl('/orders/'), {
-    method: 'POST',
+  const response = await fetch(buildUrl(`/orders/?skip=${skip}&limit=${limit}`), {
     headers: {
-      'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`,
       'ngrok-skip-browser-warning': 'true',
       'Accept': 'application/json',
     },
-    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
     const errorData = await response.text();
-    console.error('Order creation failed:', errorData);
-    throw new Error(`Failed to create order: ${response.statusText}`);
+    console.error('Failed to fetch orders:', errorData);
+    throw new Error(`Failed to fetch orders: ${response.statusText}`);
   }
 
   return response.json();
