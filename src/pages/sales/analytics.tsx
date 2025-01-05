@@ -21,7 +21,18 @@ const AnalyticsPage = () => {
     queryFn: () => getOrders(0, 100),
   });
 
-  // Calculate monthly data based on inventory, customers and orders
+  // Calculate total revenue and metrics
+  const totalRevenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0;
+  const orderCount = orders?.length || 0;
+  const averageOrderValue = orderCount > 0 ? totalRevenue / orderCount : 0;
+  
+  // Calculate inventory utilization rate (items sold vs total inventory)
+  const inventoryCount = inventory?.length || 0;
+  const utilizationRate = inventoryCount > 0 
+    ? ((orderCount / inventoryCount) * 100).toFixed(1) 
+    : 0;
+
+  // Calculate monthly data
   const currentMonth = new Date().getMonth();
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
@@ -29,11 +40,10 @@ const AnalyticsPage = () => {
     const monthIndex = (currentMonth - i + 12) % 12;
     const monthDate = new Date();
     monthDate.setMonth(monthDate.getMonth() - i);
-    monthDate.setDate(1); // Start of month
+    monthDate.setDate(1);
     const nextMonth = new Date(monthDate);
     nextMonth.setMonth(nextMonth.getMonth() + 1);
 
-    // Filter orders for this month
     const monthOrders = orders?.filter(order => {
       const orderDate = new Date(order.date);
       return orderDate >= monthDate && orderDate < nextMonth;
@@ -44,15 +54,10 @@ const AnalyticsPage = () => {
 
     return {
       month: monthNames[monthIndex],
-      sales: monthlyOrderCount,
+      orders: monthlyOrderCount,
       revenue: monthlyRevenue,
     };
   }).reverse();
-
-  // Calculate total revenue from orders
-  const totalRevenue = orders?.reduce((sum, order) => sum + order.total, 0) || 0;
-  const averageOrderValue = orders && orders.length > 0 ? totalRevenue / orders.length : 0;
-  const conversionRate = customers && inventory ? ((customers.length / inventory.length) * 100).toFixed(1) : 0;
 
   return (
     <div className="p-6 space-y-6">
@@ -64,34 +69,45 @@ const AnalyticsPage = () => {
             <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${(totalRevenue / 1000000).toFixed(1)}M</div>
-            <p className="text-xs text-muted-foreground">From {orders?.length || 0} orders</p>
+            <div className="text-2xl font-bold">
+              ${(totalRevenue / 1000000).toFixed(2)}M
+            </div>
+            <p className="text-xs text-muted-foreground">
+              From {orderCount} orders
+            </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Average Order Value</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${averageOrderValue.toLocaleString()}</div>
+            <div className="text-2xl font-bold">
+              ${averageOrderValue.toLocaleString()}
+            </div>
             <p className="text-xs text-muted-foreground">Per order</p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
+            <CardTitle className="text-sm font-medium">Inventory Utilization</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{conversionRate}%</div>
-            <p className="text-xs text-muted-foreground">From inventory to customers</p>
+            <div className="text-2xl font-bold">{utilizationRate}%</div>
+            <p className="text-xs text-muted-foreground">
+              Orders vs Inventory
+            </p>
           </CardContent>
         </Card>
+        
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orders?.length || 0}</div>
+            <div className="text-2xl font-bold">{orderCount}</div>
             <p className="text-xs text-muted-foreground">All time orders</p>
           </CardContent>
         </Card>
@@ -100,7 +116,7 @@ const AnalyticsPage = () => {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Sales Trend</CardTitle>
+            <CardTitle>Monthly Orders Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
@@ -113,7 +129,7 @@ const AnalyticsPage = () => {
                   <Legend />
                   <Line 
                     type="monotone" 
-                    dataKey="sales" 
+                    dataKey="orders" 
                     name="Orders"
                     stroke="#8884d8" 
                     strokeWidth={2}
