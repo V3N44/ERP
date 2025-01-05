@@ -20,8 +20,7 @@ export const fetchMonthlyBudget = async (month: number, year: number): Promise<M
   );
 
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || `Failed to fetch budget information`);
+    throw new Error('Failed to fetch budget information');
   }
 
   return response.json();
@@ -32,39 +31,45 @@ export const createMonthlyBudget = async (data: {
   year: number;
   budget_amount: number;
 }): Promise<MonthlyBudget> => {
-  const response = await fetch(`${API_CONFIG.baseURL}/monthly-budgets`, {
-    method: 'POST',
-    headers: {
-      ...API_CONFIG.headers,
-      'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-    },
-    body: JSON.stringify(data)
-  });
+  try {
+    const response = await fetch(`${API_CONFIG.baseURL}/monthly-budgets`, {
+      method: 'POST',
+      headers: {
+        ...API_CONFIG.headers,
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      body: JSON.stringify(data)
+    });
 
-  const responseData = await response.json();
-  
-  if (!response.ok) {
-    // If budget already exists, fetch and return the existing budget
-    if (responseData.detail === "Budget already exists for this month and year") {
+    const responseData = await response.json();
+    
+    if (!response.ok) {
+      // If budget already exists, fetch and return the existing budget
+      if (responseData.detail === "Budget already exists for this month and year") {
+        const existingBudgets = await fetchMonthlyBudget(data.month, data.year);
+        if (existingBudgets && existingBudgets.length > 0) {
+          return existingBudgets[0];
+        }
+      }
+      throw new Error(responseData.detail || 'Failed to create budget');
+    }
+
+    return responseData;
+  } catch (error) {
+    if (error instanceof Error && error.message === "Budget already exists for this month and year") {
       const existingBudgets = await fetchMonthlyBudget(data.month, data.year);
       if (existingBudgets && existingBudgets.length > 0) {
         return existingBudgets[0];
       }
     }
-    throw new Error(responseData.detail || 'Failed to create budget');
+    throw error;
   }
-
-  return responseData;
 };
 
 export const updateMonthlyBudget = async (
-  budgetId: number | null,
+  budgetId: number,
   data: { month: number; year: number; budget_amount: number }
 ): Promise<MonthlyBudget> => {
-  if (!budgetId) {
-    return createMonthlyBudget(data);
-  }
-
   const response = await fetch(`${API_CONFIG.baseURL}/monthly-budgets/${budgetId}`, {
     method: 'PUT',
     headers: {
@@ -74,11 +79,10 @@ export const updateMonthlyBudget = async (
     body: JSON.stringify(data)
   });
 
-  const responseData = await response.json();
-  
   if (!response.ok) {
-    throw new Error(responseData.detail || 'Failed to update budget');
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to update budget');
   }
 
-  return responseData;
+  return response.json();
 };
