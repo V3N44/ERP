@@ -41,12 +41,20 @@ export const createMonthlyBudget = async (data: {
     body: JSON.stringify(data)
   });
 
+  const responseData = await response.json();
+  
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to create budget');
+    // If budget already exists, try to fetch it
+    if (responseData.detail === "Budget already exists for this month and year") {
+      const existingBudgets = await fetchMonthlyBudget(data.month, data.year);
+      if (existingBudgets && existingBudgets.length > 0) {
+        return existingBudgets[0];
+      }
+    }
+    throw new Error(responseData.detail || 'Failed to create budget');
   }
 
-  return response.json();
+  return responseData;
 };
 
 export const updateMonthlyBudget = async (
@@ -66,10 +74,11 @@ export const updateMonthlyBudget = async (
     body: JSON.stringify(data)
   });
 
+  const responseData = await response.json();
+  
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to update budget');
+    throw new Error(responseData.detail || 'Failed to update budget');
   }
 
-  return response.json();
+  return responseData;
 };

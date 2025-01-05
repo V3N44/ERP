@@ -54,19 +54,31 @@ export default function BudgetManagementPage() {
 
   const handleUpdateBudget = async (newBudget: number) => {
     try {
-      const date = new Date();
-      const month = date.getMonth() + 1;
-      const year = date.getFullYear();
+      if (!monthlyBudgetId) {
+        const date = new Date();
+        const month = date.getMonth() + 1;
+        const year = date.getFullYear();
 
-      const updatedBudget = await updateMonthlyBudget(monthlyBudgetId, {
-        month,
-        year,
-        budget_amount: newBudget
-      });
+        const newBudgetData = await createMonthlyBudget({
+          month,
+          year,
+          budget_amount: newBudget
+        });
 
-      setMonthlyBudgetId(updatedBudget.id);
-      setMonthlyBudget(newBudget);
-      setRemainingBudget(updatedBudget.remaining_amount ?? newBudget);
+        setMonthlyBudgetId(newBudgetData.id);
+        setMonthlyBudget(newBudget);
+        setRemainingBudget(newBudgetData.remaining_amount ?? newBudget);
+      } else {
+        const date = new Date();
+        const updatedBudget = await updateMonthlyBudget(monthlyBudgetId, {
+          month: date.getMonth() + 1,
+          year: date.getFullYear(),
+          budget_amount: newBudget
+        });
+
+        setMonthlyBudget(newBudget);
+        setRemainingBudget(updatedBudget.remaining_amount ?? newBudget);
+      }
       
       toast({
         title: "Success",
