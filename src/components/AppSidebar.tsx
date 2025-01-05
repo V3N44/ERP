@@ -58,7 +58,7 @@ export function AppSidebar() {
     return item.requirements?.some((req: any) => isActive(req.path));
   };
 
-  const SidebarContentComponent = () => (
+  const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 py-2">
         <SidebarGroupLabel className="text-purple-700">
@@ -148,7 +148,7 @@ export function AppSidebar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-[280px] p-0">
-          <SidebarContentComponent />
+          <div>{SidebarContent()}</div>
         </SheetContent>
       </Sheet>
     );
@@ -176,7 +176,7 @@ export function AppSidebar() {
         <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarContentComponent />
+              <SidebarContent />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>

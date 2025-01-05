@@ -1,8 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import { useState, useEffect } from "react";
-import { API_CONFIG, handleApiResponse } from "@/config/api";
+import { useState } from "react";
 
 interface MoneyOrder {
   id: string;
@@ -19,25 +18,6 @@ interface MoneyOrderListProps {
 
 export function MoneyOrderList({ remainingBudget, onBudgetUpdate }: MoneyOrderListProps) {
   const [orders, setOrders] = useState<MoneyOrder[]>([]);
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await fetch(`${API_CONFIG.baseURL}/money-orders`, {
-          headers: API_CONFIG.headers
-        });
-        const data = await handleApiResponse(response);
-        setOrders(data.map((order: any) => ({
-          ...order,
-          date: new Date(order.date)
-        })));
-      } catch (error) {
-        console.error('Error fetching money orders:', error);
-      }
-    };
-
-    fetchOrders();
-  }, []);
 
   return (
     <div className="rounded-md border">
