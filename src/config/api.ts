@@ -11,19 +11,19 @@ export const API_CONFIG = {
 };
 
 // Helper function to build URLs
-export const buildUrl = (path: string): string => {
+export const buildUrl = (path) => {
   const baseUrl = API_CONFIG.baseURL;
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
 };
 
 // Helper function to get auth header
-export const getAuthHeader = (): { Authorization: string } | Record<string, never> => {
+export const getAuthHeader = () => {
   const token = localStorage.getItem('access_token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
 // Helper function to handle API responses
-export const handleApiResponse = async (response: Response) => {
+export const handleApiResponse = async (response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
     throw new Error(errorData?.detail || `API Error: ${response.status} ${response.statusText}`);
@@ -31,8 +31,8 @@ export const handleApiResponse = async (response: Response) => {
   return response.json();
 };
 
-// Helper function to get all headers combined
-export const getHeaders = (): HeadersInit => ({
+// Helper function to get headers with auth
+export const getHeaders = () => ({
   ...API_CONFIG.headers,
   ...getAuthHeader()
 });

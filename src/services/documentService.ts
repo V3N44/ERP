@@ -1,7 +1,7 @@
-import { API_CONFIG, buildUrl, getHeaders } from '@/config/api';
+import { API_CONFIG, buildUrl, getAuthHeader } from '@/config/api';
 
 export interface Document {
-  id?: number;
+  id?: number; // Make id optional since we don't have it when creating a new document
   customer_id: number;
   file_name: string;
   file_path: string;
@@ -15,7 +15,10 @@ export const getDocuments = async (skip: number = 0, limit: number = 100): Promi
     const response = await fetch(
       buildUrl(`/documents/?skip=${skip}&limit=${limit}`),
       {
-        headers: getHeaders(),
+        headers: {
+          'Authorization': getAuthHeader(),
+          ...API_CONFIG.headers,
+        },
       }
     );
 
@@ -38,7 +41,10 @@ export const createDocument = async (documentData: Document): Promise<Document> 
     
     const response = await fetch(buildUrl('/documents/'), {
       method: 'POST',
-      headers: getHeaders(),
+      headers: {
+        'Authorization': getAuthHeader(),
+        ...API_CONFIG.headers,
+      },
       body: JSON.stringify(documentData),
     });
 
