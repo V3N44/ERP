@@ -13,11 +13,35 @@ import { AccountingSection } from "@/components/dashboard/AccountingSection";
 import { FinancialGoals } from "@/components/dashboard/FinancialGoals";
 import { useAuth } from "@/contexts/AuthContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState } from "react";
+import { createOrder, OrderData } from "@/services/orderService";
+import { useToast } from "@/hooks/use-toast";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isAccountingUser = user?.role === "accounting" || user?.role === "admin";
+
+  const handleCreateOrder = async (orderData: OrderData) => {
+    try {
+      setIsSubmitting(true);
+      await createOrder(orderData);
+      toast({
+        title: "Success",
+        description: "Order created successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create order",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -77,7 +101,7 @@ const DashboardPage = () => {
           </TabsContent>
           
           <TabsContent value="sales" className="space-y-4">
-            <SalesManagement />
+            <SalesManagement onSubmit={handleCreateOrder} isSubmitting={isSubmitting} />
           </TabsContent>
 
           <TabsContent value="customers" className="space-y-4">

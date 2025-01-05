@@ -148,7 +148,7 @@ export function AppSidebar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-[280px] p-0">
-          <SidebarContent />
+          <div>{SidebarContent()}</div>
         </SheetContent>
       </Sheet>
     );
