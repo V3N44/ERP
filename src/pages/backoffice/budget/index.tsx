@@ -17,7 +17,6 @@ export default function BudgetManagementPage() {
   const { toast } = useToast();
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
-  // Fetch existing budget on component mount
   useEffect(() => {
     fetchExistingBudget();
   }, []);
@@ -28,20 +27,23 @@ export default function BudgetManagementPage() {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
       
-      // Changed to use /monthly-budgets/ endpoint with query parameters
       const response = await fetch(
-        `${API_CONFIG.baseURL}/monthly-budgets/?month=${month}&year=${year}`,
+        `${API_CONFIG.baseURL}/monthly-budgets/search`,
         {
+          method: 'POST',
           headers: {
             ...API_CONFIG.headers,
             'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
+          },
+          body: JSON.stringify({
+            month,
+            year
+          })
         }
       );
 
       if (response.ok) {
         const data = await response.json();
-        // Assuming the API returns an array of budgets, we take the first one
         if (data && data.length > 0) {
           const currentBudget = data[0];
           setMonthlyBudgetId(currentBudget.id);
@@ -73,11 +75,10 @@ export default function BudgetManagementPage() {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
 
-      // If we already have a budget ID, update it instead of creating new
       const method = monthlyBudgetId ? 'PUT' : 'POST';
       const url = monthlyBudgetId 
-        ? `${API_CONFIG.baseURL}/monthly-budgets/${monthlyBudgetId}/`
-        : `${API_CONFIG.baseURL}/monthly-budgets/`;
+        ? `${API_CONFIG.baseURL}/monthly-budgets/${monthlyBudgetId}`
+        : `${API_CONFIG.baseURL}/monthly-budgets`;
 
       const response = await fetch(url, {
         method,
