@@ -1,4 +1,4 @@
-import { API_CONFIG, buildUrl, getAuthHeader } from '@/config/api';
+import { API_CONFIG, buildUrl, getHeaders } from '@/config/api';
 
 export interface Appointment {
   id: number;
@@ -23,10 +23,7 @@ export const createAppointment = async (data: CreateAppointmentData) => {
     
     const response = await fetch(buildUrl('/appointments/'), {
       method: 'POST',
-      headers: {
-        'Authorization': getAuthHeader(),
-        ...API_CONFIG.headers,
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -50,10 +47,7 @@ export const getAppointments = async () => {
     console.log('Fetching appointments...');
     
     const response = await fetch(buildUrl('/appointments/'), {
-      headers: {
-        'Authorization': getAuthHeader(),
-        ...API_CONFIG.headers,
-      },
+      headers: getHeaders(),
     });
 
     if (!response.ok) {

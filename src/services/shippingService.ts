@@ -1,13 +1,10 @@
 import { ShippingOrder, CreateShipmentDTO } from "@/types/shipping";
-import { API_CONFIG, buildUrl, getAuthHeader } from "@/config/api";
+import { API_CONFIG, buildUrl, getHeaders } from "@/config/api";
 
 export const getShippingOrders = async () => {
   try {
     const response = await fetch(buildUrl('/shipments/'), {
-      headers: {
-        ...API_CONFIG.headers,
-        'Authorization': getAuthHeader(),
-      },
+      headers: getHeaders(),
     });
 
     if (!response.ok) {
@@ -24,10 +21,7 @@ export const getShippingOrders = async () => {
 export const getShipmentLocations = async (shipmentId: string | number) => {
   try {
     const response = await fetch(buildUrl(`/shipment_locations/${shipmentId}`), {
-      headers: {
-        ...API_CONFIG.headers,
-        'Authorization': getAuthHeader(),
-      },
+      headers: getHeaders(),
     });
 
     if (!response.ok) {
@@ -50,10 +44,7 @@ export const createShipmentLocation = async (data: {
   try {
     const response = await fetch(buildUrl('/shipment_locations/'), {
       method: 'POST',
-      headers: {
-        ...API_CONFIG.headers,
-        'Authorization': getAuthHeader(),
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -72,10 +63,7 @@ export const createShippingOrder = async (data: CreateShipmentDTO): Promise<Ship
   try {
     const response = await fetch(buildUrl('/shipments/'), {
       method: 'POST',
-      headers: {
-        ...API_CONFIG.headers,
-        'Authorization': getAuthHeader(),
-      },
+      headers: getHeaders(),
       body: JSON.stringify(data),
     });
 
