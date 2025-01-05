@@ -14,6 +14,7 @@ export default function BudgetManagementPage() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [monthlyBudgetId, setMonthlyBudgetId] = useState<number | null>(null);
   const [shouldRefreshOrders, setShouldRefreshOrders] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -59,6 +60,7 @@ export default function BudgetManagementPage() {
 
   const handleUpdateBudget = async (newBudget: number) => {
     try {
+      setIsSubmitting(true);
       if (!monthlyBudgetId) {
         const date = new Date();
         const month = date.getMonth() + 1;
@@ -96,6 +98,8 @@ export default function BudgetManagementPage() {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to update monthly budget",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -115,13 +119,14 @@ export default function BudgetManagementPage() {
         remainingBudget={remainingBudget}
         onUpdateBudget={handleUpdateBudget}
         totalSpent={totalSpent}
+        isSubmitting={isSubmitting}
       />
 
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-purple-900">Money Orders</h2>
         <Button 
           onClick={() => setShowAddDialog(true)}
-          disabled={!monthlyBudgetId}
+          disabled={!monthlyBudgetId || isSubmitting}
           className="bg-purple-600 hover:bg-purple-700"
         >
           <Plus className="h-4 w-4 mr-2" />

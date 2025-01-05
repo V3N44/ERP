@@ -2,19 +2,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { DollarSign, Calendar, PiggyBank, TrendingUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BudgetCardsProps {
   monthlyBudget: number;
   remainingBudget: number;
   onUpdateBudget: (value: number) => void;
   totalSpent: number;
+  isSubmitting?: boolean;
 }
 
 export const BudgetCards = ({ 
   monthlyBudget, 
   remainingBudget, 
   onUpdateBudget,
-  totalSpent 
+  totalSpent,
+  isSubmitting 
 }: BudgetCardsProps) => {
   const currentDate = new Date();
   const currentMonth = format(currentDate, 'MMMM yyyy');
@@ -24,20 +27,25 @@ export const BudgetCards = ({
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card className="bg-white/50 backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-          <CardTitle className="text-sm font-medium">Monthly Budget</CardTitle>
+          <CardTitle className="text-sm font-medium">Monthly Budget Allocation</CardTitle>
           <DollarSign className="h-4 w-4 text-purple-600" />
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-2">
-            <Input
-              type="number"
-              value={monthlyBudget}
-              onChange={(e) => onUpdateBudget(Number(e.target.value))}
-              className="w-full"
-              min="0"
-              step="100"
-            />
-            <span className="text-sm text-gray-500">USD</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                value={monthlyBudget}
+                onChange={(e) => onUpdateBudget(Number(e.target.value))}
+                className="w-full"
+                min="0"
+                step="100"
+                placeholder="Enter budget amount"
+                disabled={isSubmitting}
+              />
+              <span className="text-sm text-gray-500">USD</span>
+            </div>
+            <p className="text-xs text-gray-500">Set your monthly budget allocation</p>
           </div>
         </CardContent>
       </Card>
@@ -49,6 +57,7 @@ export const BudgetCards = ({
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold text-purple-900">{currentMonth}</p>
+          <p className="text-xs text-gray-500 mt-1">Active budget period</p>
         </CardContent>
       </Card>
 
