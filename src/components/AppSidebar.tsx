@@ -73,7 +73,7 @@ export function AppSidebar() {
           <Users className="h-4 w-4" />
         </Button>
       </div>
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 [&_[data-radix-scroll-area-viewport]]:!scrollbar-none">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.name}>
