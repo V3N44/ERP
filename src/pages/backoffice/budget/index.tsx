@@ -1,12 +1,10 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { MoneyOrderList } from "@/components/backoffice/budget/MoneyOrderList";
 import { AddMoneyOrderDialog } from "@/components/backoffice/budget/AddMoneyOrderDialog";
-import { format } from "date-fns";
-import { API_CONFIG } from "@/config/api";
+import { BudgetCards } from "@/components/backoffice/budget/BudgetCards";
+import { fetchMonthlyBudget, updateMonthlyBudget } from "@/services/budgetService";
 
 export default function BudgetManagementPage() {
   const [monthlyBudget, setMonthlyBudget] = useState(1000);
@@ -15,7 +13,6 @@ export default function BudgetManagementPage() {
   const [monthlyBudgetId, setMonthlyBudgetId] = useState<number | null>(null);
   const [shouldRefreshOrders, setShouldRefreshOrders] = useState(false);
   const { toast } = useToast();
-  const currentMonth = format(new Date(), 'MMMM yyyy');
 
   useEffect(() => {
     fetchExistingBudget();
@@ -27,44 +24,20 @@ export default function BudgetManagementPage() {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
       
-      const response = await fetch(
-        `${API_CONFIG.baseURL}/monthly-budgets/search`,
-        {
-          method: 'POST',
-          headers: {
-            ...API_CONFIG.headers,
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          },
-          body: JSON.stringify({
-            month,
-            year
-          })
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data && data.length > 0) {
-          const currentBudget = data[0];
-          setMonthlyBudgetId(currentBudget.id);
-          setMonthlyBudget(currentBudget.budget_amount);
-          setRemainingBudget(currentBudget.remaining_amount || currentBudget.budget_amount);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('Error fetching budget:', errorData);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: errorData.detail || "Failed to fetch budget information",
-        });
+      const budgets = await fetchMonthlyBudget(month, year);
+      
+      if (budgets && budgets.length > 0) {
+        const currentBudget = budgets[0];
+        setMonthlyBudgetId(currentBudget.id);
+        setMonthlyBudget(currentBudget.budget_amount);
+        setRemainingBudget(currentBudget.remaining_amount || currentBudget.budget_amount);
       }
     } catch (error) {
       console.error('Error fetching existing budget:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to fetch budget information",
+        description: error instanceof Error ? error.message : "Failed to fetch budget information",
       });
     }
   };
@@ -75,33 +48,15 @@ export default function BudgetManagementPage() {
       const month = date.getMonth() + 1;
       const year = date.getFullYear();
 
-      const method = monthlyBudgetId ? 'PUT' : 'POST';
-      const url = monthlyBudgetId 
-        ? `${API_CONFIG.baseURL}/monthly-budgets/${monthlyBudgetId}`
-        : `${API_CONFIG.baseURL}/monthly-budgets`;
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          ...API_CONFIG.headers,
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify({
-          month,
-          year,
-          budget_amount: newBudget
-        })
+      const updatedBudget = await updateMonthlyBudget(monthlyBudgetId, {
+        month,
+        year,
+        budget_amount: newBudget
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to update budget');
-      }
-
-      const data = await response.json();
-      setMonthlyBudgetId(data.id);
+      setMonthlyBudgetId(updatedBudget.id);
       setMonthlyBudget(newBudget);
-      setRemainingBudget(data.remaining_amount || newBudget);
+      setRemainingBudget(updatedBudget.remaining_amount || newBudget);
       
       toast({
         title: "Budget Updated",
@@ -110,9 +65,9 @@ export default function BudgetManagementPage() {
     } catch (error) {
       console.error('Error updating budget:', error);
       toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update monthly budget. Please try again.",
         variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update monthly budget",
       });
     }
   };
@@ -125,42 +80,11 @@ export default function BudgetManagementPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-purple-900">Budget Management</h1>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Monthly Budget</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                value={monthlyBudget}
-                onChange={(e) => handleUpdateBudget(Number(e.target.value))}
-                className="w-full"
-              />
-              <span className="text-sm text-gray-500">USD</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Current Month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{currentMonth}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-sm font-medium">Remaining Budget</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">${remainingBudget}</p>
-          </CardContent>
-        </Card>
-      </div>
+      <BudgetCards
+        monthlyBudget={monthlyBudget}
+        remainingBudget={remainingBudget}
+        onUpdateBudget={handleUpdateBudget}
+      />
 
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-purple-900">Money Orders</h2>
