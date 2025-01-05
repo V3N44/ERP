@@ -2,7 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
-import { API_CONFIG, handleApiResponse, getHeaders } from "@/config/api";
+import { API_CONFIG, handleApiResponse } from "@/config/api";
 
 interface MoneyOrder {
   id: string;
@@ -24,7 +24,7 @@ export function MoneyOrderList({ remainingBudget, onBudgetUpdate }: MoneyOrderLi
     const fetchOrders = async () => {
       try {
         const response = await fetch(`${API_CONFIG.baseURL}/money-orders`, {
-          headers: getHeaders()
+          headers: API_CONFIG.headers
         });
         const data = await handleApiResponse(response);
         setOrders(data.map((order: any) => ({
