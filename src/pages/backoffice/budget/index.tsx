@@ -25,14 +25,34 @@ export default function BudgetManagementPage() {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
         body: JSON.stringify({
-          month: date.getMonth() + 1, // API expects 1-12 for months
+          month: date.getMonth() + 1,
           year: date.getFullYear(),
           budget_amount: newBudget
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to update budget');
+        if (data.detail === "Budget already exists for this month and year") {
+          // If budget exists, try updating it instead
+          const updateResponse = await fetch(`${API_CONFIG.baseURL}/monthly-budgets/${date.getMonth() + 1}/${date.getFullYear()}/`, {
+            method: 'PUT',
+            headers: {
+              ...API_CONFIG.headers,
+              'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+            },
+            body: JSON.stringify({
+              budget_amount: newBudget
+            })
+          });
+
+          if (!updateResponse.ok) {
+            throw new Error('Failed to update existing budget');
+          }
+        } else {
+          throw new Error(data.detail || 'Failed to update budget');
+        }
       }
 
       setMonthlyBudget(newBudget);
@@ -45,7 +65,7 @@ export default function BudgetManagementPage() {
       console.error('Error updating budget:', error);
       toast({
         title: "Error",
-        description: "Failed to update monthly budget. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update monthly budget. Please try again.",
         variant: "destructive",
       });
     }
