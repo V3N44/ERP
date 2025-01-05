@@ -17,8 +17,9 @@ const BudgetManagementPage = () => {
       </div>
       
       <div className="grid gap-4">
-        {/* Budget list will be implemented here */}
-        <p className="text-muted-foreground">No budgets found. Click the button above to add a new monthly budget.</p>
+        <p className="text-muted-foreground">
+          Click on "Add Monthly Budget" to create a new budget, then view its details by clicking on it in the list.
+        </p>
       </div>
     </div>
   );

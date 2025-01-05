@@ -11,56 +11,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ChatBot } from "@/components/ChatBot";
 import Footer from "@/components/Footer";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-import { useTranslation } from "react-i18next";
-import LanguageSwitcher from "./pages/admin/settings"
-
-import Index from "./pages/Index";
-import DashboardPage from "./pages/dashboard";
-import ServiceCenterPage from "./pages/service";
-import InventoryPage from "./pages/vehicles/inventory";
-import MaintenancePage from "./pages/vehicles/maintenance";
-import DocumentsPage from "./pages/vehicles/documents";
-import SalesOrdersPage from "./pages/sales/orders";
-import AnalyticsPage from "./pages/sales/analytics";
-import ReportsPage from "./pages/sales/reports";
-import CustomerDatabasePage from "./pages/customers/database";
-import NewLeadPage from "./pages/customers/new";
-import FollowUpsPage from "./pages/customers/follow-ups";
-import SettingsPage from "./pages/admin/settings";
-import AdminReportsPage from "./pages/admin/reports";
-import UsersPage from "./pages/admin/users";
-import MessagesPage from "./pages/notifications/messages";
-import CalendarPage from "./pages/notifications/calendar";
-import MailPage from "./pages/notifications/mail";
-import DocumentationPage from "./pages/support/docs";
-import ContactPage from "./pages/support/contact";
-import FAQsPage from "./pages/support/faqs";
-import FinancePage from "./pages/finance";
-import ShippingPage from "./pages/shipping";
-import ShippingOrdersPage from "./pages/shipping/orders";
-import TrackingPage from "./pages/shipping/tracking";
-import WarehousesPage from "./pages/shipping/warehouses";
-import FreightForwardersPage from "./pages/shipping/freight-forwarders";
-import AddInventoryPage from "./pages/inventory/add";
-import InventoryListPage from "./pages/inventory/list";
-import { InvoiceManagement } from "@/components/backoffice/InvoiceManagement";
-import { CostCalculator } from "@/components/backoffice/CostCalculator";
-import { BackofficeReports } from "@/components/backoffice/BackofficeReports";
-import DataEntryPage from "./pages/purchasing/data-entry";
-import DocumentScannerPage from "./pages/purchasing/document-scanner";
-import CustomerCareDashboard from "./pages/customer-care/dashboard";
-import VendorManagementPage from "./pages/customer-care/vendors";
-import PurchaseApprovalsPage from "./pages/customer-care/PurchaseApprovals";
-import PayPalIntegrationPage from "./pages/finance/paypal-integration";
-import AutomatedEntriesPage from "./pages/accounting/automated-entries";
-import DiscrepancyDetectionPage from "./pages/accounting/discrepancy-detection";
-import ChartOfAccountsPage from "./pages/accounting/chart-of-accounts";
-import BankAccountsPage from "./pages/accounting/bank-accounts";
-import AddVendorPage from "./pages/customer-care/add-vendor";
-import LeadsPage from "./pages/customers/leads";
-import BudgetManagementPage from "./pages/backoffice/budget/index";
-import AddMonthlyBudgetPage from "./pages/backoffice/budget/add";
+import { BudgetDetails } from "@/components/budget/BudgetDetails";
 
 const queryClient = new QueryClient();
 
@@ -190,6 +141,11 @@ const App = () => (
                     <Route path="/backoffice/budget/add" element={
                       <ProtectedRoute allowedRoles={["admin", "accounting"]}>
                         <AddMonthlyBudgetPage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/backoffice/budget/:budgetId" element={
+                      <ProtectedRoute allowedRoles={["admin", "accounting"]}>
+                        <BudgetDetails />
                       </ProtectedRoute>
                     } />
                   </Routes>
