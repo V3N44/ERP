@@ -4,12 +4,14 @@ import { adminMenuItems } from "./admin";
 import { accountingMenuItems } from "./accounting";
 import { baseMenuItems } from "./base";
 import { backofficeMenuItems } from "./backoffice";
+import { budgetMenuItems } from "./budget";
 
 const allMenuItems = [
   ...baseMenuItems,
   ...adminMenuItems,
   ...accountingMenuItems,
   ...backofficeMenuItems,
+  ...budgetMenuItems,
 ];
 
 export const getMenuItemsByRole = (role: UserRole) => {
