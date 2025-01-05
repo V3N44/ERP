@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ export default function BudgetManagementPage() {
   const [monthlyBudget, setMonthlyBudget] = useState(1000);
   const [remainingBudget, setRemainingBudget] = useState(1000);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [monthlyBudgetId, setMonthlyBudgetId] = useState<number | null>(null);
+  const [shouldRefreshOrders, setShouldRefreshOrders] = useState(false);
   const { toast } = useToast();
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
@@ -25,7 +27,7 @@ export default function BudgetManagementPage() {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`
         },
         body: JSON.stringify({
-          month: date.getMonth() + 1, // API expects 1-12 for months
+          month: date.getMonth() + 1,
           year: date.getFullYear(),
           budget_amount: newBudget
         })
@@ -35,8 +37,11 @@ export default function BudgetManagementPage() {
         throw new Error('Failed to update budget');
       }
 
+      const data = await response.json();
+      setMonthlyBudgetId(data.id);
       setMonthlyBudget(newBudget);
       setRemainingBudget(newBudget);
+      
       toast({
         title: "Budget Updated",
         description: `Monthly budget has been set to $${newBudget}`,
@@ -49,6 +54,10 @@ export default function BudgetManagementPage() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleOrderCreated = () => {
+    setShouldRefreshOrders(prev => !prev);
   };
 
   return (
@@ -94,19 +103,34 @@ export default function BudgetManagementPage() {
 
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold text-purple-900">Money Orders</h2>
-        <Button onClick={() => setShowAddDialog(true)}>New Money Order</Button>
+        <Button 
+          onClick={() => setShowAddDialog(true)}
+          disabled={!monthlyBudgetId}
+        >
+          New Money Order
+        </Button>
       </div>
 
-      <MoneyOrderList 
-        remainingBudget={remainingBudget}
-        onBudgetUpdate={setRemainingBudget}
-      />
+      {monthlyBudgetId ? (
+        <MoneyOrderList 
+          remainingBudget={remainingBudget}
+          onBudgetUpdate={setRemainingBudget}
+          monthlyBudgetId={monthlyBudgetId}
+          shouldRefresh={shouldRefreshOrders}
+        />
+      ) : (
+        <div className="text-center py-4 text-gray-500">
+          Please set a monthly budget first to view and create money orders.
+        </div>
+      )}
 
       <AddMoneyOrderDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         remainingBudget={remainingBudget}
         onBudgetUpdate={setRemainingBudget}
+        monthlyBudgetId={monthlyBudgetId!}
+        onOrderCreated={handleOrderCreated}
       />
     </div>
   );
