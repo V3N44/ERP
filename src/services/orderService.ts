@@ -7,8 +7,7 @@ export interface OrderItem {
   total: number;
 }
 
-export interface Order {
-  id: number;
+export interface OrderData {
   customer_id: number;
   contact_number: string;
   address: string;
@@ -18,7 +17,11 @@ export interface Order {
   items: OrderItem[];
 }
 
-export const getOrders = async (skip = 0, limit = 100) => {
+export interface Order extends OrderData {
+  id: number;
+}
+
+export const getOrders = async (skip = 0, limit = 100): Promise<Order[]> => {
   const token = localStorage.getItem('access_token');
   if (!token) {
     throw new Error('No authentication token found');
@@ -36,6 +39,31 @@ export const getOrders = async (skip = 0, limit = 100) => {
     const errorData = await response.text();
     console.error('Failed to fetch orders:', errorData);
     throw new Error(`Failed to fetch orders: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
+export const createOrder = async (orderData: OrderData): Promise<Order> => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
+  const response = await fetch(buildUrl('/orders/'), {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'ngrok-skip-browser-warning': 'true',
+    },
+    body: JSON.stringify(orderData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('Failed to create order:', errorData);
+    throw new Error(`Failed to create order: ${response.statusText}`);
   }
 
   return response.json();

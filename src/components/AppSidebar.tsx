@@ -1,188 +1,82 @@
-import { ChevronLeft, ChevronRight, Users, ChevronDown } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useChat } from "@/contexts/ChatContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { useTranslation } from "react-i18next";
-import { getMenuItemsByRole } from "@/utils/menuItems";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  useSidebar,
-} from "@/components/ui/sidebar";
-import { Button } from "./ui/button";
-import { ScrollArea } from "./ui/scroll-area";
-import { MiniSidebar } from "./sidebar/MiniSidebar";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useLocation, Link } from "react-router-dom";
 import { Menu } from "lucide-react";
+import { useState } from "react";
 
 export function AppSidebar() {
-  const { t } = useTranslation();
-  const { createNewChat } = useChat();
-  const { state, toggleSidebar } = useSidebar();
-  const navigate = useNavigate();
-  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
   const location = useLocation();
-  const [expandedItems, setExpandedItems] = useState<string[]>([]);
-  const isMobile = useIsMobile();
-
-  const menuItems = user ? getMenuItemsByRole(user.role) : [];
-
-  const handleNavigation = (path: string) => {
-    navigate(path);
-  };
-
-  const toggleExpand = (itemName: string) => {
-    setExpandedItems(prev => 
-      prev.includes(itemName) 
-        ? prev.filter(item => item !== itemName)
-        : [...prev, itemName]
-    );
-  };
-
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
-
-  const isGroupActive = (item: any) => {
-    if (isActive(item.path)) return true;
-    return item.requirements?.some((req: any) => isActive(req.path));
-  };
-
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-2">
-        <SidebarGroupLabel className="text-purple-700">
-          {t(`${user?.role}.dashboard`)}
-        </SidebarGroupLabel>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8 text-purple-600 hover:text-purple-700"
-          onClick={createNewChat}
-        >
-          <Users className="h-4 w-4" />
-        </Button>
-      </div>
-      <ScrollArea className="flex-1">
-        <SidebarMenu>
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.name}>
-              {item.name === "Dashboard" || item.name === "Service Center" ? (
-                <SidebarMenuButton 
-                  className={cn(
-                    "text-purple-600 hover:bg-purple-50 w-full px-3 py-2",
-                    isActive(item.path) && "bg-purple-100 text-purple-800"
-                  )}
-                  onClick={() => handleNavigation(item.path)}
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.name}
-                </SidebarMenuButton>
-              ) : (
-                <>
-                  <div 
-                    className={cn(
-                      "flex items-center px-3 py-2 text-purple-700 cursor-pointer hover:bg-purple-50",
-                      isGroupActive(item) && "bg-purple-100"
-                    )}
-                    onClick={() => toggleExpand(item.name)}
-                  >
-                    <item.icon className="h-4 w-4 mr-2" />
-                    <span className="flex-1">{item.name}</span>
-                    {item.requirements && item.requirements.length > 0 && (
-                      <ChevronDown 
-                        className={cn(
-                          "h-4 w-4 transition-transform",
-                          expandedItems.includes(item.name) && "rotate-180"
-                        )} 
-                      />
-                    )}
-                  </div>
-                  {item.requirements && item.requirements.length > 0 && expandedItems.includes(item.name) && (
-                    <SidebarMenuSub>
-                      {item.requirements.map((req) => (
-                        <SidebarMenuItem key={req.name}>
-                          <SidebarMenuButton 
-                            className={cn(
-                              "text-purple-600 hover:bg-purple-50 pl-8",
-                              isActive(req.path) && "bg-purple-100 text-purple-800"
-                            )}
-                            onClick={() => handleNavigation(req.path)}
-                          >
-                            <req.icon className="h-4 w-4 mr-2" />
-                            {req.name}
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenuSub>
-                  )}
-                </>
-              )}
-            </SidebarMenuItem>
-          ))}
-        </SidebarMenu>
-      </ScrollArea>
-    </div>
-  );
-
-  if (isMobile) {
-    return (
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            className="fixed top-4 left-4 z-50 md:hidden"
-          >
-            <Menu className="h-6 w-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-[280px] p-0">
-          <SidebarContent />
-        </SheetContent>
-      </Sheet>
-    );
-  }
 
   return (
-    <div className="relative hidden md:block">
-      <Sidebar className="min-h-screen border-r border-purple-100/50">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="fixed z-50 h-8 w-8 rounded-full bg-white shadow-sm border border-purple-100 hover:bg-purple-50 transition-all md:absolute md:-right-4 md:top-4"
-          style={{
-            left: state === "expanded" ? "14rem" : "3.5rem",
-            top: "1rem",
-          }}
-        >
-          {state === "expanded" ? (
-            <ChevronLeft className="h-4 w-4 text-purple-600" />
-          ) : (
-            <ChevronRight className="h-4 w-4 text-purple-600" />
-          )}
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="outline" size="icon" className="md:hidden">
+          <Menu className="h-6 w-6" />
         </Button>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarContent />
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-[240px] p-0">
+        <MobileSidebar />
+      </SheetContent>
+      <div className="hidden border-r bg-background md:block">
+        <div className="space-y-4 py-4">
+          <div className="px-3 py-2">
+            <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+              Overview
+            </h2>
+            <div className="space-y-1">
+              <Link to="/" className={cn("block p-2 rounded-md", location.pathname === "/" ? "bg-muted" : "hover:bg-muted")}>
+                Dashboard
+              </Link>
+              <Link to="/sales/orders" className={cn("block p-2 rounded-md", location.pathname === "/sales/orders" ? "bg-muted" : "hover:bg-muted")}>
+                Sales Orders
+              </Link>
+              <Link to="/sales/analytics" className={cn("block p-2 rounded-md", location.pathname === "/sales/analytics" ? "bg-muted" : "hover:bg-muted")}>
+                Sales Analytics
+              </Link>
+              <Link to="/inventory" className={cn("block p-2 rounded-md", location.pathname === "/inventory" ? "bg-muted" : "hover:bg-muted")}>
+                Inventory
+              </Link>
+              <Link to="/customers" className={cn("block p-2 rounded-md", location.pathname === "/customers" ? "bg-muted" : "hover:bg-muted")}>
+                Customers
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Sheet>
+  );
+}
 
-      {state === "collapsed" && <MiniSidebar departments={menuItems} />}
-    </div>
+function MobileSidebar() {
+  return (
+    <ScrollArea className="h-full py-6">
+      <div className="space-y-4">
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Overview
+          </h2>
+          <div className="space-y-1">
+            <Link to="/" className="block p-2 rounded-md hover:bg-muted">
+              Dashboard
+            </Link>
+            <Link to="/sales/orders" className="block p-2 rounded-md hover:bg-muted">
+              Sales Orders
+            </Link>
+            <Link to="/sales/analytics" className="block p-2 rounded-md hover:bg-muted">
+              Sales Analytics
+            </Link>
+            <Link to="/inventory" className="block p-2 rounded-md hover:bg-muted">
+              Inventory
+            </Link>
+            <Link to="/customers" className="block p-2 rounded-md hover:bg-muted">
+              Customers
+            </Link>
+          </div>
+        </div>
+      </div>
+    </ScrollArea>
   );
 }
