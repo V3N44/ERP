@@ -9,7 +9,7 @@ export interface MonthlyBudget {
 export const createMonthlyBudget = async (budget: MonthlyBudget) => {
   try {
     const response = await api.post('/monthly-budgets/', budget);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error creating monthly budget:', error);
     throw error;

@@ -10,6 +10,23 @@ export const API_CONFIG = {
   }
 };
 
+// Create and export the api object for making HTTP requests
+export const api = {
+  post: async (path, data) => {
+    const response = await fetch(`${API_CONFIG.baseURL}${path}`, {
+      method: 'POST',
+      headers: API_CONFIG.headers,
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    return response.json();
+  }
+};
+
 // Helper function to build URLs
 export const buildUrl = (path) => {
   const baseUrl = API_CONFIG.baseURL;
