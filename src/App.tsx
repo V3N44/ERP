@@ -59,6 +59,7 @@ import ChartOfAccountsPage from "./pages/accounting/chart-of-accounts";
 import BankAccountsPage from "./pages/accounting/bank-accounts";
 import AddVendorPage from "./pages/customer-care/add-vendor";
 import LeadsPage from "./pages/customers/leads";
+import BudgetManagementPage from "./pages/backoffice/budget/index";
 
 const queryClient = new QueryClient();
 
@@ -170,6 +171,11 @@ const App = () => (
                     <Route path="/backoffice/invoices" element={<InvoiceManagement />} />
                     <Route path="/backoffice/calculator" element={<CostCalculator />} />
                     <Route path="/backoffice/reports" element={<BackofficeReports />} />
+                    <Route path="/backoffice/budget" element={
+                      <ProtectedRoute allowedRoles={["admin", "accounting"]}>
+                        <BudgetManagementPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/purchasing/data-entry" element={<DataEntryPage />} />
                     <Route path="/purchasing/document-scanner" element={<DocumentScannerPage />} />
                     <Route path="/customer-care/dashboard" element={<CustomerCareDashboard />} />

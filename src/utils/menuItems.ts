@@ -190,6 +190,12 @@ const allMenuItems = [
         roles: ["admin", "accounting"] 
       },
       { 
+        name: "Budget Management", 
+        icon: DollarSign, 
+        path: "/backoffice/budget", 
+        roles: ["admin", "accounting"] 
+      },
+      { 
         name: "Reports", 
         icon: PieChart, 
         path: "/backoffice/reports", 
