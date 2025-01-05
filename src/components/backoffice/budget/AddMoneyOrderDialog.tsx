@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { API_CONFIG, handleApiResponse } from "@/config/api";
+import { API_CONFIG, handleApiResponse, getHeaders } from "@/config/api";
 
 interface AddMoneyOrderDialogProps {
   open: boolean;
@@ -47,7 +47,7 @@ export function AddMoneyOrderDialog({
     try {
       const response = await fetch(`${API_CONFIG.baseURL}/money-orders`, {
         method: 'POST',
-        headers: API_CONFIG.headers,
+        headers: getHeaders(),
         body: JSON.stringify({
           reason,
           amount: orderAmount,
