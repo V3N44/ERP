@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 export default function BudgetManagementPage() {
   const [monthlyBudget, setMonthlyBudget] = useState(0);
   const [remainingBudget, setRemainingBudget] = useState(0);
+  const [totalSpent, setTotalSpent] = useState(0);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [monthlyBudgetId, setMonthlyBudgetId] = useState<number | null>(null);
   const [shouldRefreshOrders, setShouldRefreshOrders] = useState(false);
@@ -18,6 +19,10 @@ export default function BudgetManagementPage() {
   useEffect(() => {
     fetchExistingBudget();
   }, []);
+
+  useEffect(() => {
+    setTotalSpent(monthlyBudget - remainingBudget);
+  }, [monthlyBudget, remainingBudget]);
 
   const fetchExistingBudget = async () => {
     try {
@@ -109,6 +114,7 @@ export default function BudgetManagementPage() {
         monthlyBudget={monthlyBudget}
         remainingBudget={remainingBudget}
         onUpdateBudget={handleUpdateBudget}
+        totalSpent={totalSpent}
       />
 
       <div className="flex justify-between items-center">
