@@ -182,6 +182,11 @@ const App = () => (
                     <Route path="/accounting/discrepancy-detection" element={<DiscrepancyDetectionPage />} />
                     <Route path="/accounting/chart-of-accounts" element={<ChartOfAccountsPage />} />
                     <Route path="/accounting/bank-accounts" element={<BankAccountsPage />} />
+                    <Route path="/backoffice/budget" element={
+                      <ProtectedRoute allowedRoles={["admin", "accounting"]}>
+                        <BudgetManagementPage />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/backoffice/budget/add" element={
                       <ProtectedRoute allowedRoles={["admin", "accounting"]}>
                         <AddMonthlyBudgetPage />
