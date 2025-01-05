@@ -5,31 +5,41 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getInventoryItems } from "@/services/inventoryService";
+import { getOrders } from "@/services/orderService";
 
 export const ExpensesChart = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState([]);
 
-  const { data: inventory } = useQuery({
-    queryKey: ['inventory'],
-    queryFn: () => getInventoryItems(0, 100),
+  const { data: orders } = useQuery({
+    queryKey: ['orders'],
+    queryFn: () => getOrders(0, 100),
   });
 
-  // Calculate daily expenses based on inventory
+  // Calculate weekly sales data
   const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const totalInventoryValue = inventory?.reduce((total, item) => total + (item.price || 0), 0) || 0;
-  
-  const expensesData = daysOfWeek.map((day, index) => ({
-    day,
-    income: Math.round(totalInventoryValue / 7) + (index * 50), // Simulate daily variation
-    spent: Math.round((totalInventoryValue / 7) * 0.8) + (index * 30), // Expenses as 80% of income
-  }));
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Start from Monday
 
-  // Calculate total spent and income for the title
-  const totalSpent = expensesData.reduce((sum, item) => sum + item.spent, 0);
-  const totalIncome = expensesData.reduce((sum, item) => sum + item.income, 0);
-  const chartTitle = "Weekly Inventory Value Distribution";
+  const weeklySalesData = daysOfWeek.map((day, index) => {
+    const currentDate = new Date(startOfWeek);
+    currentDate.setDate(startOfWeek.getDate() + index);
+
+    const dayOrders = orders?.filter(order => {
+      const orderDate = new Date(order.date);
+      return orderDate.toDateString() === currentDate.toDateString();
+    }) || [];
+
+    const dayRevenue = dayOrders.reduce((sum, order) => sum + order.total, 0);
+    const dayExpenses = dayRevenue * 0.7; // Assuming 70% of revenue goes to expenses
+
+    return {
+      day,
+      income: Math.round(dayRevenue),
+      spent: Math.round(dayExpenses),
+    };
+  });
 
   const handleInputChange = (day: string, field: 'income' | 'spent', value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -45,7 +55,7 @@ export const ExpensesChart = () => {
   };
 
   const handleEdit = () => {
-    setTempData(expensesData);
+    setTempData(weeklySalesData);
     setIsEditing(true);
   };
 
@@ -53,7 +63,7 @@ export const ExpensesChart = () => {
     <Card className="bg-white border-none shadow-sm rounded-2xl">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-heading font-semibold text-gray-700">
-          {chartTitle}
+          Weekly Sales Distribution
         </CardTitle>
         <Button
           variant="ghost"
@@ -70,7 +80,7 @@ export const ExpensesChart = () => {
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={isEditing ? tempData : expensesData} barGap={8}>
+          <BarChart data={isEditing ? tempData : weeklySalesData} barGap={8}>
             <XAxis 
               dataKey="day" 
               axisLine={false}
@@ -146,11 +156,11 @@ export const ExpensesChart = () => {
         <div className="mt-4 flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-gray-200"></div>
-            <span className="text-sm font-sans text-gray-600">Income</span>
+            <span className="text-sm font-sans text-gray-600">Revenue</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-            <span className="text-sm font-sans text-gray-600">Spent</span>
+            <span className="text-sm font-sans text-gray-600">Expenses</span>
           </div>
         </div>
       </CardContent>
