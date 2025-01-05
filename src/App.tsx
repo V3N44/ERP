@@ -171,11 +171,6 @@ const App = () => (
                     <Route path="/backoffice/invoices" element={<InvoiceManagement />} />
                     <Route path="/backoffice/calculator" element={<CostCalculator />} />
                     <Route path="/backoffice/reports" element={<BackofficeReports />} />
-                    <Route path="/backoffice/budget" element={
-                      <ProtectedRoute allowedRoles={["admin", "accounting"]}>
-                        <BudgetManagementPage />
-                      </ProtectedRoute>
-                    } />
                     <Route path="/purchasing/data-entry" element={<DataEntryPage />} />
                     <Route path="/purchasing/document-scanner" element={<DocumentScannerPage />} />
                     <Route path="/customer-care/dashboard" element={<CustomerCareDashboard />} />
