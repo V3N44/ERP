@@ -60,6 +60,7 @@ import BankAccountsPage from "./pages/accounting/bank-accounts";
 import AddVendorPage from "./pages/customer-care/add-vendor";
 import LeadsPage from "./pages/customers/leads";
 import BudgetManagementPage from "./pages/backoffice/budget/index";
+import AddMonthlyBudgetPage from "./pages/backoffice/budget/add";
 
 const queryClient = new QueryClient();
 
@@ -181,6 +182,11 @@ const App = () => (
                     <Route path="/accounting/discrepancy-detection" element={<DiscrepancyDetectionPage />} />
                     <Route path="/accounting/chart-of-accounts" element={<ChartOfAccountsPage />} />
                     <Route path="/accounting/bank-accounts" element={<BankAccountsPage />} />
+                    <Route path="/backoffice/budget/add" element={
+                      <ProtectedRoute allowedRoles={["admin", "accounting"]}>
+                        <AddMonthlyBudgetPage />
+                      </ProtectedRoute>
+                    } />
                   </Routes>
                 </AppLayout>
               </SidebarProvider>

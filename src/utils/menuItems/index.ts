@@ -3,12 +3,13 @@ import { UserRole } from "@/types/auth";
 import { adminMenuItems } from "./admin";
 import { accountingMenuItems } from "./accounting";
 import { baseMenuItems } from "./base";
-import { customerMenuItems } from "./customer";
+import { backofficeMenuItems } from "./backoffice";
 
 const allMenuItems = [
   ...baseMenuItems,
   ...adminMenuItems,
-  ...accountingMenuItems
+  ...accountingMenuItems,
+  ...backofficeMenuItems,
 ];
 
 export const getMenuItemsByRole = (role: UserRole) => {
