@@ -54,7 +54,7 @@ export const SalesManagement = ({ onSubmit, isSubmitting }: SalesManagementProps
       status: "Pending",
       items: [
         {
-          item_name: selectedVehicle.product_name,
+          item_name: `${selectedVehicle.make} ${selectedVehicle.model}`, // Fixed: Now properly setting item_name
           quantity: 1,
           price: selectedVehicle.price,
           total: selectedVehicle.price,
