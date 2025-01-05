@@ -20,8 +20,15 @@ const BudgetManagementPage = () => {
   const { data: budgets, isLoading, error } = useQuery({
     queryKey: ['monthly-budgets'],
     queryFn: fetchMonthlyBudgets,
-    onError: (err) => {
-      console.error('Error fetching monthly budgets:', err);
+    meta: {
+      onError: (err: Error) => {
+        console.error('Error fetching monthly budgets:', err);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load budgets. Please try again later."
+        });
+      }
     }
   });
 
