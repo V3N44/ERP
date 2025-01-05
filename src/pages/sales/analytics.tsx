@@ -73,7 +73,7 @@ const AnalyticsPage = () => {
               ${(totalRevenue / 1000000).toFixed(2)}M
             </div>
             <p className="text-xs text-muted-foreground">
-              From {orderCount} orders
+              Total: ${totalRevenue.toLocaleString()} from {orderCount} orders
             </p>
           </CardContent>
         </Card>
