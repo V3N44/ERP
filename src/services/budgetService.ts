@@ -48,8 +48,9 @@ export const fetchCurrentMonthBudget = async (): Promise<MonthlyBudget | null> =
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
     
-    // First get all budgets to find the current month's budget ID
-    const response = await fetch(`${api.baseURL}/monthly-budgets/`, {
+    // Get the current month's budget directly using query parameters
+    const response = await fetch(
+      `${api.baseURL}/monthly-budgets/current?month=${currentMonth}&year=${currentYear}`, {
       method: 'GET',
       headers: {
         ...api.headers,
@@ -58,32 +59,13 @@ export const fetchCurrentMonthBudget = async (): Promise<MonthlyBudget | null> =
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch budgets');
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch budget');
     }
 
-    const budgets = await response.json();
-    const currentBudget = budgets.find((budget: MonthlyBudget) => 
-      budget.month === currentMonth && budget.year === currentYear
-    );
-
-    if (!currentBudget) {
-      return null;
-    }
-
-    // Now fetch the specific budget details
-    const detailsResponse = await fetch(`${api.baseURL}/monthly-budgets/${currentBudget.id}`, {
-      method: 'GET',
-      headers: {
-        ...api.headers,
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!detailsResponse.ok) {
-      throw new Error('Failed to fetch budget details');
-    }
-
-    return await detailsResponse.json();
+    return await response.json();
   } catch (error) {
     console.error('Error fetching current month budget:', error);
     throw error;
