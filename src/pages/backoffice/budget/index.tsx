@@ -148,6 +148,7 @@ export default function BudgetManagementPage() {
         <Button 
           onClick={() => setShowAddDialog(true)}
           disabled={!monthlyBudgetId}
+          className="bg-purple-600 hover:bg-purple-700"
         >
           New Money Order
         </Button>
@@ -166,14 +167,16 @@ export default function BudgetManagementPage() {
         </div>
       )}
 
-      <AddMoneyOrderDialog
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        remainingBudget={remainingBudget}
-        onBudgetUpdate={setRemainingBudget}
-        monthlyBudgetId={monthlyBudgetId!}
-        onOrderCreated={handleOrderCreated}
-      />
+      {monthlyBudgetId && (
+        <AddMoneyOrderDialog
+          open={showAddDialog}
+          onOpenChange={setShowAddDialog}
+          remainingBudget={remainingBudget}
+          onBudgetUpdate={setRemainingBudget}
+          monthlyBudgetId={monthlyBudgetId}
+          onOrderCreated={handleOrderCreated}
+        />
+      )}
     </div>
   );
 }
