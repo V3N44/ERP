@@ -25,27 +25,22 @@ export const createOrder = async (data: OrderData) => {
 
   console.log('Creating order with data:', data);
 
-  try {
-    const response = await fetch(buildUrl('/orders/'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'ngrok-skip-browser-warning': 'true',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
+  const response = await fetch(buildUrl('/orders/'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'ngrok-skip-browser-warning': 'true',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Order creation failed:', errorText);
-      throw new Error(`Failed to create order: ${response.statusText}`);
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error('Error in createOrder:', error);
-    throw error;
+  if (!response.ok) {
+    const errorData = await response.text();
+    console.error('Order creation failed:', errorData);
+    throw new Error(`Failed to create order: ${response.statusText}`);
   }
+
+  return response.json();
 };
