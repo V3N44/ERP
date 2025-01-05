@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { MoneyOrderList } from "@/components/backoffice/budget/MoneyOrderList";
 import { AddMoneyOrderDialog } from "@/components/backoffice/budget/AddMoneyOrderDialog";
 import { format } from "date-fns";
+import { API_CONFIG } from "@/config/api";
 
 export default function BudgetManagementPage() {
   const [monthlyBudget, setMonthlyBudget] = useState(1000);
@@ -14,13 +15,40 @@ export default function BudgetManagementPage() {
   const { toast } = useToast();
   const currentMonth = format(new Date(), 'MMMM yyyy');
 
-  const handleUpdateBudget = (newBudget: number) => {
-    setMonthlyBudget(newBudget);
-    setRemainingBudget(newBudget);
-    toast({
-      title: "Budget Updated",
-      description: `Monthly budget has been set to $${newBudget}`,
-    });
+  const handleUpdateBudget = async (newBudget: number) => {
+    try {
+      const date = new Date();
+      const response = await fetch(`${API_CONFIG.baseURL}/monthly-budgets/`, {
+        method: 'POST',
+        headers: {
+          ...API_CONFIG.headers,
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify({
+          month: date.getMonth() + 1, // API expects 1-12 for months
+          year: date.getFullYear(),
+          budget_amount: newBudget
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update budget');
+      }
+
+      setMonthlyBudget(newBudget);
+      setRemainingBudget(newBudget);
+      toast({
+        title: "Budget Updated",
+        description: `Monthly budget has been set to $${newBudget}`,
+      });
+    } catch (error) {
+      console.error('Error updating budget:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update monthly budget. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
