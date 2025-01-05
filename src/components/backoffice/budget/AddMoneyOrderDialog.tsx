@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { API_CONFIG, handleApiResponse } from "@/config/api";
 
 interface AddMoneyOrderDialogProps {
   open: boolean;
@@ -29,7 +30,7 @@ export function AddMoneyOrderDialog({
   const [reason, setReason] = useState("");
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     const orderAmount = Number(amount);
@@ -43,20 +44,41 @@ export function AddMoneyOrderDialog({
       return;
     }
 
-    // Update remaining budget
-    onBudgetUpdate(remainingBudget - orderAmount);
-    
-    // Reset form
-    setAmount("");
-    setReason("");
-    
-    // Close dialog
-    onOpenChange(false);
-    
-    toast({
-      title: "Money Order Created",
-      description: "Your money order has been submitted for approval",
-    });
+    try {
+      const response = await fetch(`${API_CONFIG.baseURL}/money-orders`, {
+        method: 'POST',
+        headers: API_CONFIG.headers,
+        body: JSON.stringify({
+          reason,
+          amount: orderAmount,
+          monthly_budget_id: 0 // You might want to pass the actual budget ID here
+        })
+      });
+
+      await handleApiResponse(response);
+      
+      // Update remaining budget
+      onBudgetUpdate(remainingBudget - orderAmount);
+      
+      // Reset form
+      setAmount("");
+      setReason("");
+      
+      // Close dialog
+      onOpenChange(false);
+      
+      toast({
+        title: "Money Order Created",
+        description: "Your money order has been submitted for approval",
+      });
+    } catch (error) {
+      console.error('Error creating money order:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to create money order. Please try again.",
+      });
+    }
   };
 
   return (
