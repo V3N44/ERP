@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/config/api";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,11 +13,17 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2, Eye, Plus } from "lucide-react";
+import { AlertCircle, Loader2, Eye, Plus, Edit2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { updateMonthlyBudget } from "@/services/budgetService";
 
 const BudgetManagementPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editAmount, setEditAmount] = useState<string>("");
 
   const { data: budgets, isLoading, error } = useQuery({
     queryKey: ["budgets"],
@@ -35,6 +41,46 @@ const BudgetManagementPage = () => {
       return response.json();
     },
   });
+
+  const updateBudgetMutation = useMutation({
+    mutationFn: async ({ id, amount }: { id: number; amount: number }) => {
+      return updateMonthlyBudget(id, { budget_amount: amount });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      toast({
+        title: "Success",
+        description: "Budget amount updated successfully",
+      });
+      setEditingId(null);
+      setEditAmount("");
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update budget amount",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleEditClick = (budget: any) => {
+    setEditingId(budget.id);
+    setEditAmount(budget.budget_amount.toString());
+  };
+
+  const handleSaveEdit = async (id: number) => {
+    const amount = parseFloat(editAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid budget amount",
+        variant: "destructive",
+      });
+      return;
+    }
+    updateBudgetMutation.mutate({ id, amount });
+  };
 
   const handleAddBudget = () => {
     navigate("/backoffice/budget/add");
@@ -100,19 +146,50 @@ const BudgetManagementPage = () => {
                 <TableRow key={budget.id}>
                   <TableCell>{budget.month}</TableCell>
                   <TableCell>{budget.year}</TableCell>
-                  <TableCell>${budget.budget_amount}</TableCell>
+                  <TableCell>
+                    {editingId === budget.id ? (
+                      <div className="flex items-center gap-2">
+                        <Input
+                          type="number"
+                          value={editAmount}
+                          onChange={(e) => setEditAmount(e.target.value)}
+                          className="w-32"
+                        />
+                        <Button 
+                          size="sm"
+                          onClick={() => handleSaveEdit(budget.id)}
+                          disabled={updateBudgetMutation.isPending}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    ) : (
+                      <>${budget.budget_amount}</>
+                    )}
+                  </TableCell>
                   <TableCell>${budget.remaining_budget}</TableCell>
                   <TableCell>
                     {format(new Date(budget.created_at), "PPP")}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => navigate(`/backoffice/budget/${budget.id}`)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(`/backoffice/budget/${budget.id}`)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      {editingId !== budget.id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditClick(budget)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
