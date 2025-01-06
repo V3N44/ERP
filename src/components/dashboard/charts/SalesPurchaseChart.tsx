@@ -1,82 +1,34 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { useQuery } from "@tanstack/react-query";
-import { getInventoryItems } from "@/services/inventoryService";
-import { getCustomers } from "@/services/customerService";
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
-export const SalesPurchaseChart = () => {
-  const { data: inventory } = useQuery({
-    queryKey: ['inventory'],
-    queryFn: () => getInventoryItems(0, 100),
-  });
+const data = [
+  { name: "Mon", sales: 400, paced: 240 },
+  { name: "Tue", sales: 300, paced: 139 },
+  { name: "Wed", sales: 520, paced: 380 },
+  { name: "Thu", sales: 400, paced: 380 },
+  { name: "Fri", sales: 592, paced: 430 },
+  { name: "Sat", sales: 690, paced: 450 },
+  { name: "Sun", sales: 390, paced: 210 },
+];
 
-  const { data: customers } = useQuery({
-    queryKey: ['customers'],
-    queryFn: () => getCustomers({ skip: 0, limit: 100 }),
-  });
-
-  // Calculate monthly data based on inventory and customers
-  const currentMonth = new Date().getMonth();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
-  const lastSixMonths = Array.from({ length: 6 }, (_, i) => {
-    const monthIndex = (currentMonth - i + 12) % 12;
-    return {
-      month: monthNames[monthIndex],
-      sales: customers ? Math.round((customers.length / 6) * (i + 1)) : 0,
-      purchases: inventory ? Math.round((inventory.length / 6) * (i + 1)) : 0,
-    };
-  }).reverse();
-
+export function SalesPurchaseChart() {
   return (
-    <Card className="bg-white border-none shadow-sm rounded-2xl">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-sm font-heading font-semibold text-gray-700">
-          Sales vs Purchases
-        </CardTitle>
+        <CardTitle>Weekly Sales Distribution</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={lastSixMonths}>
-            <XAxis 
-              dataKey="month" 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
-            />
-            <YAxis 
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
-            />
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={data}>
+            <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
             <Tooltip />
-            <Line 
-              type="monotone" 
-              dataKey="sales" 
-              stroke="#8B5CF6" 
-              strokeWidth={2}
-              dot={{ fill: '#8B5CF6' }}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="purchases" 
-              stroke="#10B981" 
-              strokeWidth={2}
-              dot={{ fill: '#10B981' }}
-            />
-          </LineChart>
+            <Legend />
+            <Bar dataKey="sales" name="Total Sales" fill="#8884d8" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="paced" name="Paced Orders" fill="#82ca9d" radius={[4, 4, 0, 0]} />
+          </BarChart>
         </ResponsiveContainer>
-        <div className="mt-4 flex items-center justify-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <span className="text-sm font-sans text-gray-600">Sales</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-            <span className="text-sm font-sans text-gray-600">Purchases</span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
-};
+}
