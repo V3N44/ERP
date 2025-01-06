@@ -73,7 +73,7 @@ export const fetchAllBudgets = async (): Promise<MonthlyBudget[]> => {
     throw new Error('No authentication token found');
   }
 
-  const response = await fetch(`${api.baseURL}/monthly-budgets/all`, {
+  const response = await fetch(`${api.baseURL}/monthly-budgets/?skip=0&limit=100`, {
     method: 'GET',
     headers: {
       ...api.headers,

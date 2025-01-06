@@ -22,14 +22,16 @@ const BudgetManagementPage = () => {
   const { data: budgets, isLoading, error } = useQuery({
     queryKey: ["budgets"],
     queryFn: fetchAllBudgets,
-    onError: (error) => {
-      console.error('Error fetching budgets:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load budgets. Please try again later.",
-      });
-    },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error fetching budgets:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load budgets. Please try again later.",
+        });
+      }
+    }
   });
 
   const handleAddBudget = () => {
