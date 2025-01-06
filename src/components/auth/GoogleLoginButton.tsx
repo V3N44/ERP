@@ -1,8 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle } from "lucide-react";
-import { auth } from "@/config/firebase";
+import { auth, analytics } from "@/config/firebase";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { logEvent } from "firebase/analytics";
 import { Button } from "@/components/ui/button";
 
 export const GoogleLoginButton = () => {
@@ -13,6 +14,11 @@ export const GoogleLoginButton = () => {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      
+      // Log successful login event
+      logEvent(analytics, 'login', {
+        method: 'Google'
+      });
       
       console.log('Google login success:', result);
 
@@ -29,6 +35,11 @@ export const GoogleLoginButton = () => {
       navigate("/dashboard");
     } catch (error: any) {
       console.error('Google login error:', error);
+      
+      // Log login error event
+      logEvent(analytics, 'login_error', {
+        error_message: error.message
+      });
       
       toast({
         variant: "destructive",
