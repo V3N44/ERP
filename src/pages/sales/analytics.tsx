@@ -5,6 +5,7 @@ import { getOrders } from "@/services/orderService";
 import { MetricsCards } from "@/components/sales/MetricsCards";
 import { TrendCharts } from "@/components/sales/TrendCharts";
 import { OrdersTable } from "@/components/sales/OrdersTable";
+import { OrdersUpdate } from "@/components/sales/OrdersUpdate";
 
 const AnalyticsPage = () => {
   const { data: inventory } = useQuery({
@@ -19,7 +20,7 @@ const AnalyticsPage = () => {
 
   const { data: orders, isLoading: isLoadingOrders } = useQuery({
     queryKey: ['orders'],
-    queryFn: () => getOrders(0, 100), // Using the pagination parameters
+    queryFn: () => getOrders(0, 100),
   });
 
   // Calculate total revenue and metrics
@@ -71,7 +72,10 @@ const AnalyticsPage = () => {
         utilizationRate={utilizationRate}
       />
 
-      <TrendCharts monthlyData={lastSixMonths} />
+      <div className="grid gap-6 md:grid-cols-2">
+        <TrendCharts monthlyData={lastSixMonths} />
+        {orders && <OrdersUpdate orders={orders} />}
+      </div>
 
       <OrdersTable orders={orders} isLoading={isLoadingOrders} />
     </div>
