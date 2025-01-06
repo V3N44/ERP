@@ -11,8 +11,6 @@ interface ChatResponse {
   response: string;
 }
 
-const CHAT_API_URL = 'http://127.0.0.1:8080/chat';
-
 export const sendChatMessage = async (message: string, contextData?: Record<string, unknown[]>): Promise<string> => {
   try {
     const requestBody: ChatRequest = {
@@ -26,17 +24,18 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
 
     console.log('Sending chat request:', requestBody);
 
-    const response = await fetch(CHAT_API_URL, {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/chat`, {
       method: 'POST',
       headers: {
-        ...API_CONFIG.headers,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Accept'
+        'Authorization': `Bearer ${token}`
       },
-      mode: 'cors',
       body: JSON.stringify(requestBody)
     });
 
@@ -53,6 +52,34 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
     return data.response;
   } catch (error) {
     console.error('Error sending chat message:', error);
+    throw error;
+  }
+};
+
+export const resetChat = async (): Promise<string> => {
+  try {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/chat/reset`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to reset chat: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error resetting chat:', error);
     throw error;
   }
 };
