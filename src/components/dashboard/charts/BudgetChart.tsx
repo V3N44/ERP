@@ -1,24 +1,76 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
+import { fetchAllBudgets } from "@/services/budgetService";
+import { useQuery } from "@tanstack/react-query";
 
-const initialSpendingData = [
-  { name: "Marketing", value: 400, color: "#1EAEDB" },
-  { name: "Operations", value: 300, color: "#45B6E0" },
-  { name: "Salaries", value: 450, color: "#67C3E6" },
-  { name: "Equipment", value: 150, color: "#89D0EC" },
-  { name: "Remaining", value: 200, color: "#D3E4FD" },
-];
-
-const totalBudget = 1500;
+const getColorForIndex = (index: number) => {
+  const colors = ["#1EAEDB", "#45B6E0", "#67C3E6", "#89D0EC", "#D3E4FD"];
+  return colors[index % colors.length];
+};
 
 export const BudgetChart = () => {
-  const [spendingData, setSpendingData] = useState(initialSpendingData);
   const [isEditing, setIsEditing] = useState(false);
-  const [tempData, setTempData] = useState(initialSpendingData);
+  const [spendingData, setSpendingData] = useState<any[]>([]);
+  const [tempData, setTempData] = useState<any[]>([]);
+
+  const { data: budgets } = useQuery({
+    queryKey: ['budgets'],
+    queryFn: fetchAllBudgets
+  });
+
+  useEffect(() => {
+    if (budgets) {
+      // Get current month's budget
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      
+      const currentBudget = budgets.find(
+        budget => budget.month === currentMonth && budget.year === currentYear
+      );
+
+      if (currentBudget) {
+        // Calculate total spent from money orders
+        const totalSpent = currentBudget.money_orders?.reduce(
+          (acc: number, order: any) => acc + order.amount, 
+          0
+        ) || 0;
+
+        // Group money orders by reason
+        const spendingByReason = currentBudget.money_orders?.reduce((acc: any, order: any) => {
+          if (!acc[order.reason]) {
+            acc[order.reason] = 0;
+          }
+          acc[order.reason] += order.amount;
+          return acc;
+        }, {}) || {};
+
+        // Convert to chart data format
+        const newSpendingData = Object.entries(spendingByReason).map(([reason, amount], index) => ({
+          name: reason,
+          value: amount,
+          color: getColorForIndex(index)
+        }));
+
+        // Add remaining budget
+        const remaining = currentBudget.budget_amount - totalSpent;
+        if (remaining > 0) {
+          newSpendingData.push({
+            name: "Remaining",
+            value: remaining,
+            color: getColorForIndex(newSpendingData.length)
+          });
+        }
+
+        setSpendingData(newSpendingData);
+        setTempData(newSpendingData);
+      }
+    }
+  }, [budgets]);
 
   const handleInputChange = (name: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -42,6 +94,12 @@ export const BudgetChart = () => {
   const totalSpent = spendingData.reduce((acc, item) => 
     item.name !== "Remaining" ? acc + item.value : acc, 0
   );
+
+  const totalBudget = budgets?.find(budget => {
+    const currentDate = new Date();
+    return budget.month === currentDate.getMonth() + 1 && 
+           budget.year === currentDate.getFullYear();
+  })?.budget_amount || 0;
 
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
