@@ -50,10 +50,15 @@ export const MoneyOrdersTable = ({
       const details = await onViewDetails(orderId);
       setSelectedOrder(details);
       setIsDetailsOpen(true);
-    } catch (error) {
+    } catch (error: any) {
+      // Check if it's a 404 error
+      const errorMessage = error.message?.includes("404") 
+        ? "Money order not found" 
+        : "Failed to fetch money order details";
+      
       toast({
         title: "Error",
-        description: "Failed to fetch money order details",
+        description: errorMessage,
         variant: "destructive",
       });
     }

@@ -24,7 +24,8 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch money orders');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to fetch money orders');
       }
       return response.json();
     },
@@ -39,9 +40,12 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
         'Authorization': `Bearer ${token}`,
       },
     });
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch money order details');
+      const errorData = await response.json();
+      throw new Error(errorData.detail || `Failed to fetch money order details`);
     }
+    
     return response.json();
   };
 
