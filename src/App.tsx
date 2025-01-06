@@ -59,6 +59,7 @@ import ChartOfAccountsPage from "./pages/accounting/chart-of-accounts";
 import BankAccountsPage from "./pages/accounting/bank-accounts";
 import BudgetManagementPage from "./pages/backoffice/budget";
 import AddMonthlyBudgetPage from "./pages/backoffice/budget/add";
+import AddMoneyOrderPage from "./pages/backoffice/budget/add-money-order";
 
 const queryClient = new QueryClient();
 
@@ -190,6 +191,11 @@ const App = () => (
                         <AddMonthlyBudgetPage />
                       </ProtectedRoute>
                     } />
+                    <Route path="/backoffice/budget/add-money-order" element={
+                      <ProtectedRoute allowedRoles={["admin", "accounting"]}>
+                        <AddMoneyOrderPage />
+                      </ProtectedRoute>
+                    } />
                   </Routes>
                 </AppLayout>
               </SidebarProvider>
@@ -202,4 +208,3 @@ const App = () => (
 );
 
 export default App;
-
