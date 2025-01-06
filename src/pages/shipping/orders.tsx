@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { ShippingOrder } from "@/types/shipping";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -30,6 +31,26 @@ const ShippingOrdersPage = () => {
     }
   });
 
+  // Calculate metrics
+  const calculateMetrics = (orders: ShippingOrder[] = []) => {
+    const totalOrders = orders.length;
+    const pendingOrders = orders.filter(order => order.status === "Pending").length;
+    const confirmedOrders = orders.filter(order => order.status === "Confirmed").length;
+    const totalCost = orders.reduce((sum, order) => sum + (order.shipping_cost || 0), 0);
+    const averageCost = totalOrders > 0 ? totalCost / totalOrders : 0;
+    const uniqueCountries = new Set(orders.map(order => order.country)).size;
+
+    return {
+      totalOrders,
+      pendingOrders,
+      confirmedOrders,
+      averageCost,
+      uniqueCountries
+    };
+  };
+
+  const metrics = calculateMetrics(allShippingOrders);
+
   // Client-side pagination
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -39,12 +60,18 @@ const ShippingOrdersPage = () => {
     setCurrentPage(page);
   };
 
-  const totalOrders = allShippingOrders?.length || 0;
-  const pendingOrders = allShippingOrders?.filter(order => order.bookingStatus === "Pending").length || 0;
-  const confirmedOrders = allShippingOrders?.filter(order => order.bookingStatus === "Confirmed").length || 0;
-  const totalPages = Math.ceil(totalOrders / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil((allShippingOrders?.length || 0) / ITEMS_PER_PAGE);
   const canGoNext = currentPage < totalPages;
   const canGoPrevious = currentPage > 1;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -59,13 +86,13 @@ const ShippingOrdersPage = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalOrders}</div>
+            <div className="text-2xl font-bold">{metrics.totalOrders}</div>
           </CardContent>
         </Card>
         <Card>
@@ -73,7 +100,7 @@ const ShippingOrdersPage = () => {
             <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingOrders}</div>
+            <div className="text-2xl font-bold">{metrics.pendingOrders}</div>
           </CardContent>
         </Card>
         <Card>
@@ -81,7 +108,23 @@ const ShippingOrdersPage = () => {
             <CardTitle className="text-sm font-medium">Confirmed Orders</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{confirmedOrders}</div>
+            <div className="text-2xl font-bold">{metrics.confirmedOrders}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Cost</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{formatCurrency(metrics.averageCost)}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Destinations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{metrics.uniqueCountries}</div>
           </CardContent>
         </Card>
       </div>
