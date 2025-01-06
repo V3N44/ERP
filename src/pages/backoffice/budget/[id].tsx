@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { CreateMoneyOrderForm } from "@/components/backoffice/CreateMoneyOrderForm";
 import {
   getMonthlyBudgetDetails,
   updateMonthlyBudget,
@@ -115,6 +116,8 @@ const BudgetDetailsPage = () => {
           Back to List
         </Button>
       </div>
+
+      <CreateMoneyOrderForm budgetId={budget.id} />
 
       <Card className="p-6 mb-6">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
