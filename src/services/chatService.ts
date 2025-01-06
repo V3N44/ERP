@@ -31,8 +31,12 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
       headers: {
         ...API_CONFIG.headers,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Accept'
       },
+      mode: 'cors',
       body: JSON.stringify(requestBody)
     });
 
@@ -40,8 +44,7 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
       console.error('Chat API Error:', {
         status: response.status,
         statusText: response.statusText,
-        url: response.url,
-        body: await response.text()
+        url: response.url
       });
       throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
     }
