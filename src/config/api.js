@@ -1,12 +1,10 @@
 // API configuration
 export const API_CONFIG = {
-  baseURL: "https://0db2-122-255-33-126.ngrok-free.app",
+  baseURL: "http://127.0.0.1:8080",
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
-    'Access-Control-Allow-Origin': '*'
+    'Accept': 'application/json'
   }
 };
 
