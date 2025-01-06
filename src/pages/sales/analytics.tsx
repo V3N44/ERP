@@ -44,6 +44,11 @@ const AnalyticsPage = () => {
   const completedOrders = orders?.filter(order => order.status === 'Completed') || [];
   const cancelledOrders = orders?.filter(order => order.status === 'Cancelled') || [];
 
+  // Calculate revenue by status
+  const pendingRevenue = pendingOrders.reduce((sum, order) => sum + order.total, 0);
+  const completedRevenue = completedOrders.reduce((sum, order) => sum + order.total, 0);
+  const cancelledRevenue = cancelledOrders.reduce((sum, order) => sum + order.total, 0);
+
   // Filter orders based on selected status
   const filteredOrders = statusFilter 
     ? orders?.filter(order => order.status === statusFilter)
@@ -71,10 +76,16 @@ const AnalyticsPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-700">{pendingOrders.length}</div>
+            <div className="mt-2 text-sm text-yellow-600">
+              Revenue: ${pendingRevenue.toLocaleString()}
+            </div>
+            <div className="mt-1 text-xs text-yellow-600">
+              {((pendingOrders.length / orderCount) * 100).toFixed(1)}% of total orders
+            </div>
             <Button 
               onClick={() => setStatusFilter('Pending')}
               variant="outline" 
-              className="mt-2 w-full"
+              className="mt-4 w-full"
             >
               View Pending Orders
             </Button>
@@ -87,10 +98,16 @@ const AnalyticsPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-700">{completedOrders.length}</div>
+            <div className="mt-2 text-sm text-green-600">
+              Revenue: ${completedRevenue.toLocaleString()}
+            </div>
+            <div className="mt-1 text-xs text-green-600">
+              {((completedOrders.length / orderCount) * 100).toFixed(1)}% of total orders
+            </div>
             <Button 
               onClick={() => setStatusFilter('Completed')}
               variant="outline"
-              className="mt-2 w-full"
+              className="mt-4 w-full"
             >
               View Completed Orders
             </Button>
@@ -103,10 +120,16 @@ const AnalyticsPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-700">{cancelledOrders.length}</div>
+            <div className="mt-2 text-sm text-red-600">
+              Revenue Lost: ${cancelledRevenue.toLocaleString()}
+            </div>
+            <div className="mt-1 text-xs text-red-600">
+              {((cancelledOrders.length / orderCount) * 100).toFixed(1)}% of total orders
+            </div>
             <Button 
               onClick={() => setStatusFilter('Cancelled')}
               variant="outline"
-              className="mt-2 w-full"
+              className="mt-4 w-full"
             >
               View Cancelled Orders
             </Button>
