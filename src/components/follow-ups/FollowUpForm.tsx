@@ -3,6 +3,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createFollowUp } from "@/services/followUpService";
@@ -23,6 +24,9 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
       type: "",
       date: new Date(),
       time: "",
+      priority: "medium",
+      notes: "",
+      contactMethod: "",
     }
   });
 
@@ -34,8 +38,11 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
         date: data.date.toISOString(),
         time: data.time,
         status: "Scheduled",
-        lead_id: leadId || 1, // Default to 1 if no lead_id provided
-        user_id: user?.id || 1 // Default to 1 if no user_id available
+        priority: data.priority,
+        notes: data.notes,
+        contact_method: data.contactMethod,
+        lead_id: leadId || 1,
+        user_id: user?.id || 1
       };
 
       await createFollowUp(followUpData);
@@ -66,22 +73,72 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
           )}
         />
         
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select follow-up type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Call">Call</SelectItem>
+                    <SelectItem value="Meeting">Meeting</SelectItem>
+                    <SelectItem value="Email">Email</SelectItem>
+                    <SelectItem value="Visit">Site Visit</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="priority"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Priority</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
-          name="type"
+          name="contactMethod"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Type</FormLabel>
+              <FormLabel>Contact Method</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select follow-up type" />
+                    <SelectValue placeholder="Select contact method" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="Call">Call</SelectItem>
-                  <SelectItem value="Meeting">Meeting</SelectItem>
-                  <SelectItem value="Email">Email</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                  <SelectItem value="in-person">In Person</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -117,6 +174,24 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
               <FormLabel>Time</FormLabel>
               <FormControl>
                 <Input type="time" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Notes</FormLabel>
+              <FormControl>
+                <Textarea 
+                  placeholder="Enter any additional notes or details"
+                  className="min-h-[100px]"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
