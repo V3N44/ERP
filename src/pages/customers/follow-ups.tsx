@@ -2,10 +2,40 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FollowUpsTable } from "@/components/follow-ups/FollowUpsTable";
 import { PhoneCall, Mail, Calendar } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getFollowUps } from "@/services/followUpService";
+import { useQuery } from "@tanstack/react-query";
 
 const FollowUpsPage = () => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  
+  const { data: followUps = [] } = useQuery({
+    queryKey: ['followUps'],
+    queryFn: getFollowUps
+  });
+
+  // Calculate counts for each type
+  const callsCount = followUps.filter(fu => fu.type === 'Call').length;
+  const emailsCount = followUps.filter(fu => fu.type === 'Email').length;
+  const meetingsCount = followUps.filter(fu => fu.type === 'Meeting').length;
+
+  // Calculate counts from last week (assuming followUps have a date field)
+  const lastWeekDate = new Date();
+  lastWeekDate.setDate(lastWeekDate.getDate() - 7);
+
+  const lastWeekCalls = followUps.filter(
+    fu => fu.type === 'Call' && new Date(fu.date) < lastWeekDate
+  ).length;
+  const lastWeekEmails = followUps.filter(
+    fu => fu.type === 'Email' && new Date(fu.date) < lastWeekDate
+  ).length;
+  const lastWeekMeetings = followUps.filter(
+    fu => fu.type === 'Meeting' && new Date(fu.date) < lastWeekDate
+  ).length;
+
+  const callsDiff = callsCount - lastWeekCalls;
+  const emailsDiff = emailsCount - lastWeekEmails;
+  const meetingsDiff = meetingsCount - lastWeekMeetings;
 
   return (
     <div className="p-6 space-y-6">
@@ -19,9 +49,9 @@ const FollowUpsPage = () => {
             <PhoneCall className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15</div>
+            <div className="text-2xl font-bold">{callsCount}</div>
             <p className="text-xs text-muted-foreground">
-              +2 from last week
+              {callsDiff >= 0 ? '+' : ''}{callsDiff} from last week
             </p>
           </CardContent>
         </Card>
@@ -31,9 +61,9 @@ const FollowUpsPage = () => {
             <Mail className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">24</div>
+            <div className="text-2xl font-bold">{emailsCount}</div>
             <p className="text-xs text-muted-foreground">
-              +5 from last week
+              {emailsDiff >= 0 ? '+' : ''}{emailsDiff} from last week
             </p>
           </CardContent>
         </Card>
@@ -43,9 +73,9 @@ const FollowUpsPage = () => {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8</div>
+            <div className="text-2xl font-bold">{meetingsCount}</div>
             <p className="text-xs text-muted-foreground">
-              +1 from last week
+              {meetingsDiff >= 0 ? '+' : ''}{meetingsDiff} from last week
             </p>
           </CardContent>
         </Card>
