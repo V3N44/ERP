@@ -13,7 +13,7 @@ import { fetchAllBudgets } from "@/services/budgetService";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2, Eye } from "lucide-react";
+import { AlertCircle, Loader2, Eye, Plus } from "lucide-react";
 
 const BudgetManagementPage = () => {
   const navigate = useNavigate();
@@ -46,7 +46,13 @@ const BudgetManagementPage = () => {
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Budget Management</h1>
-        <Button onClick={handleAddBudget}>Add New Budget</Button>
+        <div className="flex gap-4">
+          <Button onClick={handleAddBudget}>Add New Budget</Button>
+          <Button onClick={() => navigate("/backoffice/budget/add-money-order")} variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Money Order
+          </Button>
+        </div>
       </div>
 
       <div className="rounded-md border">
