@@ -23,11 +23,6 @@ export const BackofficeReports = () => {
   const [selectedBudgetId, setSelectedBudgetId] = useState<number>(1);
   const { toast } = useToast();
 
-  const { data: budgetDetails, isLoading: isLoadingDetails, error: detailsError } = useQuery({
-    queryKey: ['budget', selectedBudgetId],
-    queryFn: () => getMonthlyBudgetDetails(selectedBudgetId),
-  });
-
   const { data: allBudgets, isLoading: isLoadingBudgets, error: budgetsError } = useQuery({
     queryKey: ['budgets'],
     queryFn: fetchAllBudgets,
@@ -173,79 +168,6 @@ export const BackofficeReports = () => {
             </Table>
           ) : (
             <div className="text-center p-4">No budgets available</div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Monthly Budget Details */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Monthly Budget Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoadingDetails ? (
-            <div className="flex items-center justify-center p-4">
-              <Loader2 className="h-6 w-6 animate-spin mr-2" />
-              <span>Loading budget details...</span>
-            </div>
-          ) : detailsError ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>
-                {detailsError instanceof Error ? detailsError.message : "Failed to load budget details"}
-              </AlertDescription>
-            </Alert>
-          ) : budgetDetails ? (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-secondary rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">Month/Year</div>
-                  <div className="text-2xl font-bold">
-                    {format(new Date(budgetDetails.year, budgetDetails.month - 1), "MMMM yyyy")}
-                  </div>
-                </div>
-                <div className="p-4 bg-secondary rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">Budget Amount</div>
-                  <div className="text-2xl font-bold">${budgetDetails.budget_amount.toLocaleString()}</div>
-                </div>
-                <div className="p-4 bg-secondary rounded-lg">
-                  <div className="text-sm font-medium text-muted-foreground">Remaining Budget</div>
-                  <div className="text-2xl font-bold">${budgetDetails.remaining_budget.toLocaleString()}</div>
-                </div>
-              </div>
-
-              {/* Money Orders Table */}
-              {budgetDetails.money_orders && budgetDetails.money_orders.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-4">Money Orders</h3>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Reason</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Created At</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {budgetDetails.money_orders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell>{order.id}</TableCell>
-                          <TableCell>{order.reason}</TableCell>
-                          <TableCell>${order.amount.toLocaleString()}</TableCell>
-                          <TableCell>{order.status}</TableCell>
-                          <TableCell>{format(new Date(order.created_at), "PPP")}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="text-center p-4">No budget details available</div>
           )}
         </CardContent>
       </Card>
