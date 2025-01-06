@@ -1,23 +1,80 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
-import { BudgetChartDisplay } from "./budget/BudgetChartDisplay";
-import { BudgetChartLegend } from "./budget/BudgetChartLegend";
-import { BudgetEditForm } from "./budget/BudgetEditForm";
-import { useBudgetData } from "@/hooks/useBudgetData";
+import { fetchAllBudgets, updateMonthlyBudget } from "@/services/budgetService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+
+const getColorForIndex = (index: number) => {
+  const colors = ["#1EAEDB", "#45B6E0", "#67C3E6", "#89D0EC", "#D3E4FD"];
+  return colors[index % colors.length];
+};
 
 export const BudgetChart = () => {
-  const {
-    isEditing,
-    setIsEditing,
-    spendingData,
-    tempData,
-    setTempData,
-    newBudgetAmount,
-    setNewBudgetAmount,
-    currentBudget,
-    handleSave
-  } = useBudgetData();
+  const [isEditing, setIsEditing] = useState(false);
+  const [spendingData, setSpendingData] = useState<any[]>([]);
+  const [tempData, setTempData] = useState<any[]>([]);
+  const [newBudgetAmount, setNewBudgetAmount] = useState<string>("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const { data: budgets } = useQuery({
+    queryKey: ['budgets'],
+    queryFn: fetchAllBudgets
+  });
+
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  const currentBudget = budgets?.find(
+    budget => budget.month === currentMonth && budget.year === currentYear
+  );
+
+  useEffect(() => {
+    if (budgets) {
+      if (currentBudget) {
+        // Calculate total spent from money orders
+        const totalSpent = currentBudget.money_orders?.reduce(
+          (acc: number, order: any) => acc + order.amount, 
+          0
+        ) || 0;
+
+        // Group money orders by reason
+        const spendingByReason = currentBudget.money_orders?.reduce((acc: any, order: any) => {
+          if (!acc[order.reason]) {
+            acc[order.reason] = 0;
+          }
+          acc[order.reason] += order.amount;
+          return acc;
+        }, {}) || {};
+
+        // Convert to chart data format
+        const newSpendingData = Object.entries(spendingByReason).map(([reason, amount], index) => ({
+          name: reason,
+          value: amount,
+          color: getColorForIndex(index)
+        }));
+
+        // Add remaining budget
+        const remaining = currentBudget.budget_amount - totalSpent;
+        if (remaining > 0) {
+          newSpendingData.push({
+            name: "Remaining",
+            value: remaining,
+            color: getColorForIndex(newSpendingData.length)
+          });
+        }
+
+        setSpendingData(newSpendingData);
+        setTempData(newSpendingData);
+        setNewBudgetAmount(currentBudget.budget_amount.toString());
+      }
+    }
+  }, [budgets, currentBudget]);
 
   const handleInputChange = (name: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -32,6 +89,38 @@ export const BudgetChart = () => {
     setNewBudgetAmount(value);
   };
 
+  const handleSave = async () => {
+    if (!currentBudget) return;
+
+    try {
+      const amount = parseFloat(newBudgetAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid budget amount",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await updateMonthlyBudget(currentBudget.id, { budget_amount: amount });
+      
+      toast({
+        title: "Success",
+        description: "Budget amount updated successfully",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      setIsEditing(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update budget amount",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleEdit = () => {
     setTempData(spendingData);
     setIsEditing(true);
@@ -42,10 +131,6 @@ export const BudgetChart = () => {
   );
 
   const totalBudget = currentBudget?.budget_amount || 0;
-  const totalMoneyOrders = currentBudget?.money_orders?.reduce(
-    (acc: number, order: any) => acc + order.amount, 
-    0
-  ) || 0;
 
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
@@ -67,23 +152,86 @@ export const BudgetChart = () => {
         </Button>
       </CardHeader>
       <CardContent>
-        <BudgetChartDisplay 
-          spendingData={spendingData}
-          totalSpent={totalSpent}
-          totalBudget={totalBudget}
-          totalMoneyOrders={totalMoneyOrders}
-        />
+        <div className="relative">
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={spendingData}
+                cx="50%"
+                cy="50%"
+                innerRadius={85}
+                outerRadius={95}
+                startAngle={90}
+                endAngle={-270}
+                paddingAngle={2}
+                dataKey="value"
+                strokeWidth={0}
+              >
+                {spendingData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.color}
+                  />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+            <p className="text-3xl font-bold text-gray-700">${totalSpent}</p>
+            <p className="text-sm text-gray-500">of ${totalBudget}</p>
+          </div>
+        </div>
 
         {isEditing && (
-          <BudgetEditForm
-            tempData={tempData}
-            newBudgetAmount={newBudgetAmount}
-            onBudgetAmountChange={handleBudgetAmountChange}
-            onInputChange={handleInputChange}
-          />
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2 border p-3 rounded-lg">
+              <label className="font-medium text-gray-700">Budget Amount</label>
+              <Input
+                type="number"
+                value={newBudgetAmount}
+                onChange={(e) => handleBudgetAmountChange(e.target.value)}
+                className="h-8"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {tempData.map((item) => (
+                <div key={item.name} className="space-y-2 border p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    <span className="font-medium text-gray-700">{item.name}</span>
+                  </div>
+                  <Input
+                    type="number"
+                    value={item.value}
+                    onChange={(e) => handleInputChange(item.name, e.target.value)}
+                    className="h-8"
+                    disabled={item.name === "Remaining"}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
-        <BudgetChartLegend spendingData={spendingData} />
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+          {spendingData.map((item, index) => (
+            <div key={index} className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: item.color }}
+              ></div>
+              <span className="text-sm font-sans text-gray-600">
+                {item.name} {item.name !== "Remaining" && `($${item.value})`}
+              </span>
+            </div>
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
