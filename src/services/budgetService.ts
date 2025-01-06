@@ -77,7 +77,8 @@ export const fetchAllBudgets = async (): Promise<MonthlyBudget[]> => {
     throw new Error('No authentication token found');
   }
 
-  const response = await fetch(`${api.baseURL}/monthly-budgets/`, {
+  // First, get all budget IDs
+  const response = await fetch(`${api.baseURL}/monthly-budgets`, {
     method: 'GET',
     headers: {
       ...api.headers,
@@ -91,7 +92,11 @@ export const fetchAllBudgets = async (): Promise<MonthlyBudget[]> => {
     throw new Error(errorData?.detail || 'Failed to fetch budgets');
   }
 
-  return await response.json();
+  const budgetIds = await response.json();
+  
+  // Then fetch details for each budget
+  const budgetPromises = budgetIds.map((id: number) => getMonthlyBudgetDetails(id));
+  return Promise.all(budgetPromises);
 };
 
 export const getMonthlyBudgetDetails = async (budgetId: number): Promise<MonthlyBudget> => {
