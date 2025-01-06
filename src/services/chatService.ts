@@ -48,8 +48,8 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
       throw new Error(`Failed to send message: ${response.status} ${response.statusText}`);
     }
 
-    const data: ChatResponse = await response.json();
-    return data.response;
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('Error sending chat message:', error);
     throw error;
