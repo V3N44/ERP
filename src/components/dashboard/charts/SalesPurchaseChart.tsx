@@ -1,94 +1,82 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
+import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
-import { getOrders } from "@/services/orderService";
-import { Loader2 } from "lucide-react";
+import { getInventoryItems } from "@/services/inventoryService";
+import { getCustomers } from "@/services/customerService";
 
-export function SalesPurchaseChart() {
-  const { data: orders, isLoading } = useQuery({
-    queryKey: ['orders'],
-    queryFn: () => getOrders(0, 100),
+export const SalesPurchaseChart = () => {
+  const { data: inventory } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => getInventoryItems(0, 100),
   });
 
-  // Calculate weekly data from orders
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Start from Monday
+  const { data: customers } = useQuery({
+    queryKey: ['customers'],
+    queryFn: () => getCustomers({ skip: 0, limit: 100 }),
+  });
 
-  const weeklyData = daysOfWeek.map((day, index) => {
-    const currentDate = new Date(startOfWeek);
-    currentDate.setDate(startOfWeek.getDate() + index);
-
-    const dayOrders = orders?.filter(order => {
-      const orderDate = new Date(order.date);
-      return orderDate.toDateString() === currentDate.toDateString();
-    }) || [];
-
-    const totalSales = dayOrders.reduce((sum, order) => sum + order.total, 0);
-    const pacedOrders = dayOrders.filter(order => order.status === "Pending").reduce((sum, order) => sum + order.total, 0);
-
+  // Calculate monthly data based on inventory and customers
+  const currentMonth = new Date().getMonth();
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const lastSixMonths = Array.from({ length: 6 }, (_, i) => {
+    const monthIndex = (currentMonth - i + 12) % 12;
     return {
-      name: day,
-      sales: totalSales,
-      paced: pacedOrders,
+      month: monthNames[monthIndex],
+      sales: customers ? Math.round((customers.length / 6) * (i + 1)) : 0,
+      purchases: inventory ? Math.round((inventory.length / 6) * (i + 1)) : 0,
     };
-  });
-
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Weekly Sales Distribution</CardTitle>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center h-[350px]">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-        </CardContent>
-      </Card>
-    );
-  }
+  }).reverse();
 
   return (
-    <Card>
+    <Card className="bg-white border-none shadow-sm rounded-2xl">
       <CardHeader>
-        <CardTitle>Weekly Sales Distribution</CardTitle>
+        <CardTitle className="text-sm font-heading font-semibold text-gray-700">
+          Sales vs Purchases
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
-          <BarChart data={weeklyData}>
-            <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={lastSixMonths}>
+            <XAxis 
+              dataKey="month" 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 12 }}
+            />
             <YAxis 
-              stroke="#888888" 
-              fontSize={12} 
-              tickLine={false} 
-              axisLine={false} 
-              tickFormatter={(value) => `$${value}`} 
+              axisLine={false}
+              tickLine={false}
+              tick={{ fill: '#64748b', fontSize: 12 }}
             />
-            <Tooltip 
-              formatter={(value) => [`$${value}`, '']}
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e2e8f0',
-                borderRadius: '6px',
-                padding: '8px'
-              }}
-            />
-            <Legend />
-            <Bar 
+            <Tooltip />
+            <Line 
+              type="monotone" 
               dataKey="sales" 
-              name="Total Sales" 
-              fill="#8884d8" 
-              radius={[4, 4, 0, 0]} 
+              stroke="#8B5CF6" 
+              strokeWidth={2}
+              dot={{ fill: '#8B5CF6' }}
             />
-            <Bar 
-              dataKey="paced" 
-              name="Paced Orders" 
-              fill="#82ca9d" 
-              radius={[4, 4, 0, 0]} 
+            <Line 
+              type="monotone" 
+              dataKey="purchases" 
+              stroke="#10B981" 
+              strokeWidth={2}
+              dot={{ fill: '#10B981' }}
             />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
+        <div className="mt-4 flex items-center justify-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+            <span className="text-sm font-sans text-gray-600">Sales</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+            <span className="text-sm font-sans text-gray-600">Purchases</span>
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
-}
+};
