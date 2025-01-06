@@ -54,22 +54,22 @@ const FollowUpsPage = () => {
       {/* Filter Buttons */}
       <div className="flex gap-2">
         <Button 
-          variant={selectedType === 'call' ? 'default' : 'outline'}
-          onClick={() => setSelectedType(selectedType === 'call' ? null : 'call')}
+          variant={selectedType === 'Call' ? 'default' : 'outline'}
+          onClick={() => setSelectedType(selectedType === 'Call' ? null : 'Call')}
         >
           <PhoneCall className="mr-2 h-4 w-4" />
           Calls
         </Button>
         <Button 
-          variant={selectedType === 'email' ? 'default' : 'outline'}
-          onClick={() => setSelectedType(selectedType === 'email' ? null : 'email')}
+          variant={selectedType === 'Email' ? 'default' : 'outline'}
+          onClick={() => setSelectedType(selectedType === 'Email' ? null : 'Email')}
         >
           <Mail className="mr-2 h-4 w-4" />
           Emails
         </Button>
         <Button 
-          variant={selectedType === 'meeting' ? 'default' : 'outline'}
-          onClick={() => setSelectedType(selectedType === 'meeting' ? null : 'meeting')}
+          variant={selectedType === 'Meeting' ? 'default' : 'outline'}
+          onClick={() => setSelectedType(selectedType === 'Meeting' ? null : 'Meeting')}
         >
           <Calendar className="mr-2 h-4 w-4" />
           Meetings
