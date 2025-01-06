@@ -1,7 +1,8 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { CreateMoneyOrderForm } from "@/components/backoffice/CreateMoneyOrderForm";
+import { useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { CreateMoneyOrderForm } from "@/components/backoffice/CreateMoneyOrderForm";
 
 const AddMoneyOrderPage = () => {
   const navigate = useNavigate();
