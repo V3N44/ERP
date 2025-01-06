@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface OrderItem {
   item_name: string;
@@ -27,6 +28,7 @@ interface Order {
 interface OrdersUpdateProps {
   orders: Order[];
   onDeleteOrder?: (orderId: number) => void;
+  onUpdateStatus?: (orderId: number, newStatus: string) => void;
 }
 
 const formatCurrency = (amount: number) => {
@@ -36,7 +38,7 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export const OrdersUpdate = ({ orders, onDeleteOrder }: OrdersUpdateProps) => {
+export const OrdersUpdate = ({ orders, onDeleteOrder, onUpdateStatus }: OrdersUpdateProps) => {
   const { toast } = useToast();
   
   // Get the 5 most recent orders
@@ -50,6 +52,16 @@ export const OrdersUpdate = ({ orders, onDeleteOrder }: OrdersUpdateProps) => {
       toast({
         title: "Order Deleted",
         description: `Order #${orderId} has been deleted successfully.`,
+      });
+    }
+  };
+
+  const handleStatusChange = (orderId: number, newStatus: string) => {
+    if (onUpdateStatus) {
+      onUpdateStatus(orderId, newStatus);
+      toast({
+        title: "Status Updated",
+        description: `Order #${orderId} status has been updated to ${newStatus}.`,
       });
     }
   };
@@ -75,15 +87,29 @@ export const OrdersUpdate = ({ orders, onDeleteOrder }: OrdersUpdateProps) => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge
-                      variant={
-                        order.status === "Completed" ? "success" :
-                        order.status === "Pending" ? "warning" : "destructive"
-                      }
-                      className="capitalize"
+                    <Select
+                      defaultValue={order.status}
+                      onValueChange={(value) => handleStatusChange(order.id, value)}
                     >
-                      {order.status}
-                    </Badge>
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue>
+                          <Badge
+                            variant={
+                              order.status === "Completed" ? "success" :
+                              order.status === "Pending" ? "warning" : "destructive"
+                            }
+                            className="capitalize"
+                          >
+                            {order.status}
+                          </Badge>
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="Completed">Completed</SelectItem>
+                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button
                       variant="ghost"
                       size="icon"
