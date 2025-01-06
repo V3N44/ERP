@@ -2,7 +2,6 @@ import { EarningsChart } from "./dashboard/charts/EarningsChart";
 import { ExpensesChart } from "./dashboard/charts/ExpensesChart";
 import { BudgetChart } from "./dashboard/charts/BudgetChart";
 import { SalesPurchaseChart } from "./dashboard/charts/SalesPurchaseChart";
-import { FinancialGoals } from "./dashboard/FinancialGoals";
 
 export const DashboardCharts = () => {
   return (
@@ -14,7 +13,6 @@ export const DashboardCharts = () => {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <FinancialGoals />
         <SalesPurchaseChart />
       </div>
     </div>
