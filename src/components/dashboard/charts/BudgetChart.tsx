@@ -33,31 +33,37 @@ export const BudgetChart = () => {
 
   useEffect(() => {
     if (budgets && currentBudget) {
-      const totalMoneyOrders = currentBudget.money_orders?.reduce(
-        (acc: number, order: any) => acc + order.amount, 
-        0
-      ) || 0;
-
-      const spendingByReason = currentBudget.money_orders?.reduce((acc: any, order: any) => {
+      // Group money orders by reason and calculate totals
+      const moneyOrdersByReason = currentBudget.money_orders?.reduce((acc: any, order: any) => {
         if (!acc[order.reason]) {
-          acc[order.reason] = 0;
+          acc[order.reason] = {
+            total: 0,
+            orders: []
+          };
         }
-        acc[order.reason] += order.amount;
+        acc[order.reason].total += order.amount;
+        acc[order.reason].orders.push(order);
         return acc;
       }, {}) || {};
 
-      const newSpendingData = Object.entries(spendingByReason).map(([reason, amount], index) => ({
+      // Convert grouped data to chart format with colors
+      const newSpendingData = Object.entries(moneyOrdersByReason).map(([reason, data]: [string, any], index) => ({
         name: reason,
-        value: amount,
-        color: getChartColor(index)
+        value: data.total,
+        color: getChartColor(index),
+        orders: data.orders
       }));
 
-      const remaining = currentBudget.budget_amount - totalMoneyOrders;
+      // Calculate remaining budget
+      const totalSpent = newSpendingData.reduce((acc, item) => acc + item.value, 0);
+      const remaining = currentBudget.budget_amount - totalSpent;
+      
       if (remaining > 0) {
         newSpendingData.push({
           name: "Remaining",
           value: remaining,
-          color: getChartColor(newSpendingData.length)
+          color: getChartColor(newSpendingData.length),
+          orders: []
         });
       }
 
