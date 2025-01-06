@@ -11,7 +11,7 @@ interface ChatResponse {
   response: string;
 }
 
-const CHAT_API_URL = 'http://127.0.0.1:8001/chat';
+const CHAT_API_URL = 'http://127.0.0.1:8080/chat';
 
 export const sendChatMessage = async (message: string, contextData?: Record<string, unknown[]>): Promise<string> => {
   try {
@@ -31,12 +31,8 @@ export const sendChatMessage = async (message: string, contextData?: Record<stri
       headers: {
         ...API_CONFIG.headers,
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type'
+        'Accept': 'application/json'
       },
-      credentials: 'omit',
       body: JSON.stringify(requestBody)
     });
 
