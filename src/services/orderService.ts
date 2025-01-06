@@ -29,30 +29,37 @@ export const getOrders = async (skip = 0, limit = 100) => {
     throw new Error('No authentication token found');
   }
 
-  console.log('Fetching orders with token:', token);
-  console.log('Request URL:', buildUrl(`/orders/?skip=${skip}&limit=${limit}`));
+  const url = buildUrl(`/orders/?skip=${skip}&limit=${limit}`);
+  console.log('Fetching orders from:', url);
+  console.log('Using token:', token);
 
-  const response = await fetch(buildUrl(`/orders/?skip=${skip}&limit=${limit}`), {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'ngrok-skip-browser-warning': 'true',
-      'Accept': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('API Error Response:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'ngrok-skip-browser-warning': 'true',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
     });
-    throw new Error(`Failed to fetch orders: ${response.statusText}`);
-  }
 
-  const data = await response.json();
-  console.log('API Response:', data);
-  return data;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`Failed to fetch orders: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('API Response:', data);
+    return data;
+  } catch (error) {
+    console.error('Network or parsing error:', error);
+    throw new Error('Failed to connect to the server. Please check your connection and try again.');
+  }
 };
 
 export const createOrder = async (orderData: OrderData): Promise<Order> => {
@@ -63,28 +70,34 @@ export const createOrder = async (orderData: OrderData): Promise<Order> => {
   }
 
   console.log('Creating order with data:', orderData);
+  const url = buildUrl('/orders/');
 
-  const response = await fetch(buildUrl('/orders/'), {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify(orderData),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error('API Error Response:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: errorText
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(orderData),
     });
-    throw new Error(`Failed to create order: ${response.statusText}`);
-  }
 
-  const data = await response.json();
-  console.log('Created order response:', data);
-  return data;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorText
+      });
+      throw new Error(`Failed to create order: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('Created order response:', data);
+    return data;
+  } catch (error) {
+    console.error('Network or parsing error:', error);
+    throw new Error('Failed to connect to the server. Please check your connection and try again.');
+  }
 };

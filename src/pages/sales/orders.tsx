@@ -9,7 +9,7 @@ const SalesOrdersPage = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: orders, isLoading, error } = useQuery({
+  const { data: orders, isLoading } = useQuery({
     queryKey: ['orders'],
     queryFn: async () => {
       try {
@@ -18,7 +18,12 @@ const SalesOrdersPage = () => {
         return data;
       } catch (error) {
         console.error('Error fetching orders:', error);
-        throw error;
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch orders. Please try again later.",
+        });
+        return []; // Return empty array instead of throwing
       }
     },
   });
@@ -43,15 +48,6 @@ const SalesOrdersPage = () => {
       setIsSubmitting(false);
     }
   };
-
-  if (error) {
-    console.error('Query error:', error);
-    toast({
-      variant: "destructive",
-      title: "Error",
-      description: "Failed to fetch orders. Please try again later.",
-    });
-  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">
