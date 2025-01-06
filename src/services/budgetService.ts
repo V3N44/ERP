@@ -41,6 +41,32 @@ export const createMonthlyBudget = async (budget: Omit<MonthlyBudget, "id" | "re
   }
 };
 
+export const updateMonthlyBudget = async (
+  budgetId: number,
+  budget: Partial<Pick<MonthlyBudget, "budget_amount">>
+) => {
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
+  const response = await fetch(`${api.baseURL}/monthly-budgets/${budgetId}`, {
+    method: 'PATCH',
+    headers: {
+      ...api.headers,
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(budget),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData?.detail || `Failed to update budget`);
+  }
+
+  return await response.json();
+};
+
 export const fetchCurrentMonthBudget = async (): Promise<MonthlyBudget | null> => {
   try {
     const token = localStorage.getItem('access_token');
