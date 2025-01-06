@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getOrders } from "@/services/orderService";
+import { format, startOfWeek, addDays, isWithinInterval, startOfDay, endOfDay } from "date-fns";
 
 export const ExpensesChart = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -17,27 +18,30 @@ export const ExpensesChart = () => {
   });
 
   // Calculate weekly sales data
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Start from Monday
+  const weekStart = startOfWeek(today, { weekStartsOn: 1 }); // Start from Monday
 
-  const weeklySalesData = daysOfWeek.map((day, index) => {
-    const currentDate = new Date(startOfWeek);
-    currentDate.setDate(startOfWeek.getDate() + index);
+  const weeklySalesData = Array.from({ length: 7 }, (_, index) => {
+    const currentDate = addDays(weekStart, index);
+    const dayStr = format(currentDate, 'EEE'); // Get day abbreviation (Mon, Tue, etc.)
 
+    // Filter orders for the current day
     const dayOrders = orders?.filter(order => {
       const orderDate = new Date(order.date);
-      return orderDate.toDateString() === currentDate.toDateString();
+      return isWithinInterval(orderDate, {
+        start: startOfDay(currentDate),
+        end: endOfDay(currentDate)
+      });
     }) || [];
 
     const dayRevenue = dayOrders.reduce((sum, order) => sum + order.total, 0);
     const dayExpenses = dayRevenue * 0.7; // Assuming 70% of revenue goes to expenses
 
     return {
-      day,
+      day: dayStr,
       income: Math.round(dayRevenue),
       spent: Math.round(dayExpenses),
+      date: format(currentDate, 'MMM dd') // Add date for tooltip
     };
   });
 
@@ -96,17 +100,21 @@ export const ExpensesChart = () => {
             <Tooltip 
               cursor={false}
               contentStyle={{
-                background: 'transparent',
-                border: 'none',
+                background: '#fff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+                padding: '8px'
               }}
-              labelStyle={{
-                color: '#1a1a1a',
-                fontWeight: '600'
+              labelFormatter={(value, payload) => {
+                if (payload && payload[0]) {
+                  return payload[0].payload.date;
+                }
+                return value;
               }}
-              itemStyle={{
-                color: '#1a1a1a'
-              }}
-              formatter={(value) => [`$${value}`, '']}
+              formatter={(value, name) => [
+                `$${value}`,
+                name === 'income' ? 'Revenue' : 'Expenses'
+              ]}
             />
             <Bar 
               dataKey="income" 
@@ -127,7 +135,7 @@ export const ExpensesChart = () => {
           <div className="mt-4 grid grid-cols-2 gap-4">
             {tempData.map((item) => (
               <div key={item.day} className="space-y-2 border p-3 rounded-lg">
-                <div className="font-medium text-gray-700">{item.day}</div>
+                <div className="font-medium text-gray-700">{item.day} ({item.date})</div>
                 <div className="space-y-2">
                   <div>
                     <label className="text-sm text-gray-600">Income</label>
