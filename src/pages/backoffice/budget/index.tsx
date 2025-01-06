@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { fetchAllBudgets } from "@/services/budgetService";
 import {
   Table,
   TableBody,
@@ -10,54 +9,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { fetchAllBudgets } from "@/services/budgetService";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Eye } from "lucide-react";
 
 const BudgetManagementPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-
+  
   const { data: budgets, isLoading, error } = useQuery({
-    queryKey: ['budgets'],
+    queryKey: ["budgets"],
     queryFn: fetchAllBudgets,
-    meta: {
-      onError: (err: Error) => {
-        console.error('Error fetching budgets:', err);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to load budgets. Please try again later."
-        });
-      }
-    },
-    retry: 1
   });
 
-  const formatMonth = (month: number) => {
-    return format(new Date(2024, month - 1), 'MMMM');
+  const handleAddBudget = () => {
+    navigate("/backoffice/budget/add");
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
+  const handleViewBudget = (budgetId: number) => {
+    navigate(`/backoffice/budget/${budgetId}`);
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Budget Management</h1>
-        <Button 
-          onClick={() => navigate("/backoffice/budget/add")}
-          className="bg-primary hover:bg-primary/90"
-        >
-          Add Monthly Budget
-        </Button>
+        <Button onClick={handleAddBudget}>Add New Budget</Button>
       </div>
-      
+
       <div className="rounded-md border">
         {isLoading ? (
           <div className="p-8 flex justify-center items-center">
@@ -69,10 +50,14 @@ const BudgetManagementPage = () => {
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
-              Error loading budgets. Please try again later.
+              {error instanceof Error ? error.message : "Failed to load budgets"}
             </AlertDescription>
           </Alert>
-        ) : budgets?.length ? (
+        ) : !budgets || budgets.length === 0 ? (
+          <div className="p-4 text-center">
+            No budgets found. Click the "Add New Budget" button to create one.
+          </div>
+        ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -81,28 +66,34 @@ const BudgetManagementPage = () => {
                 <TableHead>Budget Amount</TableHead>
                 <TableHead>Remaining Budget</TableHead>
                 <TableHead>Created At</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {budgets.map((budget) => (
                 <TableRow key={budget.id}>
-                  <TableCell>{formatMonth(budget.month)}</TableCell>
+                  <TableCell>
+                    {format(new Date(budget.year, budget.month - 1), "MMMM")}
+                  </TableCell>
                   <TableCell>{budget.year}</TableCell>
-                  <TableCell>{formatCurrency(budget.budget_amount)}</TableCell>
-                  <TableCell>{formatCurrency(budget.remaining_budget)}</TableCell>
-                  <TableCell>{format(new Date(budget.created_at), 'PPP')}</TableCell>
+                  <TableCell>${budget.budget_amount.toLocaleString()}</TableCell>
+                  <TableCell>${budget.remaining_budget.toLocaleString()}</TableCell>
+                  <TableCell>
+                    {format(new Date(budget.created_at), "PPP")}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleViewBudget(budget.id)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-        ) : (
-          <Alert className="m-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>No Budgets Found</AlertTitle>
-            <AlertDescription>
-              No budgets have been created yet. Click the button above to add a new monthly budget.
-            </AlertDescription>
-          </Alert>
         )}
       </div>
     </div>

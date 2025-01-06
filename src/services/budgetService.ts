@@ -95,23 +95,23 @@ export const fetchAllBudgets = async (): Promise<MonthlyBudget[]> => {
 };
 
 export const getMonthlyBudgetDetails = async (budgetId: number): Promise<MonthlyBudget> => {
-  try {
-    const token = localStorage.getItem('access_token');
-    const response = await fetch(`${api.baseURL}/monthly-budgets/${budgetId}`, {
-      method: 'GET',
-      headers: {
-        ...api.headers,
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch budget details');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching budget details:', error);
-    throw error;
+  const token = localStorage.getItem('access_token');
+  if (!token) {
+    throw new Error('No authentication token found');
   }
+
+  const response = await fetch(`${api.baseURL}/monthly-budgets/${budgetId}`, {
+    method: 'GET',
+    headers: {
+      ...api.headers,
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.detail || `Failed to fetch budget details for ID ${budgetId}`);
+  }
+
+  return await response.json();
 };
