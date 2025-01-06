@@ -11,12 +11,13 @@ interface Order {
   address: string;
   total: number;
   status: string;
-  vehicle?: {
-    make: string;
-    model: string;
-    year: number;
-    vin: string;
-  };
+  role_id: number;
+  items: Array<{
+    item_name: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }>;
 }
 
 interface OrdersTableProps {
@@ -59,7 +60,7 @@ export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
                   <TableHead>Customer ID</TableHead>
                   <TableHead>Contact Number</TableHead>
                   <TableHead>Address</TableHead>
-                  <TableHead>Vehicle Details</TableHead>
+                  <TableHead>Items</TableHead>
                   <TableHead className="text-right">Total Amount</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -72,16 +73,14 @@ export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
                     <TableCell>{order.contact_number}</TableCell>
                     <TableCell>{order.address}</TableCell>
                     <TableCell>
-                      {order.vehicle ? (
-                        <div className="text-sm">
-                          <div>{order.vehicle.make} {order.vehicle.model}</div>
+                      {order.items?.map((item, index) => (
+                        <div key={index} className="text-sm">
+                          <div>{item.item_name}</div>
                           <div className="text-gray-500">
-                            {order.vehicle.year} | VIN: {order.vehicle.vin}
+                            Qty: {item.quantity} x {formatCurrency(item.price)}
                           </div>
                         </div>
-                      ) : (
-                        <span className="text-gray-400">No vehicle details</span>
-                      )}
+                      ))}
                     </TableCell>
                     <TableCell className="text-right">{formatCurrency(order.total)}</TableCell>
                     <TableCell>
