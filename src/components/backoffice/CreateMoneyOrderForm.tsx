@@ -17,6 +17,7 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
   const queryClient = useQueryClient();
   const [reason, setReason] = useState("");
   const [amount, setAmount] = useState("");
+  const [errors, setErrors] = useState<{ reason?: string; amount?: string }>({});
 
   const createMoneyOrder = async (data: {
     monthly_budget_id: number;
@@ -50,6 +51,7 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
       });
       setReason("");
       setAmount("");
+      setErrors({});
       queryClient.invalidateQueries({ queryKey: ["budgets"] });
     },
     onError: (error) => {
@@ -61,27 +63,42 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
     },
   });
 
+  const validateForm = () => {
+    const newErrors: { reason?: string; amount?: string } = {};
+    let isValid = true;
+
+    if (!reason.trim()) {
+      newErrors.reason = "Reason is required";
+      isValid = false;
+    }
+
+    const amountNumber = parseFloat(amount);
+    if (!amount || isNaN(amountNumber)) {
+      newErrors.amount = "Please enter a valid amount";
+      isValid = false;
+    } else if (amountNumber <= 0) {
+      newErrors.amount = "Amount must be greater than 0";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason || !amount) {
+    setErrors({});
+
+    if (!validateForm()) {
       toast({
-        title: "Error",
-        description: "Please fill in all fields",
+        title: "Warning",
+        description: "Please check the form for errors",
         variant: "destructive",
       });
       return;
     }
 
     const amountNumber = parseFloat(amount);
-    if (isNaN(amountNumber) || amountNumber <= 0) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid amount",
-        variant: "destructive",
-      });
-      return;
-    }
-
     mutation.mutate({
       monthly_budget_id: budgetId,
       reason,
@@ -98,9 +115,16 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
           <Input
             id="reason"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => {
+              setReason(e.target.value);
+              setErrors((prev) => ({ ...prev, reason: undefined }));
+            }}
             placeholder="Enter reason for money order"
+            className={errors.reason ? "border-red-500" : ""}
           />
+          {errors.reason && (
+            <p className="text-sm text-red-500 mt-1">{errors.reason}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="amount">Amount</Label>
@@ -108,11 +132,18 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
             id="amount"
             type="number"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              setErrors((prev) => ({ ...prev, amount: undefined }));
+            }}
             placeholder="Enter amount"
             min="0"
             step="0.01"
+            className={errors.amount ? "border-red-500" : ""}
           />
+          {errors.amount && (
+            <p className="text-sm text-red-500 mt-1">{errors.amount}</p>
+          )}
         </div>
         <Button
           type="submit"
