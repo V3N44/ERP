@@ -25,11 +25,11 @@ const getAuthHeader = () => {
   return `Bearer ${token}`;
 };
 
-export const getAppointments = async () => {
+export const getAppointments = async (skip: number = 0, limit: number = 100) => {
   try {
     console.log('Fetching appointments...');
     
-    const response = await fetch(buildUrl('/appointments/'), {
+    const response = await fetch(buildUrl(`/appointments/?skip=${skip}&limit=${limit}`), {
       headers: {
         'Authorization': getAuthHeader(),
         ...API_CONFIG.headers,

@@ -12,6 +12,8 @@ export const ServiceAppointments = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [page, setPage] = useState(0);
+  const limit = 100;
 
   // Fetch services
   const { data: services = [] } = useQuery({
@@ -19,12 +21,13 @@ export const ServiceAppointments = () => {
     queryFn: getServices,
   });
 
-  // Fetch appointments with error handling
+  // Fetch appointments with pagination
   const { data: appointments = [], isLoading: isLoadingAppointments } = useQuery({
-    queryKey: ['appointments'],
+    queryKey: ['appointments', page, limit],
     queryFn: async () => {
       try {
-        const data = await getAppointments();
+        const skip = page * limit;
+        const data = await getAppointments(skip, limit);
         console.log('Appointments fetched:', data);
         return data;
       } catch (error) {
