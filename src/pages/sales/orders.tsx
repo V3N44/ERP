@@ -9,31 +9,49 @@ const SalesOrdersPage = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: orders, isLoading } = useQuery({
+  const { data: orders, isLoading, error } = useQuery({
     queryKey: ['orders'],
-    queryFn: () => getOrders(0, 100),
+    queryFn: async () => {
+      try {
+        const data = await getOrders(0, 100);
+        console.log('Fetched orders:', data);
+        return data;
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        throw error;
+      }
+    },
   });
 
   const handleCreateOrder = async (orderData: OrderData) => {
     try {
       setIsSubmitting(true);
       const response = await createOrder(orderData);
+      console.log('Created order:', response);
       toast({
         title: "Success",
         description: "Order created successfully",
       });
-      console.log('Order created:', response);
     } catch (error) {
+      console.error('Error creating order:', error);
       toast({
         variant: "destructive",
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create order",
       });
-      console.error('Error creating order:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  if (error) {
+    console.error('Query error:', error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to fetch orders. Please try again later.",
+    });
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-6">

@@ -25,8 +25,12 @@ export interface Order extends OrderData {
 export const getOrders = async (skip = 0, limit = 100) => {
   const token = localStorage.getItem('access_token');
   if (!token) {
+    console.error('No authentication token found');
     throw new Error('No authentication token found');
   }
+
+  console.log('Fetching orders with token:', token);
+  console.log('Request URL:', buildUrl(`/orders/?skip=${skip}&limit=${limit}`));
 
   const response = await fetch(buildUrl(`/orders/?skip=${skip}&limit=${limit}`), {
     headers: {
@@ -37,19 +41,28 @@ export const getOrders = async (skip = 0, limit = 100) => {
   });
 
   if (!response.ok) {
-    const errorData = await response.text();
-    console.error('Failed to fetch orders:', errorData);
+    const errorText = await response.text();
+    console.error('API Error Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
     throw new Error(`Failed to fetch orders: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log('API Response:', data);
+  return data;
 };
 
 export const createOrder = async (orderData: OrderData): Promise<Order> => {
   const token = localStorage.getItem('access_token');
   if (!token) {
+    console.error('No authentication token found');
     throw new Error('No authentication token found');
   }
+
+  console.log('Creating order with data:', orderData);
 
   const response = await fetch(buildUrl('/orders/'), {
     method: 'POST',
@@ -62,10 +75,16 @@ export const createOrder = async (orderData: OrderData): Promise<Order> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.text();
-    console.error('Failed to create order:', errorData);
+    const errorText = await response.text();
+    console.error('API Error Response:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText
+    });
     throw new Error(`Failed to create order: ${response.statusText}`);
   }
 
-  return response.json();
+  const data = await response.json();
+  console.log('Created order response:', data);
+  return data;
 };
