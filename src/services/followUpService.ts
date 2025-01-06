@@ -34,6 +34,21 @@ export const createFollowUp = async (followUp: Omit<FollowUp, 'id'>) => {
   return response.json();
 };
 
+export const updateFollowUp = async (id: number, followUp: Omit<FollowUp, 'id'>) => {
+  const response = await fetch(buildUrl(`/follow-ups/${id}`), {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(followUp)
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update follow-up');
+  }
+
+  return response.json();
+};
+
 export const getFollowUps = async () => {
   const response = await fetch(buildUrl('/follow-ups/'), {
     headers: getAuthHeaders()

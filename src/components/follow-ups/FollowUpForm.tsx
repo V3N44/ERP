@@ -5,16 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createFollowUp } from "@/services/followUpService";
+import { createFollowUp, updateFollowUp } from "@/services/followUpService";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 interface FollowUpFormProps {
   onSuccess: () => void;
   leadId?: number;
+  initialData?: any;
+  isEditing?: boolean;
 }
 
-export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
+export const FollowUpForm = ({ onSuccess, leadId, initialData, isEditing = false }: FollowUpFormProps) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const form = useForm({
@@ -25,6 +28,17 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
       time: "",
     }
   });
+
+  useEffect(() => {
+    if (initialData && isEditing) {
+      form.reset({
+        customerName: initialData.customer,
+        type: initialData.type,
+        date: new Date(initialData.date),
+        time: initialData.time,
+      });
+    }
+  }, [initialData, isEditing, form]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -38,14 +52,20 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
         user_id: user?.id || 1 // Default to 1 if no user_id available
       };
 
-      await createFollowUp(followUpData);
+      if (isEditing && initialData) {
+        await updateFollowUp(initialData.id, followUpData);
+        toast.success("Follow-up updated successfully!");
+      } else {
+        await createFollowUp(followUpData);
+        toast.success("Follow-up scheduled successfully!");
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['followUps'] });
-      toast.success("Follow-up scheduled successfully!");
       form.reset();
       onSuccess();
     } catch (error) {
-      console.error('Failed to create follow-up:', error);
-      toast.error("Failed to schedule follow-up");
+      console.error('Failed to handle follow-up:', error);
+      toast.error(isEditing ? "Failed to update follow-up" : "Failed to schedule follow-up");
     }
   };
 
@@ -124,7 +144,7 @@ export const FollowUpForm = ({ onSuccess, leadId }: FollowUpFormProps) => {
         />
         
         <Button type="submit" className="w-full">
-          Schedule Follow-up
+          {isEditing ? "Update Follow-up" : "Schedule Follow-up"}
         </Button>
       </form>
     </Form>
