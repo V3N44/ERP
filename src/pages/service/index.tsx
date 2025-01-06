@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Wrench, Calendar, ClipboardList } from "lucide-react";
-import { ServiceAppointments } from "@/components/service/ServiceAppointments";
 import { ServiceHistory } from "@/components/service/ServiceHistory";
 import { ServiceAlerts } from "@/components/service/ServiceAlerts";
 import { CreateServiceForm } from "@/components/service/CreateServiceForm";
@@ -50,18 +49,10 @@ const ServiceCenterPage = () => {
 
       <ServiceList />
 
-      <Tabs defaultValue="appointments" className="space-y-4">
+      <Tabs defaultValue="alerts" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="appointments">Appointments</TabsTrigger>
-          {/* <TabsTrigger value="history">Service History</TabsTrigger> */}
           <TabsTrigger value="alerts">Service Alerts</TabsTrigger>
         </TabsList>
-        <TabsContent value="appointments">
-          <ServiceAppointments />
-        </TabsContent>
-        {/* <TabsContent value="history">
-          <ServiceHistory />
-        </TabsContent> */}
         <TabsContent value="alerts">
           <ServiceAlerts />
         </TabsContent>
