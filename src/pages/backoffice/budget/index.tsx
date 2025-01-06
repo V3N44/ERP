@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { fetchAllBudgets } from "@/services/budgetService";
 import { format } from "date-fns";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Eye } from "lucide-react";
 
@@ -22,6 +22,14 @@ const BudgetManagementPage = () => {
   const { data: budgets, isLoading, error } = useQuery({
     queryKey: ["budgets"],
     queryFn: fetchAllBudgets,
+    onError: (error) => {
+      console.error('Error fetching budgets:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load budgets. Please try again later.",
+      });
+    },
   });
 
   const handleAddBudget = () => {

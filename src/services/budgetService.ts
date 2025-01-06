@@ -67,44 +67,13 @@ export const updateMonthlyBudget = async (
   return await response.json();
 };
 
-export const fetchCurrentMonthBudget = async (): Promise<MonthlyBudget | null> => {
-  try {
-    const token = localStorage.getItem('access_token');
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1;
-    const currentYear = currentDate.getFullYear();
-    
-    const response = await fetch(
-      `${api.baseURL}/monthly-budgets/current?month=${currentMonth}&year=${currentYear}`, {
-      method: 'GET',
-      headers: {
-        ...api.headers,
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      throw new Error('Failed to fetch budget');
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error('Error fetching current month budget:', error);
-    throw error;
-  }
-};
-
 export const fetchAllBudgets = async (): Promise<MonthlyBudget[]> => {
   const token = localStorage.getItem('access_token');
   if (!token) {
     throw new Error('No authentication token found');
   }
 
-  // First, get all budget IDs
-  const response = await fetch(`${api.baseURL}/monthly-budgets`, {
+  const response = await fetch(`${api.baseURL}/monthly-budgets/all`, {
     method: 'GET',
     headers: {
       ...api.headers,
@@ -113,16 +82,12 @@ export const fetchAllBudgets = async (): Promise<MonthlyBudget[]> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => null);
-    console.error('Error response:', errorData);
-    throw new Error(errorData?.detail || 'Failed to fetch budgets');
+    throw new Error('Failed to fetch budgets');
   }
 
-  const budgetIds = await response.json();
-  
-  // Then fetch details for each budget
-  const budgetPromises = budgetIds.map((id: number) => getMonthlyBudgetDetails(id));
-  return Promise.all(budgetPromises);
+  const data = await response.json();
+  console.log('Budgets response:', data);
+  return data;
 };
 
 export const getMonthlyBudgetDetails = async (budgetId: number): Promise<MonthlyBudget> => {
