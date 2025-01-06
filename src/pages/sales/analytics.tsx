@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getInventoryItems } from "@/services/inventoryService";
 import { getCustomers } from "@/services/customerService";
 import { getOrders } from "@/services/orderService";
@@ -7,6 +7,8 @@ import { TrendCharts } from "@/components/sales/TrendCharts";
 import { OrdersTable } from "@/components/sales/OrdersTable";
 
 const AnalyticsPage = () => {
+  const queryClient = useQueryClient();
+  
   const { data: inventory } = useQuery({
     queryKey: ['inventory'],
     queryFn: () => getInventoryItems(0, 100),
@@ -19,7 +21,7 @@ const AnalyticsPage = () => {
 
   const { data: orders, isLoading: isLoadingOrders } = useQuery({
     queryKey: ['orders'],
-    queryFn: () => getOrders(0, 100), // Using the pagination parameters
+    queryFn: () => getOrders(0, 100),
   });
 
   // Calculate total revenue and metrics
@@ -60,6 +62,11 @@ const AnalyticsPage = () => {
     };
   }).reverse();
 
+  const handleOrderUpdated = () => {
+    // Invalidate and refetch orders
+    queryClient.invalidateQueries({ queryKey: ['orders'] });
+  };
+
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-2xl font-bold text-purple-900">Sales Analytics</h1>
@@ -73,7 +80,11 @@ const AnalyticsPage = () => {
 
       <TrendCharts monthlyData={lastSixMonths} />
 
-      <OrdersTable orders={orders} isLoading={isLoadingOrders} />
+      <OrdersTable 
+        orders={orders} 
+        isLoading={isLoadingOrders} 
+        onOrderUpdated={handleOrderUpdated}
+      />
     </div>
   );
 };

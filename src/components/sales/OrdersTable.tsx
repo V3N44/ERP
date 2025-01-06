@@ -2,6 +2,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EditOrderDialog } from "./EditOrderDialog";
 
 interface Order {
   id: number;
@@ -23,6 +24,7 @@ interface Order {
 interface OrdersTableProps {
   orders: Order[] | undefined;
   isLoading: boolean;
+  onOrderUpdated?: () => void;
 }
 
 const formatCurrency = (amount: number) => {
@@ -40,7 +42,7 @@ const formatDate = (dateString: string) => {
   }
 };
 
-export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
+export const OrdersTable = ({ orders, isLoading, onOrderUpdated }: OrdersTableProps) => {
   return (
     <Card>
       <CardHeader>
@@ -63,7 +65,7 @@ export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
                   <TableHead>Items</TableHead>
                   <TableHead className="text-right">Total Amount</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Role ID</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -93,7 +95,9 @@ export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
                         {order.status}
                       </span>
                     </TableCell>
-                    <TableCell>{order.role_id}</TableCell>
+                    <TableCell>
+                      <EditOrderDialog order={order} onOrderUpdated={onOrderUpdated || (() => {})} />
+                    </TableCell>
                   </TableRow>
                 ))}
                 {(!orders || orders.length === 0) && (
