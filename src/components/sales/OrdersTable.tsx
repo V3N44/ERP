@@ -63,6 +63,7 @@ export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
                   <TableHead>Items</TableHead>
                   <TableHead className="text-right">Total Amount</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Role ID</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -92,11 +93,12 @@ export const OrdersTable = ({ orders, isLoading }: OrdersTableProps) => {
                         {order.status}
                       </span>
                     </TableCell>
+                    <TableCell>{order.role_id}</TableCell>
                   </TableRow>
                 ))}
                 {(!orders || orders.length === 0) && (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4 text-gray-500">
+                    <TableCell colSpan={8} className="text-center py-4 text-gray-500">
                       No orders found
                     </TableCell>
                   </TableRow>
