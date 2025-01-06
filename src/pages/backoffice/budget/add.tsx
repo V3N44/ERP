@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft } from "lucide-react";
 
 const AddMonthlyBudgetPage = () => {
   const navigate = useNavigate();
@@ -70,7 +71,17 @@ const AddMonthlyBudgetPage = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Add Monthly Budget</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/backoffice/budget")}
+          className="hover:bg-gray-100"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-2xl font-bold">Add Monthly Budget</h1>
+      </div>
       <Card className="max-w-2xl mx-auto p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
