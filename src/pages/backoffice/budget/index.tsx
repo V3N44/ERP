@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { fetchCurrentMonthBudget } from "@/services/budgetService";
+import { fetchAllBudgets } from "@/services/budgetService";
 import {
   Table,
   TableBody,
@@ -19,16 +19,16 @@ const BudgetManagementPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: budget, isLoading, error } = useQuery({
-    queryKey: ['current-month-budget'],
-    queryFn: fetchCurrentMonthBudget,
+  const { data: budgets, isLoading, error } = useQuery({
+    queryKey: ['budgets'],
+    queryFn: fetchAllBudgets,
     meta: {
       onError: (err: Error) => {
-        console.error('Error fetching current month budget:', err);
+        console.error('Error fetching budgets:', err);
         toast({
           variant: "destructive",
           title: "Error",
-          description: "Failed to load current month's budget. Please try again later."
+          description: "Failed to load budgets. Please try again later."
         });
       }
     },
@@ -49,7 +49,7 @@ const BudgetManagementPage = () => {
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Current Month Budget</h1>
+        <h1 className="text-2xl font-bold">Budget Management</h1>
         <Button 
           onClick={() => navigate("/backoffice/budget/add")}
           className="bg-primary hover:bg-primary/90"
@@ -60,16 +60,16 @@ const BudgetManagementPage = () => {
       
       <div className="rounded-md border">
         {isLoading ? (
-          <div className="p-4 text-center">Loading budget...</div>
+          <div className="p-4 text-center">Loading budgets...</div>
         ) : error ? (
           <Alert variant="destructive" className="m-4">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>
-              Error loading budget. Please try again later.
+              Error loading budgets. Please try again later.
             </AlertDescription>
           </Alert>
-        ) : budget ? (
+        ) : budgets?.length ? (
           <Table>
             <TableHeader>
               <TableRow>
@@ -81,21 +81,23 @@ const BudgetManagementPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>{formatMonth(budget.month)}</TableCell>
-                <TableCell>{budget.year}</TableCell>
-                <TableCell>{formatCurrency(budget.budget_amount)}</TableCell>
-                <TableCell>{formatCurrency(budget.remaining_budget)}</TableCell>
-                <TableCell>{format(new Date(budget.created_at), 'PPP')}</TableCell>
-              </TableRow>
+              {budgets.map((budget) => (
+                <TableRow key={budget.id}>
+                  <TableCell>{formatMonth(budget.month)}</TableCell>
+                  <TableCell>{budget.year}</TableCell>
+                  <TableCell>{formatCurrency(budget.budget_amount)}</TableCell>
+                  <TableCell>{formatCurrency(budget.remaining_budget)}</TableCell>
+                  <TableCell>{format(new Date(budget.created_at), 'PPP')}</TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         ) : (
           <Alert className="m-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>No Budget Found</AlertTitle>
+            <AlertTitle>No Budgets Found</AlertTitle>
             <AlertDescription>
-              No budget found for the current month. Click the button above to add a new monthly budget.
+              No budgets have been created yet. Click the button above to add a new monthly budget.
             </AlertDescription>
           </Alert>
         )}
