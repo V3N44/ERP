@@ -4,8 +4,9 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit2, Save } from "lucide-react";
-import { fetchAllBudgets } from "@/services/budgetService";
-import { useQuery } from "@tanstack/react-query";
+import { fetchAllBudgets, updateMonthlyBudget } from "@/services/budgetService";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 const getColorForIndex = (index: number) => {
   const colors = ["#1EAEDB", "#45B6E0", "#67C3E6", "#89D0EC", "#D3E4FD"];
@@ -16,23 +17,25 @@ export const BudgetChart = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [spendingData, setSpendingData] = useState<any[]>([]);
   const [tempData, setTempData] = useState<any[]>([]);
+  const [newBudgetAmount, setNewBudgetAmount] = useState<string>("");
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: budgets } = useQuery({
     queryKey: ['budgets'],
     queryFn: fetchAllBudgets
   });
 
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  const currentYear = currentDate.getFullYear();
+
+  const currentBudget = budgets?.find(
+    budget => budget.month === currentMonth && budget.year === currentYear
+  );
+
   useEffect(() => {
     if (budgets) {
-      // Get current month's budget
-      const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1;
-      const currentYear = currentDate.getFullYear();
-      
-      const currentBudget = budgets.find(
-        budget => budget.month === currentMonth && budget.year === currentYear
-      );
-
       if (currentBudget) {
         // Calculate total spent from money orders
         const totalSpent = currentBudget.money_orders?.reduce(
@@ -68,9 +71,10 @@ export const BudgetChart = () => {
 
         setSpendingData(newSpendingData);
         setTempData(newSpendingData);
+        setNewBudgetAmount(currentBudget.budget_amount.toString());
       }
     }
-  }, [budgets]);
+  }, [budgets, currentBudget]);
 
   const handleInputChange = (name: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -81,9 +85,40 @@ export const BudgetChart = () => {
     );
   };
 
-  const handleSave = () => {
-    setSpendingData(tempData);
-    setIsEditing(false);
+  const handleBudgetAmountChange = (value: string) => {
+    setNewBudgetAmount(value);
+  };
+
+  const handleSave = async () => {
+    if (!currentBudget) return;
+
+    try {
+      const amount = parseFloat(newBudgetAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          title: "Error",
+          description: "Please enter a valid budget amount",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await updateMonthlyBudget(currentBudget.id, { budget_amount: amount });
+      
+      toast({
+        title: "Success",
+        description: "Budget amount updated successfully",
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
+      setIsEditing(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to update budget amount",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEdit = () => {
@@ -95,11 +130,7 @@ export const BudgetChart = () => {
     item.name !== "Remaining" ? acc + item.value : acc, 0
   );
 
-  const totalBudget = budgets?.find(budget => {
-    const currentDate = new Date();
-    return budget.month === currentDate.getMonth() + 1 && 
-           budget.year === currentDate.getFullYear();
-  })?.budget_amount || 0;
+  const totalBudget = currentBudget?.budget_amount || 0;
 
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
@@ -153,25 +184,38 @@ export const BudgetChart = () => {
         </div>
 
         {isEditing && (
-          <div className="mt-4 grid grid-cols-2 gap-4">
-            {tempData.map((item) => (
-              <div key={item.name} className="space-y-2 border p-3 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: item.color }}
-                  ></div>
-                  <span className="font-medium text-gray-700">{item.name}</span>
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2 border p-3 rounded-lg">
+              <label className="font-medium text-gray-700">Budget Amount</label>
+              <Input
+                type="number"
+                value={newBudgetAmount}
+                onChange={(e) => handleBudgetAmountChange(e.target.value)}
+                className="h-8"
+                min="0"
+                step="0.01"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {tempData.map((item) => (
+                <div key={item.name} className="space-y-2 border p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    <span className="font-medium text-gray-700">{item.name}</span>
+                  </div>
+                  <Input
+                    type="number"
+                    value={item.value}
+                    onChange={(e) => handleInputChange(item.name, e.target.value)}
+                    className="h-8"
+                    disabled={item.name === "Remaining"}
+                  />
                 </div>
-                <Input
-                  type="number"
-                  value={item.value}
-                  onChange={(e) => handleInputChange(item.name, e.target.value)}
-                  className="h-8"
-                  disabled={item.name === "Remaining"}
-                />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
