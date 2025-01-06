@@ -5,9 +5,13 @@ import { getOrders } from "@/services/orderService";
 import { MetricsCards } from "@/components/sales/MetricsCards";
 import { TrendCharts } from "@/components/sales/TrendCharts";
 import { OrdersTable } from "@/components/sales/OrdersTable";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AnalyticsPage = () => {
   const queryClient = useQueryClient();
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
   
   const { data: inventory } = useQuery({
     queryKey: ['inventory'],
@@ -29,41 +33,23 @@ const AnalyticsPage = () => {
   const orderCount = orders?.length || 0;
   const averageOrderValue = orderCount > 0 ? totalRevenue / orderCount : 0;
   
-  // Calculate inventory utilization rate (items sold vs total inventory)
+  // Calculate inventory utilization rate
   const inventoryCount = inventory?.length || 0;
   const utilizationRate = inventoryCount > 0 
     ? ((orderCount / inventoryCount) * 100).toFixed(1) 
     : 0;
 
-  // Calculate monthly data
-  const currentMonth = new Date().getMonth();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
-  const lastSixMonths = Array.from({ length: 6 }, (_, i) => {
-    const monthIndex = (currentMonth - i + 12) % 12;
-    const monthDate = new Date();
-    monthDate.setMonth(monthDate.getMonth() - i);
-    monthDate.setDate(1);
-    const nextMonth = new Date(monthDate);
-    nextMonth.setMonth(nextMonth.getMonth() + 1);
+  // Calculate order counts by status
+  const pendingOrders = orders?.filter(order => order.status === 'Pending') || [];
+  const completedOrders = orders?.filter(order => order.status === 'Completed') || [];
+  const cancelledOrders = orders?.filter(order => order.status === 'Cancelled') || [];
 
-    const monthOrders = orders?.filter(order => {
-      const orderDate = new Date(order.date);
-      return orderDate >= monthDate && orderDate < nextMonth;
-    }) || [];
-
-    const monthlyRevenue = monthOrders.reduce((sum, order) => sum + order.total, 0);
-    const monthlyOrderCount = monthOrders.length;
-
-    return {
-      month: monthNames[monthIndex],
-      orders: monthlyOrderCount,
-      revenue: monthlyRevenue,
-    };
-  }).reverse();
+  // Filter orders based on selected status
+  const filteredOrders = statusFilter 
+    ? orders?.filter(order => order.status === statusFilter)
+    : orders;
 
   const handleOrderUpdated = () => {
-    // Invalidate and refetch orders
     queryClient.invalidateQueries({ queryKey: ['orders'] });
   };
 
@@ -78,10 +64,74 @@ const AnalyticsPage = () => {
         utilizationRate={utilizationRate}
       />
 
-      <TrendCharts monthlyData={lastSixMonths} />
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="bg-yellow-50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Pending Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-700">{pendingOrders.length}</div>
+            <Button 
+              onClick={() => setStatusFilter('Pending')}
+              variant="outline" 
+              className="mt-2 w-full"
+            >
+              View Pending Orders
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-green-50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Completed Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-700">{completedOrders.length}</div>
+            <Button 
+              onClick={() => setStatusFilter('Completed')}
+              variant="outline"
+              className="mt-2 w-full"
+            >
+              View Completed Orders
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-red-50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Cancelled Orders</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-700">{cancelledOrders.length}</div>
+            <Button 
+              onClick={() => setStatusFilter('Cancelled')}
+              variant="outline"
+              className="mt-2 w-full"
+            >
+              View Cancelled Orders
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {statusFilter && (
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold">
+            {statusFilter} Orders ({filteredOrders?.length || 0})
+          </h2>
+          <Button 
+            variant="ghost"
+            onClick={() => setStatusFilter(null)}
+          >
+            View All Orders
+          </Button>
+        </div>
+      )}
+
+      <TrendCharts monthlyData={[]} />
 
       <OrdersTable 
-        orders={orders} 
+        orders={filteredOrders} 
         isLoading={isLoadingOrders} 
         onOrderUpdated={handleOrderUpdated}
       />
