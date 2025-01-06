@@ -7,6 +7,7 @@ import { TrendCharts } from "@/components/sales/TrendCharts";
 import { OrdersTable } from "@/components/sales/OrdersTable";
 import { OrdersUpdate } from "@/components/sales/OrdersUpdate";
 import { useToast } from "@/hooks/use-toast";
+import { buildUrl } from "@/config/api";
 
 const AnalyticsPage = () => {
   const { toast } = useToast();
@@ -64,15 +65,33 @@ const AnalyticsPage = () => {
 
   const handleDeleteOrder = async (orderId: number) => {
     try {
-      // Implement your delete API call here
-      await fetch(`/api/orders/${orderId}`, {
+      const token = localStorage.getItem('access_token');
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await fetch(buildUrl(`/orders/${orderId}`), {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
       });
-      refetch(); // Refresh the orders data
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete order: ${response.statusText}`);
+      }
+
+      await refetch(); // Refresh the orders data
+      toast({
+        title: "Success",
+        description: "Order deleted successfully",
+      });
     } catch (error) {
+      console.error('Error deleting order:', error);
       toast({
         title: "Error",
-        description: "Failed to delete order. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to delete order",
         variant: "destructive",
       });
     }
@@ -80,19 +99,34 @@ const AnalyticsPage = () => {
 
   const handleUpdateStatus = async (orderId: number, newStatus: string) => {
     try {
-      // Implement your update API call here
-      await fetch(`/api/orders/${orderId}`, {
+      const token = localStorage.getItem('access_token');
+      if (!token) throw new Error('No authentication token found');
+
+      const response = await fetch(buildUrl(`/orders/${orderId}`), {
         method: 'PATCH',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: JSON.stringify({ status: newStatus }),
       });
-      refetch(); // Refresh the orders data
+
+      if (!response.ok) {
+        throw new Error(`Failed to update order status: ${response.statusText}`);
+      }
+
+      await refetch(); // Refresh the orders data
+      toast({
+        title: "Success",
+        description: "Order status updated successfully",
+      });
     } catch (error) {
+      console.error('Error updating order status:', error);
       toast({
         title: "Error",
-        description: "Failed to update order status. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to update order status",
         variant: "destructive",
       });
     }
