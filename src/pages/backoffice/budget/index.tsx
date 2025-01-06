@@ -13,7 +13,7 @@ import {
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 const BudgetManagementPage = () => {
   const navigate = useNavigate();
@@ -60,7 +60,10 @@ const BudgetManagementPage = () => {
       
       <div className="rounded-md border">
         {isLoading ? (
-          <div className="p-4 text-center">Loading budgets...</div>
+          <div className="p-8 flex justify-center items-center">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            <span>Loading budgets...</span>
+          </div>
         ) : error ? (
           <Alert variant="destructive" className="m-4">
             <AlertCircle className="h-4 w-4" />
