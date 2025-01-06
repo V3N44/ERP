@@ -17,7 +17,7 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
     queryKey: ["moneyOrders", budgetId],
     queryFn: async () => {
       const token = localStorage.getItem('access_token');
-      const response = await fetch(`${api.baseURL}/money-orders/${budgetId}`, {
+      const response = await fetch(`${api.baseURL}/money-orders/?skip=0&limit=100`, {
         headers: {
           ...api.headers,
           'Authorization': `Bearer ${token}`,
