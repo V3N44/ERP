@@ -2,6 +2,8 @@ import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { MessageCircle, ArrowRight } from "lucide-react";
+import { auth } from "@/config/firebase";
+import { signInWithCredential, GoogleAuthProvider } from "firebase/auth";
 
 export const GoogleLoginButton = () => {
   const navigate = useNavigate();
@@ -11,6 +13,13 @@ export const GoogleLoginButton = () => {
     console.log('Google login success:', credentialResponse);
     try {
       if (credentialResponse.credential) {
+        // Create a Google Auth Provider credential
+        const credential = GoogleAuthProvider.credential(credentialResponse.credential);
+        
+        // Sign in to Firebase with the credential
+        const result = await signInWithCredential(auth, credential);
+        console.log('Firebase auth result:', result);
+
         toast({
           title: "Google login successful",
           description: (

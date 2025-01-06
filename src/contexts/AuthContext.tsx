@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@/types/auth";
 import { users } from "@/data/users";
 import { loginUser } from "@/services/authService";
+import { auth } from "@/config/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 interface AuthContextType {
   user: User | null;
@@ -22,6 +24,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } else if (rememberedUser) {
       setUser(JSON.parse(rememberedUser));
     }
+
+    // Set up Firebase auth state listener
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // Create a user object from Firebase user
+        const user: User = {
+          email: firebaseUser.email || '',
+          name: firebaseUser.displayName || '',
+          role: 'user', // Default role for Google sign-in users
+        };
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+    });
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
   const login = async (identifier: string, password: string, remember: boolean) => {
@@ -63,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('access_token');
-    // Don't remove rememberedUser on logout if it exists
+    auth.signOut(); // Sign out from Firebase
   };
 
   return (
