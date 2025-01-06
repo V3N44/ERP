@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line } from 'recharts';
 import { useQuery } from "@tanstack/react-query";
-import { getMonthlyBudgetDetails } from "@/services/budgetService";
+import { getMonthlyBudgetDetails, fetchAllBudgets } from "@/services/budgetService";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const mockData = [
   { month: 'Jan', invoices: 65, revenue: 89000 },
@@ -19,11 +20,27 @@ const mockData = [
 ];
 
 export const BackofficeReports = () => {
-  const [selectedBudgetId, setSelectedBudgetId] = useState<number>(1); // Start with budget ID 1
+  const [selectedBudgetId, setSelectedBudgetId] = useState<number>(1);
+  const { toast } = useToast();
 
-  const { data: budgetDetails, isLoading, error } = useQuery({
+  const { data: budgetDetails, isLoading: isLoadingDetails, error: detailsError } = useQuery({
     queryKey: ['budget', selectedBudgetId],
     queryFn: () => getMonthlyBudgetDetails(selectedBudgetId),
+  });
+
+  const { data: allBudgets, isLoading: isLoadingBudgets, error: budgetsError } = useQuery({
+    queryKey: ['budgets'],
+    queryFn: fetchAllBudgets,
+    onSettled: (data, error) => {
+      if (error) {
+        console.error('Error fetching budgets:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load budgets. Please try again later.",
+        });
+      }
+    },
   });
 
   return (
@@ -108,23 +125,75 @@ export const BackofficeReports = () => {
         </Card>
       </div>
 
+      {/* All Monthly Budgets Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>All Monthly Budgets</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingBudgets ? (
+            <div className="flex items-center justify-center p-4">
+              <Loader2 className="h-6 w-6 animate-spin mr-2" />
+              <span>Loading budgets...</span>
+            </div>
+          ) : budgetsError ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>
+                Failed to load budgets. Please try again later.
+              </AlertDescription>
+            </Alert>
+          ) : allBudgets && allBudgets.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Month/Year</TableHead>
+                  <TableHead>Budget Amount</TableHead>
+                  <TableHead>Remaining Budget</TableHead>
+                  <TableHead>Created At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allBudgets.map((budget) => (
+                  <TableRow 
+                    key={budget.id}
+                    className="cursor-pointer hover:bg-muted"
+                    onClick={() => setSelectedBudgetId(budget.id)}
+                  >
+                    <TableCell>
+                      {format(new Date(budget.year, budget.month - 1), "MMMM yyyy")}
+                    </TableCell>
+                    <TableCell>${budget.budget_amount.toLocaleString()}</TableCell>
+                    <TableCell>${budget.remaining_budget.toLocaleString()}</TableCell>
+                    <TableCell>{format(new Date(budget.created_at), "PPP")}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center p-4">No budgets available</div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Monthly Budget Details */}
       <Card>
         <CardHeader>
           <CardTitle>Monthly Budget Details</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {isLoadingDetails ? (
             <div className="flex items-center justify-center p-4">
               <Loader2 className="h-6 w-6 animate-spin mr-2" />
               <span>Loading budget details...</span>
             </div>
-          ) : error ? (
+          ) : detailsError ? (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>
-                {error instanceof Error ? error.message : "Failed to load budget details"}
+                {detailsError instanceof Error ? detailsError.message : "Failed to load budget details"}
               </AlertDescription>
             </Alert>
           ) : budgetDetails ? (
