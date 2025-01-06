@@ -1,11 +1,12 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { BudgetChartCenter } from "./BudgetChartCenter";
+import { getChartColor } from "@/utils/chartColors";
 
 interface BudgetChartDisplayProps {
   spendingData: Array<{
     name: string;
     value: number;
-    color: string;
+    color?: string;
   }>;
   totalSpent: number;
   totalBudget: number;
@@ -35,7 +36,10 @@ export const BudgetChartDisplay = ({
             strokeWidth={0}
           >
             {spendingData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
+              <Cell 
+                key={`cell-${index}`} 
+                fill={entry.color || getChartColor(index)} 
+              />
             ))}
           </Pie>
           <Tooltip />

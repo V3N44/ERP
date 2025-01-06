@@ -8,11 +8,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { BudgetChartDisplay } from "./budget/BudgetChartDisplay";
 import { BudgetChartLegend } from "./budget/BudgetChartLegend";
-
-const getColorForIndex = (index: number) => {
-  const colors = ["#1EAEDB", "#45B6E0", "#67C3E6", "#89D0EC", "#D3E4FD"];
-  return colors[index % colors.length];
-};
+import { getChartColor } from "@/utils/chartColors";
 
 export const BudgetChart = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -53,7 +49,7 @@ export const BudgetChart = () => {
       const newSpendingData = Object.entries(spendingByReason).map(([reason, amount], index) => ({
         name: reason,
         value: amount,
-        color: getColorForIndex(index)
+        color: getChartColor(index)
       }));
 
       const remaining = currentBudget.budget_amount - totalMoneyOrders;
@@ -61,7 +57,7 @@ export const BudgetChart = () => {
         newSpendingData.push({
           name: "Remaining",
           value: remaining,
-          color: getColorForIndex(newSpendingData.length)
+          color: getChartColor(newSpendingData.length)
         });
       }
 
