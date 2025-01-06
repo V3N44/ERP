@@ -19,7 +19,7 @@ const AnalyticsPage = () => {
 
   const { data: orders, isLoading: isLoadingOrders } = useQuery({
     queryKey: ['orders'],
-    queryFn: () => getOrders(0, 100),
+    queryFn: () => getOrders(0, 100), // Using the pagination parameters
   });
 
   // Calculate total revenue and metrics
