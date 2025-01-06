@@ -7,7 +7,11 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { EditFollowUpDialog } from "./EditFollowUpDialog";
 
-export const FollowUpsTable = () => {
+interface FollowUpsTableProps {
+  selectedType: string | null;
+}
+
+export const FollowUpsTable = ({ selectedType }: FollowUpsTableProps) => {
   const [selectedFollowUp, setSelectedFollowUp] = useState<any>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
@@ -29,8 +33,13 @@ export const FollowUpsTable = () => {
     return <div>Error loading follow-ups</div>;
   }
 
+  // Filter follow-ups by type if selected
+  const filteredFollowUps = selectedType
+    ? followUps?.filter((followUp: any) => followUp.type === selectedType)
+    : followUps;
+
   // Group follow-ups by status
-  const groupedFollowUps = followUps?.reduce((acc: any, followUp: any) => {
+  const groupedFollowUps = filteredFollowUps?.reduce((acc: any, followUp: any) => {
     const status = followUp.status || 'Pending';
     if (!acc[status]) {
       acc[status] = [];
