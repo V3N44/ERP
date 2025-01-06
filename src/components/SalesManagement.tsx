@@ -9,13 +9,29 @@ import { VehicleSelectionModal } from "./sales/VehicleSelectionModal";
 import { Search } from "lucide-react";
 import { SelectedVehicleDisplay } from "./sales/SelectedVehicleDisplay";
 import { OrderData } from "@/services/orderService";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface SalesManagementProps {
   onSubmit: (data: OrderData) => Promise<void>;
   isSubmitting: boolean;
 }
 
+const getRoleId = (role: string): number => {
+  const roleMap: { [key: string]: number } = {
+    'admin': 1,
+    'sales': 2,
+    'user': 3,
+    'shipping': 4,
+    'purchasing': 5,
+    'accounting': 6
+  };
+  return roleMap[role] || 3; // Default to user role if not found
+};
+
 export const SalesManagement = ({ onSubmit, isSubmitting }: SalesManagementProps) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [showVehicleModal, setShowVehicleModal] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -42,9 +58,25 @@ export const SalesManagement = ({ onSubmit, isSubmitting }: SalesManagementProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedVehicle) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a vehicle before submitting",
+      });
       return;
     }
 
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to create an order",
+      });
+      return;
+    }
+
+    const roleId = getRoleId(user.role);
+    
     const orderData: OrderData = {
       customer_id: 1, // This should be dynamically set based on customer selection
       contact_number: formData.contactNumber,
@@ -52,9 +84,10 @@ export const SalesManagement = ({ onSubmit, isSubmitting }: SalesManagementProps
       date: new Date().toISOString(),
       total: selectedVehicle.price || 0,
       status: "Pending",
+      role_id: roleId,
       items: [
         {
-          item_name: `${selectedVehicle.make} ${selectedVehicle.model}`, // Fixed: Now properly setting item_name
+          item_name: `${selectedVehicle.make} ${selectedVehicle.model}`,
           quantity: 1,
           price: selectedVehicle.price,
           total: selectedVehicle.price,
@@ -62,7 +95,15 @@ export const SalesManagement = ({ onSubmit, isSubmitting }: SalesManagementProps
       ],
     };
 
-    await onSubmit(orderData);
+    try {
+      await onSubmit(orderData);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create order",
+      });
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
