@@ -30,6 +30,21 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
     },
   });
 
+  // Fetch individual money order details
+  const fetchMoneyOrderDetails = async (orderId: number) => {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${api.baseURL}/money-orders/${orderId}`, {
+      headers: {
+        ...api.headers,
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch money order details');
+    }
+    return response.json();
+  };
+
   const createMoneyOrder = async (data: {
     monthly_budget_id: number;
     reason: string;
@@ -92,6 +107,7 @@ export const CreateMoneyOrderForm = ({ budgetId }: CreateMoneyOrderFormProps) =>
         <MoneyOrdersTable
           moneyOrders={moneyOrders}
           isLoading={isLoadingOrders}
+          onViewDetails={fetchMoneyOrderDetails}
         />
       </div>
     </div>
