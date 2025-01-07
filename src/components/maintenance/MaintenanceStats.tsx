@@ -15,10 +15,10 @@ export const MaintenanceStats = ({ records }: MaintenanceStatsProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-green-500 flex items-center gap-2">
-            <Check />
+      <Card className="h-[140px]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-green-500 flex items-center gap-2">
+            <Check className="h-4 w-4" />
             Completed
           </CardTitle>
         </CardHeader>
@@ -29,10 +29,10 @@ export const MaintenanceStats = ({ records }: MaintenanceStatsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-blue-500 flex items-center gap-2">
-            <Clock />
+      <Card className="h-[140px]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-blue-500 flex items-center gap-2">
+            <Clock className="h-4 w-4" />
             In Progress
           </CardTitle>
         </CardHeader>
@@ -43,10 +43,10 @@ export const MaintenanceStats = ({ records }: MaintenanceStatsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-yellow-500 flex items-center gap-2">
-            <Calendar />
+      <Card className="h-[140px]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-yellow-500 flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
             Pending
           </CardTitle>
         </CardHeader>
@@ -57,10 +57,10 @@ export const MaintenanceStats = ({ records }: MaintenanceStatsProps) => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-red-500 flex items-center gap-2">
-            <AlertCircle />
+      <Card className="h-[140px]">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-red-500 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" />
             Overdue
           </CardTitle>
         </CardHeader>
