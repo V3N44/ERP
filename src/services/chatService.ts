@@ -27,7 +27,11 @@ export const sendChatMessage = async (message: string): Promise<string> => {
 
     const response = await fetch(`${CHAT_API_CONFIG.baseURL}/chat`, {
       method: 'POST',
-      headers: CHAT_API_CONFIG.headers,
+      headers: {
+        ...CHAT_API_CONFIG.headers,
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      },
       body: JSON.stringify(requestBody)
     });
 
@@ -47,7 +51,11 @@ export const resetChat = async (): Promise<void> => {
   try {
     const response = await fetch(`${CHAT_API_CONFIG.baseURL}/chat/reset`, {
       method: 'POST',
-      headers: CHAT_API_CONFIG.headers
+      headers: {
+        ...CHAT_API_CONFIG.headers,
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
     });
 
     if (!response.ok) {
