@@ -1,13 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Download, FileText, Filter } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getOrders } from "@/services/orderService";
 import { getInventoryItems } from "@/services/inventoryService";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { generateDocx, generatePDF } from "@/utils/reportGenerators";
-import { FileFormatSelect } from "@/components/reports/FileFormatSelect";
 
 const ReportsPage = () => {
   const { toast } = useToast();
@@ -21,41 +19,6 @@ const ReportsPage = () => {
     queryKey: ['inventory'],
     queryFn: () => getInventoryItems(0, 100),
   });
-
-  const downloadReport = async (content: string, filename: string, format: 'txt' | 'docx' | 'pdf') => {
-    try {
-      switch (format) {
-        case 'txt':
-          const blob = new Blob([content], { type: 'text/plain' });
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `${filename}.txt`);
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-          window.URL.revokeObjectURL(url);
-          break;
-        case 'docx':
-          await generateDocx(content, filename);
-          break;
-        case 'pdf':
-          generatePDF(content, filename);
-          break;
-      }
-
-      toast({
-        title: "Report Generated",
-        description: `${filename}.${format} has been downloaded successfully.`,
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate report. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const generateMonthlySalesSummary = () => {
     if (!orders || !Array.isArray(orders) || orders.length === 0) {
@@ -106,7 +69,7 @@ const ReportsPage = () => {
       });
     });
 
-    return reportContent;
+    downloadReport(reportContent, `sales_summary_${format(new Date(), 'MMM_yyyy')}.txt`);
   };
 
   const generateInventoryReport = () => {
@@ -146,7 +109,24 @@ const ReportsPage = () => {
       reportContent += "------------------------\n\n";
     });
 
-    return reportContent;
+    downloadReport(reportContent, `inventory_report_${format(new Date(), 'MMM_yyyy')}.txt`);
+  };
+
+  const downloadReport = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+
+    toast({
+      title: "Report Generated",
+      description: `${filename} has been downloaded successfully.`,
+    });
   };
 
   return (
@@ -173,39 +153,13 @@ const ReportsPage = () => {
                   title: "Monthly Sales Summary", 
                   date: format(new Date(), 'MMMM yyyy'),
                   description: "Detailed monthly sales report including order statistics and item details",
-                  action: (format: 'txt' | 'docx' | 'pdf') => {
-                    if (!orders || !Array.isArray(orders) || orders.length === 0) {
-                      toast({
-                        title: "No data available",
-                        description: "There are no sales records to generate a report.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    const content = generateMonthlySalesSummary();
-                    if (content) {
-                      downloadReport(content, `sales_summary_${format(new Date(), 'MMM_yyyy')}`, format);
-                    }
-                  }
+                  action: generateMonthlySalesSummary
                 },
                 { 
                   title: "Inventory Report", 
                   date: format(new Date(), 'MMMM yyyy'),
                   description: "Complete inventory list with detailed vehicle specifications",
-                  action: (format: 'txt' | 'docx' | 'pdf') => {
-                    if (!inventory || !Array.isArray(inventory) || inventory.length === 0) {
-                      toast({
-                        title: "No data available",
-                        description: "There are no inventory items to generate a report.",
-                        variant: "destructive",
-                      });
-                      return;
-                    }
-                    const content = generateInventoryReport();
-                    if (content) {
-                      downloadReport(content, `inventory_report_${format(new Date(), 'MMM_yyyy')}`, format);
-                    }
-                  }
+                  action: generateInventoryReport
                 },
                 { 
                   title: "Quarterly Performance Report", 
@@ -233,12 +187,14 @@ const ReportsPage = () => {
                     <span className="text-sm text-muted-foreground">
                       {report.size || "Available for download"}
                     </span>
-                    {report.action && (
-                      <FileFormatSelect
-                        onSelectFormat={(format) => report.action(format)}
-                        disabled={!report.action}
-                      />
-                    )}
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={report.action}
+                      disabled={!report.action}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
