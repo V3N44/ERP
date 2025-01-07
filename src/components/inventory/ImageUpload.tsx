@@ -6,15 +6,19 @@ interface ImageUploadProps {
   setSelectedImages: (images: File[]) => void;
   imageUrls: string[];
   setImageUrls: (urls: string[]) => void;
+  imageBlobs: Blob[];
+  setImageBlobs: (blobs: Blob[]) => void;
 }
 
 export const ImageUpload = ({
   selectedImages,
   setSelectedImages,
   imageUrls,
-  setImageUrls
+  setImageUrls,
+  imageBlobs,
+  setImageBlobs
 }: ImageUploadProps) => {
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       const newSelectedImages = [...selectedImages, ...files];
@@ -24,6 +28,15 @@ export const ImageUpload = ({
       const newImageUrls = files.map(file => URL.createObjectURL(file));
       const updatedImageUrls = [...imageUrls, ...newImageUrls];
       setImageUrls(updatedImageUrls);
+
+      // Convert files to Blobs
+      const newBlobs = await Promise.all(
+        files.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+          return new Blob([arrayBuffer], { type: file.type });
+        })
+      );
+      setImageBlobs([...imageBlobs, ...newBlobs]);
     }
   };
 
@@ -38,6 +51,9 @@ export const ImageUpload = ({
       return i !== index;
     });
     setImageUrls(newUrls);
+
+    const newBlobs = imageBlobs.filter((_, i) => i !== index);
+    setImageBlobs(newBlobs);
   };
 
   return (

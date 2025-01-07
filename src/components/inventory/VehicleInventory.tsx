@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 export const VehicleInventory = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageBlobs, setImageBlobs] = useState<Blob[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -18,15 +19,15 @@ export const VehicleInventory = () => {
     setIsSubmitting(true);
 
     try {
-      // Get the first image file if available
-      const imageFile = selectedImages[0];
+      // Get the first image blob if available
+      const imageBlob = imageBlobs[0];
       
       // Update the image_url if there are any images
       if (imageUrls.length > 0) {
         formData.image_url = imageUrls[0];
       }
 
-      await createInventoryItem(formData, imageFile);
+      await createInventoryItem(formData, imageBlob);
       
       toast({
         title: "Success",
@@ -36,6 +37,7 @@ export const VehicleInventory = () => {
       // Reset form and images
       setSelectedImages([]);
       setImageUrls([]);
+      setImageBlobs([]);
       
       // Navigate to inventory list
       navigate('/vehicles/inventory');
@@ -66,6 +68,8 @@ export const VehicleInventory = () => {
             setSelectedImages={setSelectedImages}
             imageUrls={imageUrls}
             setImageUrls={setImageUrls}
+            imageBlobs={imageBlobs}
+            setImageBlobs={setImageBlobs}
           />
         </VehicleForm>
       </CardContent>

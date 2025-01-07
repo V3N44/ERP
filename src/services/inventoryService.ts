@@ -1,6 +1,5 @@
 import { API_CONFIG, buildUrl } from '@/config/api';
 import { InventoryFormData } from "@/types/inventory";
-import { convertImageToBase64 } from "@/utils/imageUtils";
 
 export interface InventoryItem extends InventoryFormData {
   id: number;
@@ -17,7 +16,7 @@ const getAuthHeader = () => {
   return `${tokenType} ${token}`;
 };
 
-export const createInventoryItem = async (data: InventoryFormData, imageFile?: File): Promise<InventoryItem> => {
+export const createInventoryItem = async (data: InventoryFormData, imageBlob?: Blob): Promise<InventoryItem> => {
   try {
     console.log('Creating inventory item with data:', data);
     
@@ -25,8 +24,13 @@ export const createInventoryItem = async (data: InventoryFormData, imageFile?: F
     console.log('Using auth header:', authHeader);
 
     let imageData = null;
-    if (imageFile) {
-      imageData = await convertImageToBase64(imageFile);
+    if (imageBlob) {
+      // Convert Blob to Base64
+      const reader = new FileReader();
+      imageData = await new Promise((resolve) => {
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(imageBlob);
+      });
       console.log('Image converted to base64');
     }
 
