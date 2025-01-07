@@ -3,6 +3,7 @@ import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recha
 import { useQuery } from "@tanstack/react-query";
 import { getInventoryItems } from "@/services/inventoryService";
 import { getCustomers } from "@/services/customerService";
+import { format, isToday, startOfWeek, addDays } from "date-fns";
 
 export const SalesPurchaseChart = () => {
   const { data: inventory } = useQuery({
@@ -15,20 +16,33 @@ export const SalesPurchaseChart = () => {
     queryFn: () => getCustomers({ skip: 0, limit: 100 }),
   });
 
-  // Calculate daily data based on inventory and customers
-  const currentDay = new Date().getDay();
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  
-  const weekData = Array.from({ length: 7 }, (_, i) => {
-    const dayIndex = (i + 1) % 7; // Start from Monday (1) to Sunday (0)
-    const isCurrentDay = dayIndex === currentDay;
+  // Calculate weekly data starting from Monday
+  const startOfCurrentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const weekData = Array.from({ length: 7 }, (_, index) => {
+    const currentDate = addDays(startOfCurrentWeek, index);
+    const isCurrentDay = isToday(currentDate);
+    
     return {
-      day: dayNames[dayIndex],
-      sales: customers ? Math.round((customers.length / 7) * (i + 1)) : 0,
-      purchases: inventory ? Math.round((inventory.length / 7) * (i + 1)) : 0,
+      day: format(currentDate, 'EEE'),
+      date: format(currentDate, 'MMM dd'),
+      sales: customers ? Math.round((customers.length / 7) * (index + 1)) : 0,
+      purchases: inventory ? Math.round((inventory.length / 7) * (index + 1)) : 0,
       isCurrentDay,
     };
   });
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-4 rounded-lg shadow-lg border">
+          <p className="font-semibold">{`${label}`}</p>
+          <p className="text-purple-500">{`Sales: ${payload[0].value}`}</p>
+          <p className="text-emerald-500">{`Purchases: ${payload[1].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
@@ -48,10 +62,10 @@ export const SalesPurchaseChart = () => {
                 <text
                   x={x}
                   y={y + 10}
-                  fill={payload.value === dayNames[currentDay] ? '#1F2937' : '#64748b'}
+                  fill={weekData[payload.index].isCurrentDay ? '#8B5CF6' : '#64748b'}
                   textAnchor="middle"
-                  fontSize={12}
-                  fontWeight={payload.value === dayNames[currentDay] ? 'bold' : 'normal'}
+                  fontSize={weekData[payload.index].isCurrentDay ? 14 : 12}
+                  fontWeight={weekData[payload.index].isCurrentDay ? 'bold' : 'normal'}
                 >
                   {payload.value}
                 </text>
@@ -62,29 +76,27 @@ export const SalesPurchaseChart = () => {
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
             />
-            <Tooltip />
+            <Tooltip content={<CustomTooltip />} />
             <Bar 
               dataKey="sales" 
-              fill="#8B5CF6"
+              fill={(data: any) => data.isCurrentDay ? '#8B5CF6' : '#C4B5FD'}
               radius={[4, 4, 0, 0]}
-              barSize={20}
             />
             <Bar 
               dataKey="purchases" 
-              fill="#10B981"
+              fill={(data: any) => data.isCurrentDay ? '#10B981' : '#6EE7B7'}
               radius={[4, 4, 0, 0]}
-              barSize={20}
             />
           </BarChart>
         </ResponsiveContainer>
         <div className="mt-4 flex items-center justify-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-            <span className="text-sm font-sans text-gray-600">Revenue</span>
+            <span className="text-sm font-sans text-gray-600">Sales</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-            <span className="text-sm font-sans text-gray-600">Expenses</span>
+            <span className="text-sm font-sans text-gray-600">Purchases</span>
           </div>
         </div>
       </CardContent>
