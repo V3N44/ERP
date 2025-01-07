@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useQuery } from "@tanstack/react-query";
 import { getInventoryItems } from "@/services/inventoryService";
 import { getCustomers } from "@/services/customerService";
+import { format, isToday, startOfWeek, addDays } from "date-fns";
 
 export const SalesPurchaseChart = () => {
   const { data: inventory } = useQuery({
@@ -15,56 +16,78 @@ export const SalesPurchaseChart = () => {
     queryFn: () => getCustomers({ skip: 0, limit: 100 }),
   });
 
-  // Calculate monthly data based on inventory and customers
-  const currentMonth = new Date().getMonth();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
-  const lastSixMonths = Array.from({ length: 6 }, (_, i) => {
-    const monthIndex = (currentMonth - i + 12) % 12;
+  // Calculate weekly data starting from Monday
+  const startOfCurrentWeek = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const weekData = Array.from({ length: 7 }, (_, index) => {
+    const currentDate = addDays(startOfCurrentWeek, index);
+    const isCurrentDay = isToday(currentDate);
+    
     return {
-      month: monthNames[monthIndex],
-      sales: customers ? Math.round((customers.length / 6) * (i + 1)) : 0,
-      purchases: inventory ? Math.round((inventory.length / 6) * (i + 1)) : 0,
+      day: format(currentDate, 'EEE'),
+      date: format(currentDate, 'MMM dd'),
+      sales: customers ? Math.round((customers.length / 7) * (index + 1)) : 0,
+      purchases: inventory ? Math.round((inventory.length / 7) * (index + 1)) : 0,
+      isCurrentDay,
     };
-  }).reverse();
+  });
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white p-4 rounded-lg shadow-lg border">
+          <p className="font-semibold">{`${label}`}</p>
+          <p className="text-purple-500">{`Sales: ${payload[0].value}`}</p>
+          <p className="text-emerald-500">{`Purchases: ${payload[1].value}`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <Card className="bg-white border-none shadow-sm rounded-2xl">
       <CardHeader>
         <CardTitle className="text-sm font-heading font-semibold text-gray-700">
-          Sales vs Purchases
+          Weekly Sales Distribution
         </CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={lastSixMonths}>
+          <BarChart data={weekData}>
             <XAxis 
-              dataKey="month" 
+              dataKey="day" 
               axisLine={false}
               tickLine={false}
-              tick={{ fill: '#64748b', fontSize: 12 }}
+              tick={({ x, y, payload }) => (
+                <text
+                  x={x}
+                  y={y + 10}
+                  fill={weekData[payload.index].isCurrentDay ? '#8B5CF6' : '#64748b'}
+                  textAnchor="middle"
+                  fontSize={weekData[payload.index].isCurrentDay ? 14 : 12}
+                  fontWeight={weekData[payload.index].isCurrentDay ? 'bold' : 'normal'}
+                >
+                  {payload.value}
+                </text>
+              )}
             />
             <YAxis 
               axisLine={false}
               tickLine={false}
               tick={{ fill: '#64748b', fontSize: 12 }}
             />
-            <Tooltip />
-            <Line 
-              type="monotone" 
+            <Tooltip content={<CustomTooltip />} />
+            <Bar 
               dataKey="sales" 
-              stroke="#8B5CF6" 
-              strokeWidth={2}
-              dot={{ fill: '#8B5CF6' }}
+              fill={(data: any) => data.isCurrentDay ? '#8B5CF6' : '#C4B5FD'}
+              radius={[4, 4, 0, 0]}
             />
-            <Line 
-              type="monotone" 
+            <Bar 
               dataKey="purchases" 
-              stroke="#10B981" 
-              strokeWidth={2}
-              dot={{ fill: '#10B981' }}
+              fill={(data: any) => data.isCurrentDay ? '#10B981' : '#6EE7B7'}
+              radius={[4, 4, 0, 0]}
             />
-          </LineChart>
+          </BarChart>
         </ResponsiveContainer>
         <div className="mt-4 flex items-center justify-center gap-4">
           <div className="flex items-center gap-2">
