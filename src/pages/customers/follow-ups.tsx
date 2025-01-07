@@ -1,13 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FollowUpsTable } from "@/components/follow-ups/FollowUpsTable";
-import { PhoneCall, Mail, Calendar } from "lucide-react";
-import { useState, useEffect } from "react";
+import { PhoneCall, Mail, Calendar, Plus } from "lucide-react";
+import { useState } from "react";
 import { getFollowUps } from "@/services/followUpService";
 import { useQuery } from "@tanstack/react-query";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FollowUpForm } from "@/components/follow-ups/FollowUpForm";
 
 const FollowUpsPage = () => {
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [isNewFollowUpOpen, setIsNewFollowUpOpen] = useState(false);
   
   const { data: followUps = [] } = useQuery({
     queryKey: ['followUps'],
@@ -19,7 +22,7 @@ const FollowUpsPage = () => {
   const emailsCount = followUps.filter(fu => fu.type === 'Email').length;
   const meetingsCount = followUps.filter(fu => fu.type === 'Meeting').length;
 
-  // Calculate counts from last week (assuming followUps have a date field)
+  // Calculate counts from last week
   const lastWeekDate = new Date();
   lastWeekDate.setDate(lastWeekDate.getDate() - 7);
 
@@ -39,7 +42,13 @@ const FollowUpsPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold text-purple-900">Follow-ups</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-purple-900">Follow-ups</h1>
+        <Button onClick={() => setIsNewFollowUpOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          New Follow-up
+        </Button>
+      </div>
       
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -107,6 +116,15 @@ const FollowUpsPage = () => {
       </div>
 
       <FollowUpsTable selectedType={selectedType} />
+
+      <Dialog open={isNewFollowUpOpen} onOpenChange={setIsNewFollowUpOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>New Follow-up</DialogTitle>
+          </DialogHeader>
+          <FollowUpForm onSuccess={() => setIsNewFollowUpOpen(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
