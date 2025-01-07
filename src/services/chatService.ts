@@ -1,4 +1,5 @@
 import { API_CONFIG } from '@/config/api';
+import { CHAT_API_CONFIG } from '@/config/chatApi';
 
 interface ChatRequest {
   query: string;
@@ -24,12 +25,9 @@ export const sendChatMessage = async (message: string): Promise<string> => {
       }
     };
 
-    const response = await fetch(`${API_CONFIG.baseURL}/chat`, {
+    const response = await fetch(`${CHAT_API_CONFIG.baseURL}/chat`, {
       method: 'POST',
-      headers: {
-        ...API_CONFIG.headers,
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      },
+      headers: CHAT_API_CONFIG.headers,
       body: JSON.stringify(requestBody)
     });
 
@@ -47,12 +45,9 @@ export const sendChatMessage = async (message: string): Promise<string> => {
 
 export const resetChat = async (): Promise<void> => {
   try {
-    const response = await fetch(`${API_CONFIG.baseURL}/chat/reset`, {
+    const response = await fetch(`${CHAT_API_CONFIG.baseURL}/chat/reset`, {
       method: 'POST',
-      headers: {
-        ...API_CONFIG.headers,
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      }
+      headers: CHAT_API_CONFIG.headers
     });
 
     if (!response.ok) {
