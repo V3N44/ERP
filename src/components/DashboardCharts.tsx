@@ -1,25 +1,27 @@
-import { EarningsChart } from "./dashboard/charts/EarningsChart";
-import { ExpensesChart } from "./dashboard/charts/ExpensesChart";
-import { BudgetChart } from "./dashboard/charts/BudgetChart";
-import { SalesPurchaseChart } from "./dashboard/charts/SalesPurchaseChart";
+import React from 'react';
+import { SalesPurchaseChart } from './dashboard/charts/SalesPurchaseChart';
 
-export const DashboardCharts = () => {
-  const mockData = {
-    sales: [],
-    purchases: [],
-    dates: []
-  };
+interface ChartData {
+  sales: any[];
+  purchases: any[];
+  dates: any[];
+}
 
+interface DashboardChartsProps {
+  data: ChartData;
+}
+
+export const DashboardCharts: React.FC<DashboardChartsProps> = ({ data }) => {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <EarningsChart />
-        <ExpensesChart />
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="col-span-2">
+        <SalesPurchaseChart data={data} />
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SalesPurchaseChart data={mockData} />
-        <BudgetChart />
+      <div className="col-span-1">
+        {/* Placeholder for another chart component */}
+      </div>
+      <div className="col-span-1">
+        {/* Placeholder for another chart component */}
       </div>
     </div>
   );
