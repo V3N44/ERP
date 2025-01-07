@@ -3,15 +3,17 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { useQuery } from "@tanstack/react-query";
 import { getInventoryItems } from "@/services/inventoryService";
 import { getCustomers } from "@/services/customerService";
-import { format, startOfMonth, eachDayOfInterval, subDays } from "date-fns";
+import { format, subDays, eachDayOfInterval } from "date-fns";
+import type { Customer } from "@/services/customerService";
+import type { InventoryItem } from "@/types/inventory";
 
 export const SalesPurchaseChart = () => {
-  const { data: inventory } = useQuery({
+  const { data: inventory } = useQuery<InventoryItem[]>({
     queryKey: ['inventory'],
     queryFn: () => getInventoryItems(0, 100),
   });
 
-  const { data: customers } = useQuery({
+  const { data: customers } = useQuery<Customer[]>({
     queryKey: ['customers'],
     queryFn: () => getCustomers({ skip: 0, limit: 100 }),
   });
@@ -25,7 +27,7 @@ export const SalesPurchaseChart = () => {
   const chartData = last7Days.map(date => {
     // For purchases, count inventory items added on this date
     const dailyPurchases = inventory?.filter(item => {
-      const itemDate = new Date(item.created_at || new Date());
+      const itemDate = new Date(item.registration_year, 0); // Using registration_year as creation date
       return format(itemDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
     }).length || 0;
 
@@ -38,7 +40,7 @@ export const SalesPurchaseChart = () => {
     // Calculate total value of purchases for the day
     const purchaseValue = inventory
       ?.filter(item => {
-        const itemDate = new Date(item.created_at || new Date());
+        const itemDate = new Date(item.registration_year, 0);
         return format(itemDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
       })
       .reduce((sum, item) => sum + (item.price || 0), 0) || 0;
