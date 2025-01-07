@@ -1,15 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, XCircle, Plus, Pencil, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NewPurchaseForm } from "./NewPurchaseForm";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Purchase } from "@/types/purchases";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EditPurchaseDialog } from "./purchase-form/EditPurchaseDialog";
-import { PurchaseTable } from "./purchase-table/PurchaseTable";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -73,34 +74,24 @@ export const PurchaseApprovals = () => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [selectedPurchaseId, setSelectedPurchaseId] = useState<number | null>(null);
   
-  const queryClient = useQueryClient();
-  
-  const { data: purchases = [], isLoading } = useQuery({
+  const { data: purchases = [], refetch, isLoading } = useQuery({
     queryKey: ['purchases'],
     queryFn: fetchPurchases,
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
   const handleSuccess = () => {
     setOpen(false);
     setEditPurchase(null);
-    queryClient.invalidateQueries({ queryKey: ['purchases'] });
+    refetch();
     toast.success("Purchase updated successfully");
   };
 
   const handleStatusUpdate = async (id: number, status: 'approved' | 'rejected') => {
     try {
-      // Optimistic update
-      queryClient.setQueryData(['purchases'], (old: Purchase[] | undefined) => {
-        if (!old) return [];
-        return old.map(p => p.id === id ? { ...p, status } : p);
-      });
-
       await updatePurchaseStatus(id, status);
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
+      refetch();
       toast.success(`Purchase ${status} successfully`);
     } catch (error) {
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
       toast.error("Failed to update purchase status");
     }
   };
@@ -109,17 +100,11 @@ export const PurchaseApprovals = () => {
     if (!selectedPurchaseId) return;
     
     try {
-      // Optimistic update
-      queryClient.setQueryData(['purchases'], (old: Purchase[] | undefined) => {
-        if (!old) return [];
-        return old.filter(p => p.id !== selectedPurchaseId);
-      });
-
       await deletePurchase(selectedPurchaseId);
-      setDeleteConfirmOpen(false);
+      refetch();
       toast.success("Purchase deleted successfully");
+      setDeleteConfirmOpen(false);
     } catch (error) {
-      queryClient.invalidateQueries({ queryKey: ['purchases'] });
       toast.error("Failed to delete purchase");
     }
   };
@@ -189,22 +174,118 @@ export const PurchaseApprovals = () => {
         </TabsList>
 
         <TabsContent value="pending">
-          <PurchaseTable
-            purchases={pendingPurchases}
-            onStatusUpdate={handleStatusUpdate}
-            onEdit={setEditPurchase}
-            onDelete={openDeleteConfirm}
-          />
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Challan No</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Payment Type</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pendingPurchases.map((purchase) => (
+                <TableRow key={purchase.id}>
+                  <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{purchase.challan_no}</TableCell>
+                  <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
+                  <TableCell>
+                    <Badge variant="warning">
+                      {purchase.status || 'pending'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{purchase.payment_type}</TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleStatusUpdate(purchase.id!, 'approved')}
+                      >
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => handleStatusUpdate(purchase.id!, 'rejected')}
+                      >
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setEditPurchase(purchase)}
+                      >
+                        <Pencil className="h-4 w-4 text-blue-600" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openDeleteConfirm(purchase.id!)}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </TabsContent>
 
         <TabsContent value="history">
           <ScrollArea className="h-[500px]">
-            <PurchaseTable
-              purchases={historyPurchases}
-              onStatusUpdate={handleStatusUpdate}
-              onEdit={setEditPurchase}
-              onDelete={openDeleteConfirm}
-            />
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Challan No</TableHead>
+                  <TableHead>Amount</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Payment Type</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {historyPurchases.map((purchase) => (
+                  <TableRow key={purchase.id}>
+                    <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
+                    <TableCell>{purchase.challan_no}</TableCell>
+                    <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={
+                        purchase.status === 'approved' ? 'success' : 
+                        purchase.status === 'rejected' ? 'destructive' : 
+                        'warning'
+                      }>
+                        {purchase.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{purchase.payment_type}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setEditPurchase(purchase)}
+                        >
+                          <Pencil className="h-4 w-4 text-blue-600" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openDeleteConfirm(purchase.id!)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </ScrollArea>
         </TabsContent>
       </Tabs>
