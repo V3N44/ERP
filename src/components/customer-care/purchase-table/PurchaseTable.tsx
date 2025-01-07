@@ -3,12 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle, Pencil, Trash2 } from "lucide-react";
 import { Purchase } from "@/types/purchases";
-import { LoadingState } from "./LoadingState";
-import { EmptyState } from "./EmptyState";
 
 interface PurchaseTableProps {
   purchases: Purchase[];
-  isLoading?: boolean;
   onStatusUpdate: (id: number, status: 'approved' | 'rejected') => void;
   onEdit: (purchase: Purchase) => void;
   onDelete: (id: number) => void;
@@ -16,7 +13,6 @@ interface PurchaseTableProps {
 
 export const PurchaseTable = ({ 
   purchases,
-  isLoading,
   onStatusUpdate,
   onEdit,
   onDelete
@@ -34,65 +30,59 @@ export const PurchaseTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {isLoading ? (
-          <LoadingState />
-        ) : purchases.length === 0 ? (
-          <EmptyState />
-        ) : (
-          purchases.map((purchase) => (
-            <TableRow key={purchase.id}>
-              <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
-              <TableCell>{purchase.challan_no}</TableCell>
-              <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
-              <TableCell>
-                <Badge variant={
-                  purchase.status === 'approved' ? 'success' : 
-                  purchase.status === 'rejected' ? 'destructive' : 
-                  'warning'
-                }>
-                  {purchase.status || 'pending'}
-                </Badge>
-              </TableCell>
-              <TableCell>{purchase.payment_type}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  {purchase.status === 'pending' && (
-                    <>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => onStatusUpdate(purchase.id!, 'approved')}
-                      >
-                        <CheckCircle className="h-4 w-4 text-green-600" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => onStatusUpdate(purchase.id!, 'rejected')}
-                      >
-                        <XCircle className="h-4 w-4 text-red-600" />
-                      </Button>
-                    </>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onEdit(purchase)}
-                  >
-                    <Pencil className="h-4 w-4 text-blue-600" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(purchase.id!)}
-                  >
-                    <Trash2 className="h-4 w-4 text-red-600" />
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))
-        )}
+        {purchases.map((purchase) => (
+          <TableRow key={purchase.id}>
+            <TableCell>{new Date(purchase.purchase_date).toLocaleDateString()}</TableCell>
+            <TableCell>{purchase.challan_no}</TableCell>
+            <TableCell>${purchase.grand_total.toFixed(2)}</TableCell>
+            <TableCell>
+              <Badge variant={
+                purchase.status === 'approved' ? 'success' : 
+                purchase.status === 'rejected' ? 'destructive' : 
+                'warning'
+              }>
+                {purchase.status || 'pending'}
+              </Badge>
+            </TableCell>
+            <TableCell>{purchase.payment_type}</TableCell>
+            <TableCell>
+              <div className="flex gap-2">
+                {purchase.status === 'pending' && (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => onStatusUpdate(purchase.id!, 'approved')}
+                    >
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => onStatusUpdate(purchase.id!, 'rejected')}
+                    >
+                      <XCircle className="h-4 w-4 text-red-600" />
+                    </Button>
+                  </>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(purchase)}
+                >
+                  <Pencil className="h-4 w-4 text-blue-600" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(purchase.id!)}
+                >
+                  <Trash2 className="h-4 w-4 text-red-600" />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
       </TableBody>
     </Table>
   );
