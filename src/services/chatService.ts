@@ -1,3 +1,4 @@
+import { API_CONFIG } from '@/config/api';
 import { CHAT_API_CONFIG } from '@/config/chatApi';
 
 interface ChatRequest {
@@ -28,9 +29,8 @@ export const sendChatMessage = async (message: string): Promise<string> => {
       method: 'POST',
       headers: {
         ...CHAT_API_CONFIG.headers,
-        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type, Origin'
+        'Access-Control-Allow-Headers': 'Content-Type'
       },
       body: JSON.stringify(requestBody)
     });
@@ -53,9 +53,8 @@ export const resetChat = async (): Promise<void> => {
       method: 'POST',
       headers: {
         ...CHAT_API_CONFIG.headers,
-        'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type, Origin'
+        'Access-Control-Allow-Headers': 'Content-Type'
       }
     });
 

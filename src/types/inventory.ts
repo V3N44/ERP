@@ -22,11 +22,5 @@ export interface InventoryFormData {
   dimensions: string;
   m3_size: string;
   stock_no: string;
-  image_url?: string;
-  created_at?: string;
-}
-
-export interface InventoryItem extends InventoryFormData {
-  id: number;
-  created_at: string;
+  image_url: string;
 }
