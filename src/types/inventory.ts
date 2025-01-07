@@ -1,4 +1,5 @@
-export interface InventoryFormData {
+export interface InventoryItem {
+  id: number;
   product_name: string;
   category: string;
   quantity: number;
@@ -23,4 +24,5 @@ export interface InventoryFormData {
   m3_size: string;
   stock_no: string;
   image_url: string;
+  created_at?: string;
 }
