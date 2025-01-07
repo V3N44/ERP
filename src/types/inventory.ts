@@ -1,26 +1,43 @@
-export interface InventoryFormData {
+export interface InventoryItem {
+  id: number;
+  stock_no: string;
   product_name: string;
   category: string;
-  quantity: number;
+  make: string;
+  model: string;
+  registration_year: number;
   price: number;
-  supplier_id: number;
+  location: string;
   chassis_number: string;
   engine_number: string;
   mileage: number;
-  registration_year: number;
-  evaluation_grade: string;
-  make: string;
-  model: string;
   fuel_type: string;
   transmission: string;
-  steering: string;
   drive: string;
-  seats: number;
-  doors: number;
   colour: string;
-  location: string;
   dimensions: string;
-  m3_size: string;
+  quantity: number;
+  image_url: string;
+  created_at: string;
+}
+
+export interface InventoryFormData {
   stock_no: string;
+  product_name: string;
+  category: string;
+  make: string;
+  model: string;
+  registration_year: number;
+  price: number;
+  location: string;
+  chassis_number: string;
+  engine_number: string;
+  mileage: number;
+  fuel_type: string;
+  transmission: string;
+  drive: string;
+  colour: string;
+  dimensions: string;
+  quantity: number;
   image_url: string;
 }

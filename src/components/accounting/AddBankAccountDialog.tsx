@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { API_URL } from "@/config";
+import { createBank } from "@/services/bankService";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AddBankAccountDialogProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface AddBankAccountDialogProps {
 
 export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankAccountDialogProps) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     bank_name: "",
@@ -29,33 +31,9 @@ export function AddBankAccountDialog({ open, onOpenChange, onSuccess }: AddBankA
     setIsLoading(true);
 
     try {
-      const accessToken = localStorage.getItem('access_token');
-      
-      if (!accessToken) {
-        throw new Error('No access token found. Please login again.');
-      }
-
-      const response = await fetch(`${API_URL}/banks/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to add bank account');
-      }
-
-      toast({
-        title: "Success",
-        description: "Bank account added successfully",
-      });
-      
+      await createBank(formData);
+      await queryClient.invalidateQueries({ queryKey: ['banks'] });
       onSuccess();
-      onOpenChange(false);
       setFormData({
         bank_name: "",
         account_name: "",
