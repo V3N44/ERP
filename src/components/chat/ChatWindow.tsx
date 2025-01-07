@@ -4,7 +4,7 @@ import { Card } from "../ui/card";
 import { ScrollArea } from "../ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useChat } from "@/contexts/ChatContext";
-import { MessageCircle, X, Maximize2, Minimize2, Plus } from "lucide-react";
+import { MessageCircle, X, Maximize2, Minimize2, Plus, RefreshCw } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
 
@@ -15,6 +15,8 @@ interface ChatWindowProps {
   onSendMessage: (text: string) => void;
   onSendAudio: (blobUrl: string) => void;
   onSendFile: (file: File) => void;
+  onResetChat: () => void;
+  isResetting: boolean;
 }
 
 export const ChatWindow = ({
@@ -23,7 +25,9 @@ export const ChatWindow = ({
   onToggleExpand,
   onSendMessage,
   onSendAudio,
-  onSendFile
+  onSendFile,
+  onResetChat,
+  isResetting
 }: ChatWindowProps) => {
   const { chats, currentChatId, createNewChat } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -56,6 +60,15 @@ export const ChatWindow = ({
             className="h-8 w-8 hover:bg-primary-foreground/10"
           >
             <Plus className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={onResetChat}
+            disabled={isResetting}
+            className="h-8 w-8 hover:bg-primary-foreground/10"
+          >
+            <RefreshCw className={`h-4 w-4 ${isResetting ? 'animate-spin' : ''}`} />
           </Button>
           <Button 
             variant="ghost" 

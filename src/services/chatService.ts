@@ -44,3 +44,22 @@ export const sendChatMessage = async (message: string): Promise<string> => {
     throw error;
   }
 };
+
+export const resetChat = async (): Promise<void> => {
+  try {
+    const response = await fetch(`${API_CONFIG.baseURL}/chat/reset`, {
+      method: 'POST',
+      headers: {
+        ...API_CONFIG.headers,
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Reset Chat API Error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Error resetting chat:', error);
+    throw error;
+  }
+};

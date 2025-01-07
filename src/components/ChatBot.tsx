@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
-import { MessageCircle } from "lucide-react";
+import { MessageCircle, RefreshCw } from "lucide-react";
 import { useChat } from "@/contexts/ChatContext";
-import { sendChatMessage } from "@/services/chatService";
+import { sendChatMessage, resetChat } from "@/services/chatService";
 import { toast } from "./ui/use-toast";
 import { ChatWindow } from "./chat/ChatWindow";
 
@@ -10,6 +10,7 @@ export const ChatBot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isAnimating, setIsAnimating] = useState(true);
+  const [isResetting, setIsResetting] = useState(false);
   const { currentChatId, createNewChat, addMessageToChat } = useChat();
 
   useEffect(() => {
@@ -49,6 +50,27 @@ export const ChatBot = () => {
         description: "Failed to send message. Please try again.",
         variant: "destructive"
       });
+    }
+  };
+
+  const handleResetChat = async () => {
+    try {
+      setIsResetting(true);
+      await resetChat();
+      createNewChat(); // Create a new chat after reset
+      toast({
+        title: "Success",
+        description: "Chat history has been reset.",
+      });
+    } catch (error) {
+      console.error('Error resetting chat:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset chat. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -106,6 +128,8 @@ export const ChatBot = () => {
           onSendMessage={handleSendMessage}
           onSendAudio={handleSendAudio}
           onSendFile={handleSendFile}
+          onResetChat={handleResetChat}
+          isResetting={isResetting}
         />
       ) : (
         <Button
