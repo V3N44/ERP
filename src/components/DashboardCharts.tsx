@@ -4,12 +4,6 @@ import { BudgetChart } from "./dashboard/charts/BudgetChart";
 import { SalesPurchaseChart } from "./dashboard/charts/SalesPurchaseChart";
 
 export const DashboardCharts = () => {
-  const mockData = {
-    sales: [],
-    purchases: [],
-    dates: []
-  };
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -18,7 +12,7 @@ export const DashboardCharts = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SalesPurchaseChart data={mockData} />
+        <SalesPurchaseChart />
         <BudgetChart />
       </div>
     </div>
