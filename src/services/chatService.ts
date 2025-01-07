@@ -14,17 +14,8 @@ interface ChatResponse {
   response: string;
 }
 
-const getChatToken = async () => {
-  const token = localStorage.getItem('access_token');
-  if (!token) {
-    throw new Error('No access token found');
-  }
-  return token;
-};
-
 export const sendChatMessage = async (message: string): Promise<string> => {
   try {
-    const token = await getChatToken();
     const requestBody: ChatRequest = {
       query: message,
       context_data: {
@@ -38,7 +29,8 @@ export const sendChatMessage = async (message: string): Promise<string> => {
       method: 'POST',
       headers: {
         ...CHAT_API_CONFIG.headers,
-        'Authorization': `Bearer ${token}`
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type'
       },
       body: JSON.stringify(requestBody)
     });
@@ -57,12 +49,12 @@ export const sendChatMessage = async (message: string): Promise<string> => {
 
 export const resetChat = async (): Promise<void> => {
   try {
-    const token = await getChatToken();
     const response = await fetch(`${CHAT_API_CONFIG.baseURL}/chat/reset`, {
       method: 'POST',
       headers: {
         ...CHAT_API_CONFIG.headers,
-        'Authorization': `Bearer ${token}`
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type'
       }
     });
 
