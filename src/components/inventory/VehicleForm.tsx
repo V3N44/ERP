@@ -45,7 +45,8 @@ export const VehicleForm = ({ children, onSubmit, isSubmitting }: VehicleFormPro
       dimensions: `${formData.get('length')}x${formData.get('width')}x${formData.get('height')}`,
       m3_size: "",
       stock_no: formData.get('stockNo')?.toString() || "",
-      image_url: ""
+      image_url: "",
+      created_at: new Date().toISOString()
     };
 
     onSubmit(data);
