@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
-import { ImageUpload } from "./ImageUpload";
-import { VehicleForm } from "./VehicleForm";
+import { ImageUpload } from "@/components/inventory/ImageUpload";
+import { VehicleForm } from "@/components/inventory/VehicleForm";
 import { createInventoryItem } from "@/services/inventoryService";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryFormData } from "@/types/inventory";
