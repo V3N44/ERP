@@ -20,6 +20,7 @@ export interface InventoryItem {
   image_url: string;
   created_at: string;
   supplier_id: number;
+  evaluation_grade?: string;
 }
 
 export interface InventoryFormData {
@@ -42,4 +43,5 @@ export interface InventoryFormData {
   quantity: number;
   image_url: string;
   supplier_id: number;
+  evaluation_grade?: string;
 }

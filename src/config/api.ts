@@ -22,7 +22,9 @@ export const api = {
     const response = await fetch(`${API_CONFIG.baseURL}${path}`, {
       method: 'POST',
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      credentials: 'include',
+      mode: 'cors'
     });
     
     if (!response.ok) {

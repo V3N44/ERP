@@ -25,7 +25,7 @@ export const SalesPurchaseChart = () => {
   const chartData = last7Days.map(date => {
     // For purchases, count inventory items added on this date
     const dailyPurchases = inventory?.filter(item => {
-      const itemDate = new Date(item.created_at || new Date());
+      const itemDate = new Date(item.created_at);
       return format(itemDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
     }).length || 0;
 
@@ -38,7 +38,7 @@ export const SalesPurchaseChart = () => {
     // Calculate total value of purchases for the day
     const purchaseValue = inventory
       ?.filter(item => {
-        const itemDate = new Date(item.created_at || new Date());
+        const itemDate = new Date(item.created_at);
         return format(itemDate, 'yyyy-MM-dd') === format(date, 'yyyy-MM-dd');
       })
       .reduce((sum, item) => sum + (item.price || 0), 0) || 0;
