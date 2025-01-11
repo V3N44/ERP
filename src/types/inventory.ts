@@ -21,6 +21,10 @@ export interface InventoryItem {
   created_at: string;
   supplier_id: number;
   evaluation_grade?: string;
+  steering?: string;
+  seats?: number;
+  doors?: number;
+  m3_size?: string;
 }
 
 export interface InventoryFormData {
@@ -44,4 +48,8 @@ export interface InventoryFormData {
   image_url: string;
   supplier_id: number;
   evaluation_grade?: string;
+  steering?: string;
+  seats?: number;
+  doors?: number;
+  m3_size?: string;
 }

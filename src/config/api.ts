@@ -12,7 +12,7 @@ export const API_CONFIG = {
 export const api = {
   baseURL: API_CONFIG.baseURL,
   headers: API_CONFIG.headers,
-  post: async (path, data) => {
+  post: async (path: string, data: any) => {
     const token = localStorage.getItem('access_token');
     const headers = {
       ...API_CONFIG.headers,
@@ -28,8 +28,8 @@ export const api = {
     });
     
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || `HTTP error! status: ${response.status}`);
     }
     
     return response.json();
@@ -37,7 +37,7 @@ export const api = {
 };
 
 // Helper function to build URLs
-export const buildUrl = (path) => {
+export const buildUrl = (path: string) => {
   const baseUrl = API_CONFIG.baseURL;
   return `${baseUrl}${path.startsWith('/') ? path : `/${path}`}`;
 };
@@ -49,7 +49,7 @@ export const getAuthHeader = () => {
 };
 
 // Helper function to handle API responses
-export const handleApiResponse = async (response) => {
+export const handleApiResponse = async (response: Response) => {
   if (!response.ok) {
     const errorData = await response.json().catch(() => null);
     throw new Error(errorData?.detail || `API Error: ${response.status} ${response.statusText}`);
