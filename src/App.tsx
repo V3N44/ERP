@@ -100,7 +100,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <AppSidebar />
       <div className="flex-1 ml-0 md:ml-16 flex flex-col">
         <div className="p-4 md:p-6 overflow-x-hidden">
-          {children}
+          <div className="max-w-[1400px] mx-auto w-full">
+            {children}
+          </div>
         </div>
         <Footer />
       </div>
