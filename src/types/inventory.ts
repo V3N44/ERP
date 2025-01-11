@@ -19,6 +19,7 @@ export interface InventoryItem {
   quantity: number;
   image_url: string;
   created_at: string;
+  supplier_id: number;
 }
 
 export interface InventoryFormData {
@@ -40,4 +41,5 @@ export interface InventoryFormData {
   dimensions: string;
   quantity: number;
   image_url: string;
+  supplier_id: number;
 }

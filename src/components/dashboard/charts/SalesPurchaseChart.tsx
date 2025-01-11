@@ -3,7 +3,7 @@ import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { useQuery } from "@tanstack/react-query";
 import { getInventoryItems } from "@/services/inventoryService";
 import { getCustomers } from "@/services/customerService";
-import { format, startOfMonth, eachDayOfInterval, subDays } from "date-fns";
+import { format, subDays, eachDayOfInterval } from "date-fns";
 
 export const SalesPurchaseChart = () => {
   const { data: inventory } = useQuery({
