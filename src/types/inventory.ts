@@ -46,6 +46,7 @@ export interface InventoryFormData {
   dimensions: string;
   quantity: number;
   image_url: string;
+  created_at: string;
   supplier_id: number;
   evaluation_grade?: string;
   steering?: string;
